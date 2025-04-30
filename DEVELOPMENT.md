@@ -41,6 +41,10 @@ Apply code style:
 ./gradlew spotlessApply
 ```
 
+## Links
+
+- [Writing a Quarkus Extensions](https://quarkus.io/guides/writing-extensions)
+
 ## Useful Commands
 
 For more useful commands go to [COMMANDS.md](COMMANDS.md).
