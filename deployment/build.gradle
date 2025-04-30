@@ -1,0 +1,16 @@
+dependencies {
+    implementation platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation project(":runtime")
+    implementation "io.quarkus:quarkus-grpc-common-deployment"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = group
+            artifactId = "littlehorse-quarkus-deployment"
+            version = version
+            from components.java
+        }
+    }
+}

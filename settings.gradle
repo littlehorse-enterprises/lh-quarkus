@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
+    }
+    plugins {
+        id "${quarkusExtensionPluginId}" version "${quarkusExtensionPluginVersion}"
+    }
+}
+rootProject.name = "littlehorse-quarkus"
+include "runtime", "deployment"

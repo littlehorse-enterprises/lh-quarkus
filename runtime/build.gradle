@@ -1,0 +1,28 @@
+plugins {
+    id "io.quarkus.extension"
+}
+
+dependencies {
+    implementation platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation "io.quarkus:quarkus-grpc-common"
+    api("io.littlehorse:littlehorse-client:${lhVersion}") {
+        exclude group: "io.grpc", module: "grpc-netty-shaded"
+        exclude group: "io.grpc", module: "grpc-services"
+    }
+    testImplementation "io.quarkus:quarkus-junit5"
+    testImplementation "io.quarkus:quarkus-junit5-mockito"
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "io.rest-assured:rest-assured"
+    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = group
+            artifactId = "littlehorse-quarkus"
+            version = version
+            from components.java
+        }
+    }
+}
