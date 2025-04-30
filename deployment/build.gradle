@@ -1,5 +1,10 @@
+plugins {
+    id "java-library"
+    id "maven-publish"
+}
+
 dependencies {
-    implementation platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
     implementation project(":runtime")
     implementation "io.quarkus:quarkus-grpc-common-deployment"
 }

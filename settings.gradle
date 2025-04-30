@@ -5,8 +5,11 @@ pluginManagement {
         mavenLocal()
     }
     plugins {
-        id "${quarkusExtensionPluginId}" version "${quarkusExtensionPluginVersion}"
+        id "io.quarkus" version "${quarkusVersion}"
+        id "io.quarkus.extension" version "${quarkusVersion}"
+        id "com.diffplug.spotless" version "${spotlessVersion}"
+        id "io.freefair.lombok" version "${lombokVersion}"
     }
 }
 rootProject.name = "littlehorse-quarkus"
-include "runtime", "deployment"
+include "runtime", "deployment", "example"

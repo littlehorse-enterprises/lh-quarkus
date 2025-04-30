@@ -1,17 +1,8 @@
-### Install
+# LittleHorse Extension for Quarkus
 
-Read [quarkus-poc doodle](../quarkus-poc)
+<a href="https://github.com/littlehorse-enterprises/lh-quarkus"><img alt="github" src="https://img.shields.io/badge/GitHub-blue?logo=github&logoColor=white"></a>
+<a href="https://littlehorse.io/"><img alt="littlehorse" src="https://raw.githubusercontent.com/littlehorse-enterprises/littlehorse/refs/heads/master/img/badges/gray.svg"/></a>
 
-### Publish
+## Development
 
-Publish snapshot:
-
-```shell
-./gradlew publishToMavenLocal
-```
-
-Publish with version:
-
-```shell
-./gradlew publishToMavenLocal -Pversion=0.13.1
-```
+For development instructions go to [DEVELOPMENT.md](DEVELOPMENT.md).
