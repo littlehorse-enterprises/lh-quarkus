@@ -9,11 +9,18 @@
 <!-- TOC -->
 * [LittleHorse Extension for Quarkus](#littlehorse-extension-for-quarkus)
   * [Table of Content](#table-of-content)
+  * [Installation](#installation)
   * [Interoperability Table](#interoperability-table)
   * [Example Project](#example-project)
   * [Development](#development)
   * [License](#license)
 <!-- TOC -->
+
+## Installation
+
+<img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-quarkus?label=latest">
+
+This extension is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus).
 
 ## Interoperability Table
 
