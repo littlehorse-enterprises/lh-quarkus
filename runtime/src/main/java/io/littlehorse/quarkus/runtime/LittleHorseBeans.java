@@ -1,10 +1,13 @@
-package io.littlehorse.quarkus.extension.poc.runtime;
+package io.littlehorse.quarkus.runtime;
 
 import com.google.common.collect.Streams;
+
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.quarkus.arc.DefaultBean;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+
 import org.eclipse.microprofile.config.Config;
 
 import java.util.Properties;
@@ -19,13 +22,12 @@ public class LittleHorseBeans {
     LHConfig configuration(Config config) {
         Properties properties = new Properties();
         Streams.stream(config.getPropertyNames())
-                .map(propertyName -> new ServerConfig(propertyName, config.getConfigValue(propertyName).getValue()))
+                .map(propertyName -> new ServerConfig(
+                        propertyName, config.getConfigValue(propertyName).getValue()))
                 .filter(ServerConfig::isValid)
                 .forEach(serverConfig -> properties.put(serverConfig.key(), serverConfig.value()));
 
-        return LHConfig.newBuilder()
-                .loadFromProperties(properties)
-                .build();
+        return LHConfig.newBuilder().loadFromProperties(properties).build();
     }
 
     record ServerConfig(String key, Object value) {

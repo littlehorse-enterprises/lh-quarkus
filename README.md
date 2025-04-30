@@ -6,3 +6,7 @@
 ## Development
 
 For development instructions go to [DEVELOPMENT.md](DEVELOPMENT.md).
+
+## Links
+
+- [Quarkus Extensions](https://quarkus.io/guides/writing-extensions)

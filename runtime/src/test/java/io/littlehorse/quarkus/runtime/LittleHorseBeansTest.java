@@ -1,16 +1,17 @@
-package io.littlehorse.quarkus.extension.poc.runtime;
+package io.littlehorse.quarkus.runtime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.smallrye.config.ConfigValue;
+
 import org.eclipse.microprofile.config.Config;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class LittleHorseBeansTest {
     LittleHorseBeans lhBeans;
@@ -30,8 +31,16 @@ class LittleHorseBeansTest {
         String expectedVersion = "v0.0.0.metronome.local.test";
 
         when(mockConfig.getPropertyNames()).thenReturn(List.of(workerProperty, hostProperty));
-        when(mockConfig.getConfigValue(hostProperty)).thenReturn(ConfigValue.builder().withName(hostProperty).withValue(expectedHost).build());
-        when(mockConfig.getConfigValue(workerProperty)).thenReturn(ConfigValue.builder().withName(workerProperty).withValue(expectedVersion).build());
+        when(mockConfig.getConfigValue(hostProperty))
+                .thenReturn(ConfigValue.builder()
+                        .withName(hostProperty)
+                        .withValue(expectedHost)
+                        .build());
+        when(mockConfig.getConfigValue(workerProperty))
+                .thenReturn(ConfigValue.builder()
+                        .withName(workerProperty)
+                        .withValue(expectedVersion)
+                        .build());
 
         LHConfig configuration = lhBeans.configuration(mockConfig);
 
@@ -47,8 +56,16 @@ class LittleHorseBeansTest {
         String expectedVersion = "v0.0.0.metronome.local.test";
 
         when(mockConfig.getPropertyNames()).thenReturn(List.of(workerProperty, hostProperty));
-        when(mockConfig.getConfigValue(hostProperty)).thenReturn(ConfigValue.builder().withName(hostProperty).withValue(expectedHost).build());
-        when(mockConfig.getConfigValue(workerProperty)).thenReturn(ConfigValue.builder().withName(workerProperty).withValue(expectedVersion).build());
+        when(mockConfig.getConfigValue(hostProperty))
+                .thenReturn(ConfigValue.builder()
+                        .withName(hostProperty)
+                        .withValue(expectedHost)
+                        .build());
+        when(mockConfig.getConfigValue(workerProperty))
+                .thenReturn(ConfigValue.builder()
+                        .withName(workerProperty)
+                        .withValue(expectedVersion)
+                        .build());
 
         LHConfig configuration = lhBeans.configuration(mockConfig);
 
@@ -63,7 +80,16 @@ class LittleHorseBeansTest {
         String expectedHost2 = "test-my.second-host.com";
 
         when(mockConfig.getPropertyNames()).thenReturn(List.of(hostProperty, hostProperty));
-        when(mockConfig.getConfigValue(hostProperty)).thenReturn(ConfigValue.builder().withName(hostProperty).withValue(expectedHost1).build(), ConfigValue.builder().withName(hostProperty).withValue(expectedHost2).build());
+        when(mockConfig.getConfigValue(hostProperty))
+                .thenReturn(
+                        ConfigValue.builder()
+                                .withName(hostProperty)
+                                .withValue(expectedHost1)
+                                .build(),
+                        ConfigValue.builder()
+                                .withName(hostProperty)
+                                .withValue(expectedHost2)
+                                .build());
 
         LHConfig configuration = lhBeans.configuration(mockConfig);
 
