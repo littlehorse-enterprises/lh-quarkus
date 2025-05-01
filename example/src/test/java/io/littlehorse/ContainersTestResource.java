@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
     private final LittleHorseCluster cluster = LittleHorseCluster.newBuilder()
-            .withKafkaImage("apache/kafka-native:3.8.0")
-            .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:0.13.1")
+            .withKafkaImage("apache/kafka-native:4.0.0")
+            .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:"
+                    + System.getProperty("lhVersion", "latest"))
             .build();
 
     @Override

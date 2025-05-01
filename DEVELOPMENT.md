@@ -30,8 +30,10 @@ pre-commit install
 Publish:
 
 ```shell
-./gradlew publishToMavenLocal -Pversion=<version>
+./gradlew publishToMavenLocal
 ```
+
+> Optionally you can pas ` -Pversion=<version>`
 
 ## Code Style
 
@@ -44,7 +46,3 @@ Apply code style:
 ## Links
 
 - [Writing a Quarkus Extensions](https://quarkus.io/guides/writing-extensions)
-
-## Useful Commands
-
-For more useful commands go to [COMMANDS.md](COMMANDS.md).
