@@ -3,22 +3,21 @@ package io.littlehorse.quarkus.runtime;
 import com.google.common.collect.Streams;
 
 import io.littlehorse.sdk.common.config.LHConfig;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc;
 import io.quarkus.arc.DefaultBean;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Singleton;
 
 import org.eclipse.microprofile.config.Config;
 
 import java.util.Properties;
 
-@ApplicationScoped
 public class LittleHorseBeans {
 
-    // https://quarkus.io/guides/config-reference
     @Produces
     @DefaultBean
-    @ApplicationScoped
+    @Singleton
     LHConfig configuration(Config config) {
         Properties properties = new Properties();
         Streams.stream(config.getPropertyNames())
@@ -28,6 +27,20 @@ public class LittleHorseBeans {
                 .forEach(serverConfig -> properties.put(serverConfig.key(), serverConfig.value()));
 
         return LHConfig.newBuilder().loadFromProperties(properties).build();
+    }
+
+    @Produces
+    @DefaultBean
+    @Singleton
+    LittleHorseGrpc.LittleHorseBlockingStub blockingStub(LHConfig config) {
+        return config.getBlockingStub();
+    }
+
+    @Produces
+    @DefaultBean
+    @Singleton
+    LittleHorseGrpc.LittleHorseFutureStub futureStub(LHConfig config) {
+        return config.getFutureStub();
     }
 
     record ServerConfig(String key, Object value) {

@@ -11,7 +11,6 @@ import io.smallrye.common.annotation.Identifier;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Produces;
 
-@ApplicationScoped
 public class LittleHorseBeans {
 
     public static final String TASK_GREETINGS = "greetings";

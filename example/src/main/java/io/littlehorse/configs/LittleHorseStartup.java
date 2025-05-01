@@ -12,11 +12,13 @@ import io.smallrye.common.annotation.Identifier;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @ApplicationScoped
 public class LittleHorseStartup {
+
+    private static final Logger log = LoggerFactory.getLogger(LittleHorseStartup.class);
 
     final Workflow workflow;
     final LHConfig config;

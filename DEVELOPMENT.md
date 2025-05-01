@@ -46,3 +46,5 @@ Apply code style:
 ## Links
 
 - [Writing a Quarkus Extensions](https://quarkus.io/guides/writing-extensions)
+- [Quarkus Configuration Guide](https://quarkus.io/guides/config-reference)
+- [Context and Dependency Injection](https://quarkus.io/guides/cdi-reference)

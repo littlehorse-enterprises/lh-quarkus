@@ -4,7 +4,6 @@ import io.littlehorse.container.LittleHorseCluster;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
@@ -17,10 +16,7 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
     @Override
     public Map<String, String> start() {
         cluster.start();
-        return cluster.getClientProperties().entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> entry.getKey().toString(),
-                        entry -> entry.getValue().toString()));
+        return cluster.getClientConfig();
     }
 
     @Override

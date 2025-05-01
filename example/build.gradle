@@ -1,6 +1,5 @@
 plugins {
     id "io.quarkus"
-    id "io.freefair.lombok"
 }
 
 dependencies {
@@ -26,6 +25,7 @@ dependencies {
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
     testImplementation "io.littlehorse:littlehorse-test-utils-container:${lhVersion}"
+    testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
 }
 
 test {

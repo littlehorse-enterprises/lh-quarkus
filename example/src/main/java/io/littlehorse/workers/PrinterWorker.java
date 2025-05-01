@@ -4,10 +4,12 @@ import static io.littlehorse.configs.LittleHorseBeans.TASK_PRINT;
 
 import io.littlehorse.sdk.worker.LHTaskMethod;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 public class PrinterWorker {
+
+    private static final Logger log = LoggerFactory.getLogger(PrinterWorker.class);
 
     @LHTaskMethod(TASK_PRINT)
     public void greetings(String message) {

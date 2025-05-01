@@ -1,14 +1,13 @@
 pluginManagement {
     repositories {
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
-        mavenLocal()
     }
     plugins {
         id "io.quarkus" version "${quarkusVersion}"
         id "io.quarkus.extension" version "${quarkusVersion}"
         id "com.diffplug.spotless" version "${spotlessVersion}"
-        id "io.freefair.lombok" version "${lombokVersion}"
     }
 }
 rootProject.name = "littlehorse-quarkus"
