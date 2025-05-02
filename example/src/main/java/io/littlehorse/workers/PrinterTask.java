@@ -14,8 +14,8 @@ public class PrinterTask {
     private static final Logger log = LoggerFactory.getLogger(PrinterTask.class);
 
     @LHTaskMethod(TASK_PRINT)
-    public void print(String message) {
+    public void print(int totalCount, String message) {
         log.info("Executing worker printer");
-        System.out.println(message);
+        System.out.printf("Total count: %d\n%s\n", totalCount, message);
     }
 }

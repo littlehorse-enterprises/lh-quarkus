@@ -1,9 +1,10 @@
 package io.littlehorse.workflows;
 
+import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.ThreadFunc;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
-// @LHWorkflow("greetings")
+@LHWorkflow("greetings")
 public class GreetingsWorkflow implements ThreadFunc {
 
     @Override

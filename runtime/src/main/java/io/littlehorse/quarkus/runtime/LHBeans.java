@@ -6,6 +6,7 @@ import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc;
 import io.quarkus.arc.DefaultBean;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
@@ -13,7 +14,8 @@ import org.eclipse.microprofile.config.Config;
 
 import java.util.Properties;
 
-public class LittleHorseBeans {
+@ApplicationScoped
+public class LHBeans {
 
     @Produces
     @DefaultBean
