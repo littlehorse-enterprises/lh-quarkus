@@ -11,12 +11,12 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class GreetingService {
+public class GreetingsService {
 
     private final LittleHorseGrpc.LittleHorseBlockingStub blockingStub;
     private final LittleHorseGrpc.LittleHorseFutureStub futureStub;
 
-    public GreetingService(
+    public GreetingsService(
             LittleHorseGrpc.LittleHorseBlockingStub blockingStub,
             LittleHorseGrpc.LittleHorseFutureStub futureStub) {
         this.blockingStub = blockingStub;

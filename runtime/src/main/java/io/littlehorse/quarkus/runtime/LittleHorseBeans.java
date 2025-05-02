@@ -44,7 +44,7 @@ public class LittleHorseBeans {
     }
 
     record ServerConfig(String key, Object value) {
-        static final String CONFIG_PREFIX_REGEX = "^(LHC_|LHW_)[A-Z_]+";
+        private static final String CONFIG_PREFIX_REGEX = "^(LHC_|LHW_)[A-Z_]+";
 
         ServerConfig(String key, Object value) {
             this.value = value;

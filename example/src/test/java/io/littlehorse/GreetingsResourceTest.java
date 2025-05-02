@@ -17,14 +17,14 @@ import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.util.UUID;
 
 @QuarkusTest
 @QuarkusTestResource(ContainersTestResource.class)
-class GreetingResourceTest {
+class GreetingsResourceTest {
 
     @Inject
     LittleHorseGrpc.LittleHorseBlockingStub blockingStub;
@@ -37,7 +37,7 @@ class GreetingResourceTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"/hello", "/hello/reactive"})
+    @ValueSource(strings = {"/hello", "/hello/reactive"})
     void testHelloEndpoint(String path) {
         given().queryParam("id", expectedId)
                 .queryParam("name", "Anakin")

@@ -1,12 +1,7 @@
 package io.littlehorse.configs;
 
-import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.wfsdk.TaskNodeOutput;
 import io.littlehorse.sdk.wfsdk.Workflow;
-import io.littlehorse.sdk.worker.LHTaskWorker;
-import io.littlehorse.workers.GreetingWorker;
-import io.littlehorse.workers.PrinterWorker;
-import io.smallrye.common.annotation.Identifier;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.Produces;
@@ -27,17 +22,17 @@ public class LittleHorseBeans {
         });
     }
 
-    @Produces
-    @ApplicationScoped
-    @Identifier(TASK_GREETINGS)
-    LHTaskWorker workerGreeting(LHConfig config) {
-        return new LHTaskWorker(new GreetingWorker(), TASK_GREETINGS, config);
-    }
-
-    @Produces
-    @ApplicationScoped
-    @Identifier(TASK_PRINT)
-    LHTaskWorker workerPrinter(LHConfig config) {
-        return new LHTaskWorker(new PrinterWorker(), TASK_PRINT, config);
-    }
+    //    @Produces
+    //    @ApplicationScoped
+    //    @Identifier(TASK_GREETINGS)
+    //    LHTaskWorker workerGreetings(LHConfig config) {
+    //        return new LHTaskWorker(new GreetingsTask(), TASK_GREETINGS, config);
+    //    }
+    //
+    //    @Produces
+    //    @ApplicationScoped
+    //    @Identifier(TASK_PRINT)
+    //    LHTaskWorker workerPrinter(LHConfig config) {
+    //        return new LHTaskWorker(new PrinterTask(), TASK_PRINT, config);
+    //    }
 }

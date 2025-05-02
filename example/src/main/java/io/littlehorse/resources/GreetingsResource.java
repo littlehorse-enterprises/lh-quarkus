@@ -1,6 +1,6 @@
 package io.littlehorse.resources;
 
-import io.littlehorse.services.GreetingService;
+import io.littlehorse.services.GreetingsService;
 import io.smallrye.mutiny.Uni;
 
 import jakarta.ws.rs.GET;
@@ -10,11 +10,11 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/hello")
-public class GreetingResource {
+public class GreetingsResource {
 
-    private final GreetingService service;
+    private final GreetingsService service;
 
-    public GreetingResource(GreetingService service) {
+    public GreetingsResource(GreetingsService service) {
         this.service = service;
     }
 
