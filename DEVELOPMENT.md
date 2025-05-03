@@ -21,9 +21,15 @@ pre-commit install
 Run LH:
 
 ```shell
-docker run --name littlehorse -d -p 2023:2023 -p 8080:8080 \
-ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
+docker compose up -d
 ```
+
+| Container             | Port |
+|-----------------------|------|
+| LittleHorse           | 2023 |
+| Kafka                 | 9092 |
+| LittleHorse Dashboard | 3000 |
+
 
 ## Tests
 
@@ -43,8 +49,8 @@ ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
 
 ```shell
 ./gradlew quarkusDev
-http -v :9000/hello name==Luck id==my-workflow-1
-http -v :9000/hello/reactive name==Anakin
+http -v :8080/hello name==Luck id==my-workflow-1
+http -v :8080/hello/reactive name==Anakin
 lhctl run greetings name Leia
 ```
 

@@ -11,6 +11,8 @@
   * [Table of Content](#table-of-content)
   * [Installation](#installation)
   * [Interoperability Table](#interoperability-table)
+  * [Usage](#usage)
+  * [Configurations](#configurations)
   * [Example Project](#example-project)
   * [Development](#development)
   * [License](#license)
@@ -22,11 +24,37 @@
 
 This extension is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus).
 
+Gradle:
+
+```groovy
+implementation "io.littlehorse:littlehorse-quarkus:${version}"
+```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>io.littlehorse</groupId>
+    <artifactId>littlehorse-client</artifactId>
+    <version>{version}</version>
+</dependency>
+```
+
 ## Interoperability Table
 
 | LH Version | Quarkus Version |
 |------------|-----------------|
 | 0.13.*     | 3.22.*          |
+
+## Usage
+
+For LittleHorse documentation go to [LittleHorse Getting Started](https://littlehorse.io/docs/getting-started).
+
+For LittleHorse Extension go to [USAGE.md](USAGE.md).
+
+## Configurations
+
+For the LittleHorse Extension configurations go to [CONFIGURATIONS.md](CONFIGURATIONS.md).
 
 ## Example Project
 
