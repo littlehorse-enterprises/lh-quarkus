@@ -37,14 +37,15 @@ ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
 ./gradlew publishToMavenLocal
 ```
 
-> Optionally you can pas ` -Pversion=<version>`
+> Optionally you can pass `-Pversion=<version>`
 
 ## Run
 
 ```shell
 ./gradlew quarkusDev
 http -v :9000/hello name==Luck id==my-workflow-1
-http -v :9000/hello/reactive name==Luck id==my-workflow-2
+http -v :9000/hello/reactive name==Anakin
+lhctl run greetings name Leia
 ```
 
 ## Run Native

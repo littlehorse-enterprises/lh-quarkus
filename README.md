@@ -30,7 +30,7 @@ This extension is available at [Maven Central](https://central.sonatype.com/arti
 
 ## Example Project
 
-For example project go to [example](example).
+For an example project go to [example](example).
 
 ## Development
 
