@@ -3,7 +3,8 @@ package io.littlehorse.quarkus.runtime;
 import com.google.common.collect.Streams;
 
 import io.littlehorse.sdk.common.config.LHConfig;
-import io.littlehorse.sdk.common.proto.LittleHorseGrpc;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 import io.quarkus.arc.DefaultBean;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -34,14 +35,14 @@ public class LHBeans {
     @Produces
     @DefaultBean
     @Singleton
-    LittleHorseGrpc.LittleHorseBlockingStub blockingStub(LHConfig config) {
+    LittleHorseBlockingStub blockingStub(LHConfig config) {
         return config.getBlockingStub();
     }
 
     @Produces
     @DefaultBean
     @Singleton
-    LittleHorseGrpc.LittleHorseFutureStub futureStub(LHConfig config) {
+    LittleHorseFutureStub futureStub(LHConfig config) {
         return config.getFutureStub();
     }
 

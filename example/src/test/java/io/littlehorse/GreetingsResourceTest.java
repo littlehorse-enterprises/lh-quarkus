@@ -8,7 +8,7 @@ import static org.hamcrest.CoreMatchers.is;
 
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.LHStatus;
-import io.littlehorse.sdk.common.proto.LittleHorseGrpc;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.WfRun;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -27,7 +27,7 @@ import java.util.UUID;
 class GreetingsResourceTest {
 
     @Inject
-    LittleHorseGrpc.LittleHorseBlockingStub blockingStub;
+    LittleHorseBlockingStub blockingStub;
 
     String expectedId;
 

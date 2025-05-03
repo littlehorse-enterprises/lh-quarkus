@@ -5,12 +5,11 @@ import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.ProtocolMessageEnum;
 
 import io.littlehorse.quarkus.runtime.LHBeans;
-import io.littlehorse.quarkus.runtime.LHTaskRecorder;
+import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
-import io.quarkus.arc.deployment.BeanContainerBuildItem;
 import io.quarkus.arc.deployment.BeanDefiningAnnotationBuildItem;
 import io.quarkus.builder.item.MultiBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -20,18 +19,20 @@ import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.IndexDependencyBuildItem;
+import io.quarkus.deployment.builditem.ServiceStartBuildItem;
+import io.quarkus.deployment.builditem.ShutdownContextBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageConfigBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Singleton;
 
-import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 class LHProcessor {
@@ -110,36 +111,43 @@ class LHProcessor {
     }
 
     @BuildStep
-    @Record(ExecutionTime.RUNTIME_INIT)
+    @Record(ExecutionTime.STATIC_INIT)
     void scanLHTasks(
-            LHTaskRecorder recorder,
-            CombinedIndexBuildItem indexContainer,
-            BeanContainerBuildItem beanContainer) {
+            LHRecorder recorder,
+            BuildProducer<LHTaskMethodBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
         IndexView index = indexContainer.getIndex();
         index.getAnnotations(LH_TASK_ANNOTATION).stream()
-                .map(annotated -> loadClass(annotated.target().asClass()))
-                //                .filter(clazz -> Arrays.stream(clazz.getMethods()).anyMatch(method
-                // -> method.isAnnotationPresent(LHTaskMethod.class)))
-                .flatMap(clazz -> Arrays.stream(clazz.getMethods()))
-                .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
-                .map(method -> method.getAnnotation(LHTaskMethod.class).value())
-                .forEach(System.out::println);
-        //        indexContainer
-        //                .getIndex()
-        //                .getAnnotations(LHWorkflow.class)
-        //                .forEach(annotationInstance ->
-        //
-        // System.out.println(annotationInstance.target().asClass().toString() +
-        // annotationInstance.value().asString()));
+                .map(annotated -> annotated.target().asClass())
+                .filter(classInfo -> classInfo.methods().stream()
+                        .anyMatch(
+                                methodInfo -> methodInfo.hasAnnotation(LH_TASK_METHOD_ANNOTATION)))
+                .map(LHProcessor::loadClass)
+                .forEach(clazz -> Arrays.stream(clazz.getMethods())
+                        .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
+                        .map(method -> method.getAnnotation(LHTaskMethod.class).value())
+                        .map(name -> new LHTaskMethodBuildItem(name, clazz))
+                        .forEach(producer::produce));
     }
 
-    static final class LHTaskBuildItem extends MultiBuildItem {
+    @BuildStep
+    @Record(ExecutionTime.RUNTIME_INIT)
+    ServiceStartBuildItem startLHTaskMethods(
+            LHRecorder recorder,
+            ShutdownContextBuildItem shutdownContext,
+            List<LHTaskMethodBuildItem> workerBuildItems) {
+        workerBuildItems.forEach(buildItem ->
+                recorder.startLHTaskMethod(buildItem.name, buildItem.clazz, shutdownContext));
+        return new ServiceStartBuildItem("LHTaskMethods");
+    }
+
+    static final class LHTaskMethodBuildItem extends MultiBuildItem {
         final String name;
         final Class<?> clazz;
 
-        LHTaskBuildItem(AnnotationInstance annotation) {
-            this.name = "";
-            this.clazz = LHProcessor.loadClass(annotation.target().asClass());
+        LHTaskMethodBuildItem(String name, Class<?> clazz) {
+            this.name = name;
+            this.clazz = clazz;
         }
     }
 }

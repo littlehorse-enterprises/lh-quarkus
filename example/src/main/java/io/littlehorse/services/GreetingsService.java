@@ -4,7 +4,8 @@ import static io.littlehorse.configs.LittleHorseBeans.TASK_GREETINGS;
 import static io.littlehorse.configs.LittleHorseBeans.VAR_NAME;
 
 import io.littlehorse.sdk.common.LHLibUtil;
-import io.littlehorse.sdk.common.proto.LittleHorseGrpc;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
 import io.smallrye.mutiny.Uni;
 
@@ -13,12 +14,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class GreetingsService {
 
-    private final LittleHorseGrpc.LittleHorseBlockingStub blockingStub;
-    private final LittleHorseGrpc.LittleHorseFutureStub futureStub;
+    private final LittleHorseBlockingStub blockingStub;
+    private final LittleHorseFutureStub futureStub;
 
     public GreetingsService(
-            LittleHorseGrpc.LittleHorseBlockingStub blockingStub,
-            LittleHorseGrpc.LittleHorseFutureStub futureStub) {
+            LittleHorseBlockingStub blockingStub, LittleHorseFutureStub futureStub) {
         this.blockingStub = blockingStub;
         this.futureStub = futureStub;
     }
@@ -39,5 +39,9 @@ public class GreetingsService {
         return Uni.createFrom()
                 .future(futureStub.runWf(newWfRunRequest(id, name)))
                 .map(wfRun -> wfRun.getId().getId());
+    }
+
+    public String sayHello(String name) {
+        return "Hello there! " + name;
     }
 }
