@@ -1,8 +1,5 @@
 package io.littlehorse.workers;
 
-import static io.littlehorse.configs.LittleHorseBeans.TASK_COUNTER;
-import static io.littlehorse.configs.LittleHorseBeans.TASK_GREETINGS;
-
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.services.GreetingsService;
@@ -14,6 +11,10 @@ import org.slf4j.LoggerFactory;
 public class GreetingsTask {
 
     private static final Logger log = LoggerFactory.getLogger(GreetingsTask.class);
+
+    public static final String TASK_COUNTER = "counter";
+    public static final String TASK_GREETINGS = "greetings";
+
     private final GreetingsService service;
     private int count;
 

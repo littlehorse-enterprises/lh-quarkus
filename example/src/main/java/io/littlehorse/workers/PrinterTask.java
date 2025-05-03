@@ -1,7 +1,5 @@
 package io.littlehorse.workers;
 
-import static io.littlehorse.configs.LittleHorseBeans.TASK_PRINT;
-
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 
@@ -12,6 +10,8 @@ import org.slf4j.LoggerFactory;
 public class PrinterTask {
 
     private static final Logger log = LoggerFactory.getLogger(PrinterTask.class);
+
+    public static final String TASK_PRINT = "print";
 
     @LHTaskMethod(TASK_PRINT)
     public void print(int totalCount, String message) {
