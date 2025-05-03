@@ -34,7 +34,6 @@ public class LHRecorder {
         ThreadFunc workflowBean = (ThreadFunc) CDI.current().select(clazz).get();
         LittleHorseBlockingStub stub =
                 CDI.current().select(LittleHorseBlockingStub.class).get();
-
         log.info("Registering LHWorkflow: {}", name);
         Workflow workflow = Workflow.newWorkflow(name, workflowBean);
         workflow.registerWfSpec(stub);

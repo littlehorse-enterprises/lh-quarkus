@@ -24,11 +24,15 @@ public class GreetingsService {
     }
 
     private static RunWfRequest newWfRunRequest(String id, String name) {
-        return RunWfRequest.newBuilder()
-                .setId(id)
+        RunWfRequest.Builder builder = RunWfRequest.newBuilder()
                 .setWfSpecName(WF_GREETINGS)
-                .putVariables(VAR_NAME, LHLibUtil.objToVarVal(name))
-                .build();
+                .putVariables(VAR_NAME, LHLibUtil.objToVarVal(name));
+
+        if (id != null) {
+            builder.setId(id);
+        }
+
+        return builder.build();
     }
 
     public String runWf(String id, String name) {
@@ -42,6 +46,6 @@ public class GreetingsService {
     }
 
     public String sayHello(String name) {
-        return "Hello there! " + name;
+        return "Hello %s!".formatted(name);
     }
 }

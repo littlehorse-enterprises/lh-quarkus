@@ -1,6 +1,5 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.workers.GreetingsTask.TASK_COUNTER;
 import static io.littlehorse.workers.GreetingsTask.TASK_GREETINGS;
 import static io.littlehorse.workers.PrinterTask.TASK_PRINT;
 
@@ -19,8 +18,7 @@ public class GreetingsWorkflow implements ThreadFunc {
     @Override
     public void threadFunction(WorkflowThread thread) {
         WfRunVariable name = thread.declareStr(VAR_NAME);
-        TaskNodeOutput totalCount = thread.execute(TASK_COUNTER);
-        TaskNodeOutput greeting = thread.execute(TASK_GREETINGS, name);
-        thread.execute(TASK_PRINT, totalCount, greeting);
+        TaskNodeOutput message = thread.execute(TASK_GREETINGS, name);
+        thread.execute(TASK_PRINT, message);
     }
 }
