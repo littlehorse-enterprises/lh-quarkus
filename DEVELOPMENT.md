@@ -49,16 +49,31 @@ docker compose up -d
 
 ```shell
 ./gradlew quarkusDev
+```
+
+```shell
 http -v :8080/hello name==Luck id==my-workflow-1
+```
+
+```shell
 http -v :8080/hello/reactive name==Anakin
+```
+
+```shell
 lhctl run greetings name Leia
 ```
 
 ## Run Native
 
 ```shell
-./gradlew build -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
-./example/build/example*runner
+./gradlew build \
+-Dquarkus.native.enabled=true \
+-Dquarkus.package.jar.enabled=false \
+-Dquarkus.package.output-name=example
+```
+
+```shell
+./example/build/example-runner
 ```
 
 ## Apply Code Style

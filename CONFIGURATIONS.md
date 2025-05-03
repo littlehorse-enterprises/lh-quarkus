@@ -4,9 +4,9 @@
 
 Quarkus support multiple configuration sources ([Quarkus Configurations](https://quarkus.io/guides/config-reference)).
 
-### Property File:
-
 ### Environment Variables:
+
+### Property File:
 
 ### System Properties
 
