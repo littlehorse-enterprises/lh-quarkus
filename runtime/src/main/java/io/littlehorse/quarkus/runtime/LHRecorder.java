@@ -4,6 +4,8 @@ import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+import io.littlehorse.sdk.common.proto.PutExternalEventDefRequest;
+import io.littlehorse.sdk.common.proto.PutWorkflowEventDefRequest;
 import io.littlehorse.sdk.usertask.UserTaskSchema;
 import io.littlehorse.sdk.wfsdk.ThreadFunc;
 import io.littlehorse.sdk.wfsdk.Workflow;
@@ -43,6 +45,18 @@ public class LHRecorder {
                 CDI.current().select(LittleHorseBlockingStub.class).get();
 
         Workflow workflow = Workflow.newWorkflow(name, bean);
+
+        workflow.getRequiredWorkflowEventDefNames().forEach(wfEvent -> {
+            log.info("Registering WorkflowEvent: {}", wfEvent);
+            stub.putWorkflowEventDef(
+                    PutWorkflowEventDefRequest.newBuilder().setName(name).build());
+        });
+
+        workflow.getRequiredExternalEventDefNames().forEach(exEvent -> {
+            log.info("Registering ExternalEvent: {}", exEvent);
+            stub.putExternalEventDef(
+                    PutExternalEventDefRequest.newBuilder().setName(name).build());
+        });
 
         log.info("Registering {}: {}", LHWorkflow.class.getSimpleName(), name);
         workflow.registerWfSpec(stub);
