@@ -90,24 +90,37 @@ class LHProcessor {
             CombinedIndexBuildItem indexContainer) {
         IndexView index = indexContainer.getIndex();
 
+        Stream<ClassInfo> tasks = index.getAnnotations(LH_TASK_ANNOTATION).stream()
+                .map(annotationInstance -> annotationInstance.target().asClass());
+
         Stream<ClassInfo> taskMethods = index.getKnownClasses().stream()
                 .filter(classInfo -> classInfo.methods().stream()
                         .anyMatch(
                                 methodInfo -> methodInfo.hasAnnotation(LH_TASK_METHOD_ANNOTATION)));
-        Stream<ClassInfo> userTaskForms = index.getKnownClasses().stream()
+
+        Stream<ClassInfo> userTaskForms =
+                index.getAnnotations(LH_USER_TASK_FORM_ANNOTATION).stream()
+                        .map(annotationInstance -> annotationInstance.target().asClass());
+
+        Stream<ClassInfo> userTaskFields = index.getKnownClasses().stream()
                 .filter(classInfo -> classInfo.fields().stream()
                         .anyMatch(fieldInfo ->
                                 fieldInfo.hasAnnotation(LH_USER_TASK_FIELD_ANNOTATION)));
+
         Stream<ClassInfo> protobufMessages =
                 index.getAllKnownSubclasses(GeneratedMessageV3.class).stream();
+
         Stream<ClassInfo> protobufBuilders =
                 index.getAllKnownSubclasses(GeneratedMessageV3.Builder.class).stream();
+
         Stream<ClassInfo> protobufEnums =
                 index.getAllKnownImplementations(ProtocolMessageEnum.class).stream();
 
         Streams.concat(
+                        tasks,
                         taskMethods,
                         userTaskForms,
+                        userTaskFields,
                         protobufMessages,
                         protobufBuilders,
                         protobufEnums)
