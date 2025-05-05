@@ -63,6 +63,20 @@ http -v :8080/hello/reactive name==Anakin
 lhctl run greetings name Leia
 ```
 
+## Run User Task
+
+```shell
+./gradlew quarkusDev
+```
+
+```shell
+lhctl run execute-order-66
+```
+
+```shell
+lhctl execute userTaskRun <wfRunId> <userTaskGuid>
+```
+
 ## Run Native
 
 ```shell

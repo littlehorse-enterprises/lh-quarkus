@@ -35,7 +35,7 @@ Maven:
 ```xml
 <dependency>
     <groupId>io.littlehorse</groupId>
-    <artifactId>littlehorse-client</artifactId>
+    <artifactId>littlehorse-quarkus</artifactId>
     <version>{version}</version>
 </dependency>
 ```
