@@ -70,7 +70,7 @@ lhctl run greetings name Leia
 ```
 
 ```shell
-lhctl run execute-order-66
+lhctl run execute-order-66 executor Anakin
 ```
 
 ```shell

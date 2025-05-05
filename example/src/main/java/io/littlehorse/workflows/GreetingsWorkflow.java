@@ -16,9 +16,9 @@ public class GreetingsWorkflow implements ThreadFunc {
     public static final String WF_GREETINGS = "greetings";
 
     @Override
-    public void threadFunction(WorkflowThread thread) {
-        WfRunVariable name = thread.declareStr(VAR_NAME);
-        TaskNodeOutput message = thread.execute(TASK_GREETINGS, name);
-        thread.execute(TASK_PRINT, message);
+    public void threadFunction(WorkflowThread wf) {
+        WfRunVariable name = wf.declareStr(VAR_NAME);
+        TaskNodeOutput message = wf.execute(TASK_GREETINGS, name);
+        wf.execute(TASK_PRINT, message);
     }
 }
