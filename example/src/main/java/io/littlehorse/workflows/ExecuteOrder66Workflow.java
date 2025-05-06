@@ -1,20 +1,20 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.workflows.ApproveForm.APPROVE_USER_TASK;
+import static io.littlehorse.forms.ApproveForm.APPROVE_USER_TASK;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
+import io.littlehorse.quarkus.workflow.LHWorkflowConsumer;
 import io.littlehorse.sdk.common.proto.Comparator;
-import io.littlehorse.sdk.wfsdk.ThreadFunc;
 import io.littlehorse.sdk.wfsdk.UserTaskOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.littlehorse.workers.PrintTask;
 
 @LHWorkflow("execute-order-66")
-public class ExecuteOrder66Workflow implements ThreadFunc {
+public class ExecuteOrder66Workflow implements LHWorkflowConsumer {
 
     @Override
-    public void threadFunction(WorkflowThread wf) {
+    public void accept(WorkflowThread wf) {
         WfRunVariable executor = wf.declareStr("executor");
         WfRunVariable isApproved = wf.declareBool("approved");
 

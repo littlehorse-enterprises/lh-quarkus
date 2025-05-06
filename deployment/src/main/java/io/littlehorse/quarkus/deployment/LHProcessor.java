@@ -9,8 +9,8 @@ import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
+import io.littlehorse.quarkus.workflow.LHWorkflowConsumer;
 import io.littlehorse.sdk.usertask.annotations.UserTaskField;
-import io.littlehorse.sdk.wfsdk.ThreadFunc;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
@@ -30,9 +30,11 @@ import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 
 import jakarta.inject.Singleton;
 
+import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
+import org.jboss.jandex.MethodInfo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,13 +48,11 @@ class LHProcessor {
     static final DotName LH_TASK_METHOD_ANNOTATION = DotName.createSimple(LHTaskMethod.class);
     static final DotName LH_USER_TASK_FORM_ANNOTATION = DotName.createSimple(LHUserTaskForm.class);
     static final DotName LH_USER_TASK_FIELD_ANNOTATION = DotName.createSimple(UserTaskField.class);
-    static final DotName THREAD_FUNC_INTERFACE = DotName.createSimple(ThreadFunc.class);
+    static final DotName LH_WORKFLOW_CONSUMER = DotName.createSimple(LHWorkflowConsumer.class);
 
-    static Class<?> loadClass(ClassInfo classInfo) {
+    public static Class<?> loadClass(String name) {
         try {
-            return Thread.currentThread()
-                    .getContextClassLoader()
-                    .loadClass(classInfo.name().toString());
+            return Thread.currentThread().getContextClassLoader().loadClass(name);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -124,7 +124,7 @@ class LHProcessor {
                         protobufMessages,
                         protobufBuilders,
                         protobufEnums)
-                .map(classInfo -> classInfo.name().toString())
+                .map(ClassInfo::toString)
                 .distinct()
                 .map(className -> ReflectiveClassBuildItem.builder(className)
                         .methods()
@@ -151,29 +151,48 @@ class LHProcessor {
                 .filter(classInfo -> classInfo.methods().stream()
                         .anyMatch(
                                 methodInfo -> methodInfo.hasAnnotation(LH_TASK_METHOD_ANNOTATION)))
-                .map(LHProcessor::loadClass)
+                .map(classInfo -> loadClass(classInfo.toString()))
                 .forEach(clazz -> Arrays.stream(clazz.getMethods())
                         .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
                         .map(method -> method.getAnnotation(LHTaskMethod.class).value())
-                        .map(name -> new LHTaskMethodBuildItem(name, clazz))
+                        .map(name -> new LHTaskMethodBuildItem(clazz, name))
                         .forEach(producer::produce));
     }
 
     @BuildStep
     @Record(ExecutionTime.STATIC_INIT)
-    void scanLHWorkflow(
+    void scanLHWorkflowConsumerClasses(
             LHRecorder recorder,
-            BuildProducer<LHWorkflowBuildItem> producer,
+            BuildProducer<LHWorkflowConsumerBuildItem> producer,
             BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LH_WORKFLOW_ANNOTATION).stream()
+                .filter(annotated -> annotated.target().kind().equals(Kind.CLASS))
                 .filter(annotated -> annotated
                         .target()
                         .asClass()
                         .interfaceNames()
-                        .contains(THREAD_FUNC_INTERFACE))
-                .map(annotated -> new LHWorkflowBuildItem(
-                        annotated.value().asString(),
-                        loadClass(annotated.target().asClass())))
+                        .contains(LH_WORKFLOW_CONSUMER))
+                .map(annotated -> new LHWorkflowConsumerBuildItem(
+                        loadClass(annotated.target().asClass().toString()),
+                        annotated.value().asString()))
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    @Record(ExecutionTime.STATIC_INIT)
+    void scanLHWorkflowMethods(
+            LHRecorder recorder,
+            BuildProducer<LHWorkflowMethodBuildItem> producer,
+            BeanArchiveIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAnnotations(LH_WORKFLOW_ANNOTATION).stream()
+                .filter(annotated -> annotated.target().kind().equals(Kind.METHOD))
+                .map(annotated -> {
+                    MethodInfo method = annotated.target().asMethod();
+                    return new LHWorkflowMethodBuildItem(
+                            loadClass(method.declaringClass().toString()),
+                            method.name(),
+                            annotated.value().asString());
+                })
                 .forEach(producer::produce);
     }
 
@@ -185,8 +204,8 @@ class LHProcessor {
             BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LH_USER_TASK_FORM_ANNOTATION).stream()
                 .map(annotated -> new LHUserTaskFormBuildItem(
-                        annotated.value().asString(),
-                        loadClass(annotated.target().asClass())))
+                        loadClass(annotated.target().asClass().toString()),
+                        annotated.value().asString()))
                 .forEach(producer::produce);
     }
 
@@ -197,16 +216,20 @@ class LHProcessor {
             ShutdownContextBuildItem shutdownContext,
             List<LHTaskMethodBuildItem> taskBuildItems,
             List<LHUserTaskFormBuildItem> userTaskFromBuildItems,
-            List<LHWorkflowBuildItem> workflowBuildItems) {
+            List<LHWorkflowConsumerBuildItem> workflowBuildItems,
+            List<LHWorkflowMethodBuildItem> workflowMethodsBuildItems) {
 
         taskBuildItems.forEach(buildItem ->
-                recorder.startLHTaskMethod(buildItem.name, buildItem.clazz, shutdownContext));
+                recorder.startLHTaskMethod(buildItem.clazz, buildItem.name, shutdownContext));
 
         userTaskFromBuildItems.forEach(
-                buildItem -> recorder.registerLHUserTaskForm(buildItem.name, buildItem.clazz));
+                buildItem -> recorder.registerLHUserTaskForm(buildItem.clazz, buildItem.name));
 
         workflowBuildItems.forEach(
-                buildItem -> recorder.registerLHWorkflow(buildItem.name, buildItem.clazz));
+                buildItem -> recorder.registerLHWorkflow(buildItem.clazz, buildItem.name));
+
+        workflowMethodsBuildItems.forEach(buildItem -> recorder.registerLHWorkflowFromMethod(
+                buildItem.clazz, buildItem.methodName, buildItem.name));
 
         return new ServiceStartBuildItem("LittleHorse");
     }
@@ -215,27 +238,36 @@ class LHProcessor {
         final String name;
         final Class<?> clazz;
 
-        LHBuildItem(String name, Class<?> clazz) {
+        LHBuildItem(Class<?> clazz, String name) {
             this.name = name;
             this.clazz = clazz;
         }
     }
 
     static final class LHTaskMethodBuildItem extends LHBuildItem {
-        LHTaskMethodBuildItem(String name, Class<?> clazz) {
-            super(name, clazz);
+        LHTaskMethodBuildItem(Class<?> clazz, String name) {
+            super(clazz, name);
         }
     }
 
-    static final class LHWorkflowBuildItem extends LHBuildItem {
-        LHWorkflowBuildItem(String name, Class<?> clazz) {
-            super(name, clazz);
+    static final class LHWorkflowConsumerBuildItem extends LHBuildItem {
+        LHWorkflowConsumerBuildItem(Class<?> clazz, String name) {
+            super(clazz, name);
+        }
+    }
+
+    static final class LHWorkflowMethodBuildItem extends LHBuildItem {
+        final String methodName;
+
+        LHWorkflowMethodBuildItem(Class<?> clazz, String methodName, String name) {
+            super(clazz, name);
+            this.methodName = methodName;
         }
     }
 
     static final class LHUserTaskFormBuildItem extends LHBuildItem {
-        LHUserTaskFormBuildItem(String name, Class<?> clazz) {
-            super(name, clazz);
+        LHUserTaskFormBuildItem(Class<?> clazz, String name) {
+            super(clazz, name);
         }
     }
 }
