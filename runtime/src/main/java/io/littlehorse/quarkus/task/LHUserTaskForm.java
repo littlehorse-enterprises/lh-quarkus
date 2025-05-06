@@ -8,5 +8,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LHUserTaskForm {
+    /**
+     * The name of the user task definition (UserTaskDef).
+     */
     String value();
 }

@@ -62,26 +62,25 @@ More about dependency injections at:
 - [Introduction to CDI](https://quarkus.io/guides/cdi)
 - [CDI Reference](https://quarkus.io/guides/cdi-reference)
 
-## Passing Configurations
-
 ## Creating a Task
 
-Create a class and add the annotation `@LHTask`. Then, you can specify a Task Method using the `@LHTaskMethod` annotation.
+Create a class and add the annotation `@LHTask`. Then, you can specify a task method using the `@LHTaskMethod` annotation.
 
 ```java
 @LHTask
-public class PrintTask {
+public class GreetingsTask {
 
-    @LHTaskMethod("print")
-    public void print(String message) {
-        System.out.println(message);
+    @LHTaskMethod("greetings-task")
+    public void print(String name) {
+        System.out.println("Hello " + name);
     }
 }
 ```
 
 And that is it, Quarkus will take care of starting and stopping your task.
+Additionally, Quarkus will register the [TaskDef](https://littlehorse.io/docs/server/concepts/tasks#register-the-taskdef-and-start-polling) when starting the application.
 
-By default `@LHTask` is created as `@Singleton`, but you can change it adding `@Dependent`.
+By default `@LHTask` is created as a `@Singleton` bean, but you can change it adding `@Dependent`.
 
 Supported scopes:
 
@@ -91,18 +90,55 @@ Supported scopes:
 | `@Dependent` | One per injection point |
 
 
-> More about task at: [Your First Task Worker](https://littlehorse.io/docs/getting-started/your-first-task-worker)
-> and [Tasks and Task Workers](https://littlehorse.io/docs/server/concepts/tasks).
+More about tasks at: [Your First Task Worker](https://littlehorse.io/docs/getting-started/your-first-task-worker)
+and [Tasks and Task Workers](https://littlehorse.io/docs/server/concepts/tasks).
 
 ## Registering a Workflow
 
+As well as with tasks, for workflows you have to create a class and then add the `@LHWorkflow` annotation.
+In LittleHorse workflows implement the `ThreadFunc` interface.
+
+```java
+@LHWorkflow("greetings")
+public class GreetingsWorkflow implements ThreadFunc {
+
+    @Override
+    public void threadFunction(WorkflowThread wf) {
+        WfRunVariable name = wf.declareStr("name");
+        wf.execute("greetings-task", name);
+    }
+}
+```
+
+Quarkus will register the [WfSpec](https://littlehorse.io/docs/server/concepts/workflows#the-wfspec) when starting the application.
+
+More about workflows at: [Yor First WfSpec](https://littlehorse.io/docs/getting-started/your-first-wfspec)
+and [Workflows](https://littlehorse.io/docs/server/concepts/workflows).
+
 ## Registering User Tasks
 
-## Enabling Task Health Checks
+As well as the other beans, for a user task you have to add the annotation `@LHUserTaskForm`.
+Then you can add any number of fields (`@UserTaskField`).
 
-## Default Injectable Objects
+```java
+@LHUserTaskForm("approve-user-task")
+public class ApproveForm {
+
+    @UserTaskField(
+            displayName = "Approved?",
+            description = "Reply 'true' if this is an acceptable request.")
+    public boolean isApproved;
+}
+```
+
+Quarkus will register the [UserTaskDef](https://littlehorse.io/docs/server/concepts/user-tasks#create-the-usertaskdef)
+when starting the application.
+
+More about user tasks at: [User Tasks](https://littlehorse.io/docs/server/concepts/user-tasks).
 
 ## Reactive RESTful Endpoint
+
+## Enabling Task Health Checks
 
 ## Native Build
 

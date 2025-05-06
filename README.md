@@ -10,6 +10,7 @@
 * [LittleHorse Extension for Quarkus](#littlehorse-extension-for-quarkus)
   * [Table of Content](#table-of-content)
   * [Installation](#installation)
+  * [Versioning](#versioning)
   * [Interoperability Table](#interoperability-table)
   * [Usage](#usage)
   * [Configurations](#configurations)
@@ -40,25 +41,33 @@ Maven:
 </dependency>
 ```
 
+## Versioning
+
+We use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+where `major.minor` numbers indicate littlehorse version compatibility,
+and the `patch` digit indicates the extension version.
+
+- `major` LittleHorse Server `major` version compatibility.
+- `minor` LittleHorse Server `minor` version compatibility.
+- `patch` **LittleHorse Extension** bundle version.
+
 ## Interoperability Table
 
-| LH Version | Quarkus Version |
-|------------|-----------------|
-| 0.13.*     | 3.22.*          |
+| LittleHorse Version | Quarkus Version |
+|---------------------|-----------------|
+| `0.13.*`            | `3.22.*`        |
 
 ## Usage
 
-For LittleHorse documentation go to [LittleHorse Getting Started](https://littlehorse.io/docs/getting-started).
-
-For LittleHorse Extension go to [USAGE.md](USAGE.md).
+For instructions about how to use this extension go to [USAGE.md](USAGE.md).
 
 ## Configurations
 
-For the LittleHorse Extension configurations go to [CONFIGURATIONS.md](CONFIGURATIONS.md).
+For LittleHorse and LittleHorse Extension configurations go to [CONFIGURATIONS.md](CONFIGURATIONS.md).
 
 ## Example Project
 
-For an example project go to [example](example).
+For an example project go to the [example](example) folder.
 
 ## Development
 

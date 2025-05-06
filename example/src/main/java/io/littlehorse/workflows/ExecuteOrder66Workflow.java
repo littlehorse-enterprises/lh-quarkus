@@ -24,8 +24,8 @@ public class ExecuteOrder66Workflow implements ThreadFunc {
 
         wf.doIfElse(
                 wf.condition(isApproved, Comparator.EQUALS, true),
-                ifBody -> ifBody.execute(
-                        PrintTask.TASK_PRINT, wf.format("Well done {0}", executor)),
+                ifBody ->
+                        ifBody.execute(PrintTask.TASK_PRINT, wf.format("Well done {0}", executor)),
                 elseBody -> elseBody.execute(
                         PrintTask.TASK_PRINT, wf.format("Very bad {0}", executor)));
     }
