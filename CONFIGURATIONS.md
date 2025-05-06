@@ -15,7 +15,8 @@ Some examples could be:
 
 ## LittleHorse Client Configurations
 
-More about LH Configurations at: [Workers/Clients Configurations](https://littlehorse.io/docs/server/operations/client-configuration).
+More about LH Configurations at: [Workers/Clients Configurations](https://littlehorse.io/docs/server/operations/client-configuration)
+and [Configuring the Clients](https://littlehorse.io/docs/server/developer-guide/client-configuration).
 
 ### Client
 

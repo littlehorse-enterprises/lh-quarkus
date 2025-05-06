@@ -138,13 +138,58 @@ More about user tasks at: [User Tasks](https://littlehorse.io/docs/server/concep
 
 ## LittleHorse Clients
 
+In case you are developing a [REST application](https://quarkus.io/guides/rest),
+you can inject a `LittleHorseBlockingStub` client:
+
+```java
+@Path("/hello")
+public class GreetingsResource {
+
+    @Inject
+    private LittleHorseBlockingStub blockingStub;
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String hello(@QueryParam("name") String name) {
+        RunWfRequest request = RunWfRequest.newBuilder()
+                .setWfSpecName("greetings")
+                .putVariables("name", LHLibUtil.objToVarVal(name)).build();
+        return blockingStub.runWf(request).getId().getId();
+    }
+}
+```
+
+In case you are developing a [Reactive Application](https://quarkus.io/guides/getting-started-reactive),
+you can inject a `LittleHorseFutureStub` into your REST resource, and use `Uni.createFrom().future()`
+to create an object `io.smallrye.mutiny.Uni`:
+
+```java
+@Path("/hello")
+public class GreetingsResource {
+
+    @Inject
+    private LittleHorseFutureStub futureStub;
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public Uni<String> hello(@QueryParam("name") String name) {
+        RunWfRequest request = RunWfRequest.newBuilder()
+                .setWfSpecName("greetings")
+                .putVariables("name", LHLibUtil.objToVarVal(name)).build();
+        return Uni.createFrom()
+                .future(futureStub.runWf(request))
+                .map(wfRun -> wfRun.getId().getId());
+    }
+}
+```
+
 ## Enabling Task Health Checks
 
 ## Native Build
 
 This extension fully support native build.
 
-Run next command in your project folder.
+Run next command in your project root folder:
 
 ```shell
 ./gradlew build \
