@@ -151,7 +151,8 @@ class LHProcessor {
                 .filter(classInfo -> classInfo.methods().stream()
                         .anyMatch(
                                 methodInfo -> methodInfo.hasAnnotation(LH_TASK_METHOD_ANNOTATION)))
-                .map(classInfo -> loadClass(classInfo.toString()))
+                .map(ClassInfo::toString)
+                .map(LHProcessor::loadClass)
                 .forEach(clazz -> Arrays.stream(clazz.getMethods())
                         .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
                         .map(method -> method.getAnnotation(LHTaskMethod.class).value())
