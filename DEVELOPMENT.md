@@ -30,7 +30,6 @@ docker compose up -d
 | Kafka                 | 9092 |
 | LittleHorse Dashboard | 3000 |
 
-
 ## Tests
 
 ```shell

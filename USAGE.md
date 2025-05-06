@@ -136,10 +136,88 @@ when starting the application.
 
 More about user tasks at: [User Tasks](https://littlehorse.io/docs/server/concepts/user-tasks).
 
-## Reactive RESTful Endpoint
+## LittleHorse Clients
 
 ## Enabling Task Health Checks
 
 ## Native Build
 
+This extension fully support native build.
+
+Run next command in your project folder.
+
+```shell
+./gradlew build \
+-Dquarkus.native.enabled=true \
+-Dquarkus.package.jar.enabled=false
+```
+
+More at [Building a Native Executable](https://quarkus.io/guides/building-native-image).
+
 ## Tests
+
+LH provides a [Testcontainer](https://testcontainers.com/) implementation to allow you to test your integrations.
+This library is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-test-utils-container).
+
+Add it into your dependencies:
+
+```groovy
+dependencies {
+    testImplementation "io.littlehorse:littlehorse-test-utils-container:${lhVersion}"
+}
+```
+
+Then we need to create a [QuarkusTestResourceLifecycleManager](https://quarkus.io/guides/getting-started-testing#launching-containers)
+class, and start LittleHorse:
+
+```java
+public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
+
+    private final LittleHorseCluster cluster = LittleHorseCluster.newBuilder()
+            .withKafkaImage("apache/kafka-native:4.0.0")
+            .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:latest")
+            .build();
+
+    @Override
+    public Map<String, String> start() {
+        cluster.start();
+        return cluster.getClientConfig();
+    }
+
+    @Override
+    public void stop() {
+        cluster.stop();
+    }
+}
+```
+
+Add the test resource at your test:
+
+```java
+@QuarkusTest
+@QuarkusTestResource(ContainersTestResource.class)
+class YourTest {
+
+    @Inject
+    LittleHorseBlockingStub blockingStub;
+
+    @Test
+    void yourTest() {
+
+    }
+}
+```
+
+As you can see in the example above, you can inject a blocking stub client into the test.
+
+It is highly recommended to add [Awaitility](http://www.awaitility.org/) and [REST Assured](https://rest-assured.io/)
+libraries:
+
+```groovy
+dependencies {
+    testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
+}
+```
+
+For a test example go to the [example](example) folder.

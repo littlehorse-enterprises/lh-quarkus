@@ -8,7 +8,6 @@ allprojects {
     apply plugin: "idea"
 
     group = "io.littlehorse"
-    version = "${lhVersion}"
 
     java {
         sourceCompatibility = JavaVersion.VERSION_21

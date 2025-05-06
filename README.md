@@ -28,7 +28,7 @@ This extension is available at [Maven Central](https://central.sonatype.com/arti
 Gradle:
 
 ```groovy
-implementation "io.littlehorse:littlehorse-quarkus:${version}"
+implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
 ```
 
 Maven:
@@ -37,7 +37,7 @@ Maven:
 <dependency>
     <groupId>io.littlehorse</groupId>
     <artifactId>littlehorse-quarkus</artifactId>
-    <version>{version}</version>
+    <version>${lhVersion}</version>
 </dependency>
 ```
 
