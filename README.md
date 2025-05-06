@@ -10,7 +10,10 @@
 * [LittleHorse Extension for Quarkus](#littlehorse-extension-for-quarkus)
   * [Table of Content](#table-of-content)
   * [Installation](#installation)
+  * [Versioning](#versioning)
   * [Interoperability Table](#interoperability-table)
+  * [Usage](#usage)
+  * [Configurations](#configurations)
   * [Example Project](#example-project)
   * [Development](#development)
   * [License](#license)
@@ -22,15 +25,49 @@
 
 This extension is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus).
 
+Gradle:
+
+```groovy
+implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
+```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>io.littlehorse</groupId>
+    <artifactId>littlehorse-quarkus</artifactId>
+    <version>${lhVersion}</version>
+</dependency>
+```
+
+## Versioning
+
+We use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+where `major.minor` numbers indicate littlehorse version compatibility,
+and the `patch` digit indicates the extension version.
+
+- `major` LittleHorse Server `major` version compatibility.
+- `minor` LittleHorse Server `minor` version compatibility.
+- `patch` **LittleHorse Extension** bundle version.
+
 ## Interoperability Table
 
-| LH Version | Quarkus Version |
-|------------|-----------------|
-| 0.13.*     | 3.22.*          |
+| LittleHorse Version | Quarkus Version |
+|---------------------|-----------------|
+| `0.13.*`            | `3.22.*`        |
+
+## Usage
+
+For instructions about how to use this extension go to [USAGE.md](USAGE.md).
+
+## Configurations
+
+For LittleHorse and LittleHorse Extension configurations go to [CONFIGURATIONS.md](CONFIGURATIONS.md).
 
 ## Example Project
 
-For an example project go to [example](example).
+For an example project go to the [example](example) folder.
 
 ## Development
 

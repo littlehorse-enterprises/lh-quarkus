@@ -4,7 +4,7 @@ import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 
 @LHTask
-public class PrinterTask {
+public class PrintTask {
 
     public static final String TASK_PRINT = "print";
 

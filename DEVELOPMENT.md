@@ -21,9 +21,14 @@ pre-commit install
 Run LH:
 
 ```shell
-docker run --name littlehorse -d -p 2023:2023 -p 8080:8080 \
-ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
+docker compose up -d
 ```
+
+| Container             | Port |
+|-----------------------|------|
+| LittleHorse           | 2023 |
+| Kafka                 | 9092 |
+| LittleHorse Dashboard | 3000 |
 
 ## Tests
 
@@ -43,16 +48,45 @@ ghcr.io/littlehorse-enterprises/littlehorse/lh-standalone:latest
 
 ```shell
 ./gradlew quarkusDev
-http -v :9000/hello name==Luck id==my-workflow-1
-http -v :9000/hello/reactive name==Anakin
+```
+
+```shell
+http -v :8080/hello name==Luck id==my-workflow-1
+```
+
+```shell
+http -v :8080/hello/reactive name==Anakin
+```
+
+```shell
 lhctl run greetings name Leia
+```
+
+## Run User Task
+
+```shell
+./gradlew quarkusDev
+```
+
+```shell
+lhctl run execute-order-66 executor Anakin
+```
+
+```shell
+lhctl execute userTaskRun <wfRunId> <userTaskGuid>
 ```
 
 ## Run Native
 
 ```shell
-./gradlew build -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
-./example/build/example*runner
+./gradlew build \
+-Dquarkus.native.enabled=true \
+-Dquarkus.package.jar.enabled=false \
+-Dquarkus.package.output-name=example
+```
+
+```shell
+./example/build/example-runner
 ```
 
 ## Apply Code Style
