@@ -8,7 +8,7 @@ import io.littlehorse.sdk.wfsdk.ThreadFunc;
 import io.littlehorse.sdk.wfsdk.UserTaskOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
-import io.littlehorse.workers.PrinterTask;
+import io.littlehorse.workers.PrintTask;
 
 @LHWorkflow("execute-order-66")
 public class ExecuteOrder66Workflow implements ThreadFunc {
@@ -25,8 +25,8 @@ public class ExecuteOrder66Workflow implements ThreadFunc {
         wf.doIfElse(
                 wf.condition(isApproved, Comparator.EQUALS, true),
                 ifBody -> ifBody.execute(
-                        PrinterTask.TASK_PRINT, wf.format("Well done {0}", executor)),
+                        PrintTask.TASK_PRINT, wf.format("Well done {0}", executor)),
                 elseBody -> elseBody.execute(
-                        PrinterTask.TASK_PRINT, wf.format("Very bad {0}", executor)));
+                        PrintTask.TASK_PRINT, wf.format("Very bad {0}", executor)));
     }
 }

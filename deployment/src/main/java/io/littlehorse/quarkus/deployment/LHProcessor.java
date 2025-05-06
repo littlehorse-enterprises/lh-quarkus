@@ -195,11 +195,11 @@ class LHProcessor {
     ServiceStartBuildItem startLH(
             LHRecorder recorder,
             ShutdownContextBuildItem shutdownContext,
-            List<LHTaskMethodBuildItem> workerBuildItems,
+            List<LHTaskMethodBuildItem> taskBuildItems,
             List<LHUserTaskFormBuildItem> userTaskFromBuildItems,
             List<LHWorkflowBuildItem> workflowBuildItems) {
 
-        workerBuildItems.forEach(buildItem ->
+        taskBuildItems.forEach(buildItem ->
                 recorder.startLHTaskMethod(buildItem.name, buildItem.clazz, shutdownContext));
 
         userTaskFromBuildItems.forEach(

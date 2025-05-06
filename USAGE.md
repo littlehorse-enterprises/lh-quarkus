@@ -31,8 +31,7 @@ public class MyService {
 }
 ```
 
-In case you need to override the [default beans](https://quarkus.io/guides/cdi-reference#default_beans)
-provided by the extension just add new ones. Example:
+In case you need to override the provided beans by the extension, just add new ones. Example:
 
 ```java
 @ApplicationScoped
@@ -65,13 +64,41 @@ More about dependency injections at:
 
 ## Passing Configurations
 
-## Creating a Worker
+## Creating a Task
+
+Create a class and add the annotation `@LHTask`. Then, you can specify a Task Method using the `@LHTaskMethod` annotation.
+
+```java
+@LHTask
+public class PrintTask {
+
+    @LHTaskMethod("print")
+    public void print(String message) {
+        System.out.println(message);
+    }
+}
+```
+
+And that is it, Quarkus will take care of starting and stopping your task.
+
+By default `@LHTask` is created as `@Singleton`, but you can change it adding `@Dependent`.
+
+Supported scopes:
+
+| Annotation   | Instances               |
+|--------------|-------------------------|
+| `@Singleton` | One per application     |
+| `@Dependent` | One per injection point |
+
+
+> More about task at: [Your First Task Worker](https://littlehorse.io/docs/getting-started/your-first-task-worker)
+> and [Tasks and Task Workers](https://littlehorse.io/docs/server/concepts/tasks).
 
 ## Registering a Workflow
 
 ## Registering User Tasks
 
-## Enabling Worker Health Checks
+## Enabling Task Health Checks
 
 ## Default Injectable Objects
 
