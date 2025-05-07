@@ -33,7 +33,7 @@ jobs:
           distribution: "corretto"
           java-version: ${{ matrix.java-version }}
       - name: Tests
-        run: ./gradlew test
+        run: ./gradlew -x spotlessJavaCheck test
 
   tests-native:
     runs-on: ubuntu-latest
