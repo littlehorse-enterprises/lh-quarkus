@@ -45,13 +45,13 @@ public class MyBeans {
 
     @Produces
     @Singleton
-    LittleHorseBlockingStub customBlockingStub(LHConfig config) {
+    public LittleHorseBlockingStub customBlockingStub(LHConfig config) {
         return config.getBlockingStub();
     }
 
     @Produces
     @Singleton
-    LittleHorseFutureStub customFutureStub(LHConfig config) {
+    public LittleHorseFutureStub customFutureStub(LHConfig config) {
         return config.getFutureStub();
     }
 }
@@ -95,15 +95,15 @@ and [Tasks and Task Workers](https://littlehorse.io/docs/server/concepts/tasks).
 
 ## Registering a Workflow
 
-As well as with tasks, for workflows you have to create a class and then add the `@LHWorkflow` annotation.
-In LittleHorse workflows implement the `ThreadFunc` interface.
+As well as with tasks, for workflows you have to create a class and add the `@LHWorkflow` annotation.
+Additionally, you have to implement the `LHWorkflowConsumer` interface.
 
 ```java
 @LHWorkflow("greetings")
-public class GreetingsWorkflow implements ThreadFunc {
+public class GreetingsWorkflow implements LHWorkflowConsumer {
 
     @Override
-    public void threadFunction(WorkflowThread wf) {
+    public void accept(WorkflowThread wf) {
         WfRunVariable name = wf.declareStr("name");
         wf.execute("greetings-task", name);
     }
@@ -112,7 +112,27 @@ public class GreetingsWorkflow implements ThreadFunc {
 
 Quarkus will register the [WfSpec](https://littlehorse.io/docs/server/concepts/workflows#the-wfspec) when starting the application.
 
-More about workflows at: [Yor First WfSpec](https://littlehorse.io/docs/getting-started/your-first-wfspec)
+Another way to register workflows is creating a `WorkflowProducer` class, example:
+
+```java
+@ApplicationScoped
+public class WorkflowProducer {
+
+    @LHWorkflow("hello-world")
+    public void helloWorld(WorkflowThread wf) {
+        wf.execute(PrintTask.TASK_PRINT, "Hello World!");
+    }
+
+    @LHWorkflow("test")
+    public void test(WorkflowThread wf) {
+        wf.execute(PrintTask.TASK_PRINT, "This is a test!");
+    }
+}
+```
+
+As you can see in the example above, you can add methods as workflows, this could be useful in some cases.
+
+More about workflows at: [Your First WfSpec](https://littlehorse.io/docs/getting-started/your-first-wfspec)
 and [Workflows](https://littlehorse.io/docs/server/concepts/workflows).
 
 ## Registering User Tasks
