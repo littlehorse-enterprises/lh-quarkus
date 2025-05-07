@@ -1,5 +1,20 @@
 # Usage
 
+## Table of Content
+
+<!-- TOC -->
+* [Usage](#usage)
+  * [Table of Content](#table-of-content)
+  * [Default Beans](#default-beans)
+  * [Creating a Task](#creating-a-task)
+  * [Registering a Workflow](#registering-a-workflow)
+  * [Registering User Tasks](#registering-user-tasks)
+  * [LittleHorse Clients](#littlehorse-clients)
+  * [Enabling Task Health Checks](#enabling-task-health-checks)
+  * [Native Build](#native-build)
+  * [Tests](#tests)
+<!-- TOC -->
+
 ## Default Beans
 
 This extension provides [default beans](https://quarkus.io/guides/cdi-reference#default_beans) such as:
@@ -286,3 +301,5 @@ dependencies {
 ```
 
 For a test example go to the [example](example) folder.
+
+More about tests at: [Testing Your Quarkus Application](https://quarkus.io/guides/getting-started-testing).

@@ -91,7 +91,7 @@ class LHProcessor {
         IndexView index = indexContainer.getIndex();
 
         Stream<ClassInfo> tasks = index.getAnnotations(LH_TASK_ANNOTATION).stream()
-                .map(annotationInstance -> annotationInstance.target().asClass());
+                .map(annotated -> annotated.target().asClass());
 
         Stream<ClassInfo> taskMethods = index.getKnownClasses().stream()
                 .filter(classInfo -> classInfo.methods().stream()
@@ -100,12 +100,16 @@ class LHProcessor {
 
         Stream<ClassInfo> userTaskForms =
                 index.getAnnotations(LH_USER_TASK_FORM_ANNOTATION).stream()
-                        .map(annotationInstance -> annotationInstance.target().asClass());
+                        .map(annotated -> annotated.target().asClass());
 
         Stream<ClassInfo> userTaskFields = index.getKnownClasses().stream()
                 .filter(classInfo -> classInfo.fields().stream()
                         .anyMatch(fieldInfo ->
                                 fieldInfo.hasAnnotation(LH_USER_TASK_FIELD_ANNOTATION)));
+
+        Stream<ClassInfo> workflowMethods = index.getAnnotations(LH_WORKFLOW_ANNOTATION).stream()
+                .filter(annotated -> annotated.target().kind().equals(Kind.METHOD))
+                .map(annotated -> annotated.target().asMethod().declaringClass());
 
         Stream<ClassInfo> protobufMessages =
                 index.getAllKnownSubclasses(GeneratedMessageV3.class).stream();
@@ -121,6 +125,7 @@ class LHProcessor {
                         taskMethods,
                         userTaskForms,
                         userTaskFields,
+                        workflowMethods,
                         protobufMessages,
                         protobufBuilders,
                         protobufEnums)

@@ -36,6 +36,15 @@ docker compose up -d
 ./gradlew test
 ```
 
+## Native Tests
+
+```shell
+./gradlew build testNative \
+-Dquarkus.native.enabled=true \
+-Dquarkus.package.jar.enabled=false \
+-Dquarkus.package.output-name=example
+```
+
 ## Publish Locally
 
 ```shell

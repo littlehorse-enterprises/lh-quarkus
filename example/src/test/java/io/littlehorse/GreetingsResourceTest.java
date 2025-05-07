@@ -22,9 +22,6 @@ import io.littlehorse.sdk.common.proto.WfSpecIdList;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
-import jakarta.inject.Inject;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -36,15 +33,8 @@ import java.util.UUID;
 @QuarkusTestResource(ContainersTestResource.class)
 class GreetingsResourceTest {
 
-    @Inject
+    @InjectLittleHorseBlockingStub
     LittleHorseBlockingStub blockingStub;
-
-    String expectedId;
-
-    @BeforeEach
-    void setUp() {
-        expectedId = UUID.randomUUID().toString();
-    }
 
     @Test
     void shouldRegisterWorkflows() {
@@ -114,6 +104,8 @@ class GreetingsResourceTest {
     @ParameterizedTest
     @ValueSource(strings = {"/hello", "/hello/reactive"})
     void testHelloEndpoint(String path) {
+        String expectedId = UUID.randomUUID().toString();
+
         given().queryParam("id", expectedId)
                 .queryParam("name", "Anakin")
                 .when()

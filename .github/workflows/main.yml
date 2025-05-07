@@ -1,0 +1,11 @@
+name: main
+run-name: Merge into main
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
