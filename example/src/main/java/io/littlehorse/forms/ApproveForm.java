@@ -1,4 +1,4 @@
-package io.littlehorse.workflows;
+package io.littlehorse.forms;
 
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.sdk.usertask.annotations.UserTaskField;

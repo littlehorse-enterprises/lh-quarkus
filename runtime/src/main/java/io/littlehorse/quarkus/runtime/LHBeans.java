@@ -6,6 +6,7 @@ import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 import io.quarkus.arc.DefaultBean;
+import io.quarkus.arc.Unremovable;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -21,6 +22,7 @@ public class LHBeans {
     @Produces
     @DefaultBean
     @Singleton
+    @Unremovable
     LHConfig configuration(Config config) {
         Properties properties = new Properties();
         Streams.stream(config.getPropertyNames())
@@ -35,6 +37,7 @@ public class LHBeans {
     @Produces
     @DefaultBean
     @Singleton
+    @Unremovable
     LittleHorseBlockingStub blockingStub(LHConfig config) {
         return config.getBlockingStub();
     }
@@ -42,6 +45,7 @@ public class LHBeans {
     @Produces
     @DefaultBean
     @Singleton
+    @Unremovable
     LittleHorseFutureStub futureStub(LHConfig config) {
         return config.getFutureStub();
     }
