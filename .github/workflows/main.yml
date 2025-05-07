@@ -1,8 +1,10 @@
-name: pr
-run-name: Tests for branch "${{ github.head_ref }}"
+name: main
+run-name: Merge into main
 on:
   workflow_dispatch:
-  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   tests:
