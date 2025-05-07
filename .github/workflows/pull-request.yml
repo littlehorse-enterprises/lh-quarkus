@@ -1,4 +1,4 @@
-name: pr
+name: pull-request
 run-name: Tests for branch "${{ github.head_ref }}"
 on:
   workflow_dispatch:
