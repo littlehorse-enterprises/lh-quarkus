@@ -1,7 +1,11 @@
 package io.littlehorse;
 
 import io.littlehorse.container.LittleHorseCluster;
+import io.littlehorse.sdk.common.config.LHConfig;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
+import io.quarkus.test.common.QuarkusTestResourceLifecycleManager.TestInjector.AnnotatedAndMatchesType;
 
 import java.util.Map;
 
@@ -22,5 +26,19 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
     @Override
     public void stop() {
         cluster.stop();
+    }
+
+    @Override
+    public void inject(TestInjector testInjector) {
+        LHConfig config =
+                LHConfig.newBuilder().loadFromMap(cluster.getClientConfig()).build();
+        testInjector.injectIntoFields(
+                config.getBlockingStub(),
+                new AnnotatedAndMatchesType(
+                        InjectLittleHorseBlockingStub.class, LittleHorseBlockingStub.class));
+        testInjector.injectIntoFields(
+                config.getFutureStub(),
+                new AnnotatedAndMatchesType(
+                        InjectLittleHorseFutureStub.class, LittleHorseFutureStub.class));
     }
 }
