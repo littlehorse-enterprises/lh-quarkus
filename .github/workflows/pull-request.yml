@@ -15,9 +15,9 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "21"
-      - name: Test Native Artifact
+      - name: Tests
         run: >
-          ./gradlew build test testNative \
-          -Dquarkus.native.enabled=true \
-          -Dquarkus.package.jar.enabled=false \
+          ./gradlew build test testNative
+          -Dquarkus.native.enabled=true
+          -Dquarkus.package.jar.enabled=false
           -Dquarkus.package.output-name=example
