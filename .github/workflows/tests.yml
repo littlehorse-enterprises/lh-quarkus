@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
@@ -42,11 +42,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Java 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: "21"
+          java-version: "17"
       - name: Tests
         run: >
           ./gradlew -x test -x spotlessJavaCheck build testNative
