@@ -30,7 +30,7 @@ public class LHTaskWorkerRegister {
         return taskWorkers;
     }
 
-    public void registerTaskWorker(LHTaskWorker worker) {
+    public void registerAndStartTaskWorker(LHTaskWorker worker) {
         if (config.tasksRegisterEnabled()) {
             log.info(
                     "Registering {}: {}",

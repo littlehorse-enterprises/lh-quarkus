@@ -13,7 +13,7 @@ public class LHRecorder {
 
     public void startLHTaskMethod(
             LHTaskMethodRecordable recordable, ShutdownContext shutdownContext) {
-        recordable.startTaskWorker(shutdownContext);
+        recordable.registerAndStartTaskWorker(shutdownContext);
     }
 
     public void registerLHWorkflow(LHWorkflowRecordable recordable) {

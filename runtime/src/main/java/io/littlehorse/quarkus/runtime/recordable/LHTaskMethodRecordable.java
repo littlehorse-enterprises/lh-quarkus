@@ -26,13 +26,13 @@ public class LHTaskMethodRecordable {
         return taskDefName;
     }
 
-    public void startTaskWorker(ShutdownContext shutdownContext) {
+    public void registerAndStartTaskWorker(ShutdownContext shutdownContext) {
         LHConfig config = CDI.current().select(LHConfig.class).get();
         LHTaskWorkerRegister workerRegister =
                 CDI.current().select(LHTaskWorkerRegister.class).get();
         Object bean = CDI.current().select(beanClass).get();
         LHTaskWorker worker = new LHTaskWorker(bean, taskDefName, config);
         shutdownContext.addShutdownTask(new ShutdownContext.CloseRunnable(worker));
-        workerRegister.registerTaskWorker(worker);
+        workerRegister.registerAndStartTaskWorker(worker);
     }
 }
