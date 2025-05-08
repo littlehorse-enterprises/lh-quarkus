@@ -2,7 +2,7 @@ package io.littlehorse.workflows;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
-import io.littlehorse.workers.PrintTask;
+import io.littlehorse.tasks.PrintTask;
 
 import jakarta.enterprise.context.ApplicationScoped;
 

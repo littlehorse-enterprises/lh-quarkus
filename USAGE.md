@@ -111,14 +111,14 @@ and [Tasks and Task Workers](https://littlehorse.io/docs/server/concepts/tasks).
 ## Registering a Workflow
 
 As well as with tasks, for workflows you have to create a class and add the `@LHWorkflow` annotation.
-Additionally, you have to implement the `LHWorkflowConsumer` interface.
+Additionally, you have to implement the `LHWorkflowDefinition` interface.
 
 ```java
 @LHWorkflow("greetings")
-public class GreetingsWorkflow implements LHWorkflowConsumer {
+public class GreetingsWorkflow implements LHWorkflowDefinition {
 
     @Override
-    public void accept(WorkflowThread wf) {
+    public void define(WorkflowThread wf) {
         WfRunVariable name = wf.declareStr("name");
         wf.execute("greetings-task", name);
     }
@@ -219,6 +219,24 @@ public class GreetingsResource {
 ```
 
 ## Enabling Task Health Checks
+
+Add `quarkus-smallrye-health` to your project.
+
+```groovy
+implementation "io.quarkus:quarkus-smallrye-health"
+```
+
+This extension will automatically add all [LHTaskWorker::healthStatus](https://github.com/littlehorse-enterprises/littlehorse/blob/master/sdk-java/src/main/java/io/littlehorse/sdk/worker/LHTaskWorker.java#L254)
+to the quarkus health checks.
+
+To disable this feature, you have to pass `quarkus.littlehorse.health.enabled=false`
+config at build time (either `jar` or `native`). Example:
+
+```shell
+./gradlew build -Dquarkus.littlehorse.health.enabled=false
+```
+
+More about quarkus healthy checks at: [Smallrey Health](https://quarkus.io/guides/smallrye-health).
 
 ## Native Build
 

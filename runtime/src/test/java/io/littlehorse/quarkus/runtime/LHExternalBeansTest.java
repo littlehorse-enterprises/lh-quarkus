@@ -13,14 +13,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-class LHBeansTest {
-    LHBeans lhBeans;
+class LHExternalBeansTest {
+    LHExternalBeans lhBeans;
     Config mockConfig;
 
     @BeforeEach
     void beforeEach() {
         mockConfig = mock(Config.class);
-        lhBeans = new LHBeans();
+        lhBeans = new LHExternalBeans();
     }
 
     @Test

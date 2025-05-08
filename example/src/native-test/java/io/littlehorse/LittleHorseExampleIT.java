@@ -5,6 +5,6 @@ import io.quarkus.test.junit.QuarkusIntegrationTest;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-class GreetingsResourceIT extends GreetingsResourceTest {
+class LittleHorseExampleIT extends LittleHorseExampleTest {
     // Execute the same tests but in packaged mode.
 }

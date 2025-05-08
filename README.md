@@ -9,6 +9,7 @@
 <!-- TOC -->
 * [LittleHorse Extension for Quarkus](#littlehorse-extension-for-quarkus)
   * [Table of Content](#table-of-content)
+  * [Features](#features)
   * [Installation](#installation)
   * [Versioning](#versioning)
   * [Interoperability Table](#interoperability-table)
@@ -18,6 +19,15 @@
   * [Development](#development)
   * [License](#license)
 <!-- TOC -->
+
+## Features
+
+- Register and start tasks
+- Register workflows
+- Register user tasks
+- Health checks
+- Default LH beans
+- Native build support
 
 ## Installation
 
@@ -53,9 +63,9 @@ and the `patch` digit indicates the extension version.
 
 ## Interoperability Table
 
-| LittleHorse Version | Quarkus Version |
-|---------------------|-----------------|
-| `0.13.*`            | `3.22.*`        |
+| LittleHorse Extension Version | Quarkus Version |
+|-------------------------------|-----------------|
+| `0.13.*`                      | `3.22.*`        |
 
 ## Usage
 

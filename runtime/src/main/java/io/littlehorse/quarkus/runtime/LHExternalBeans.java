@@ -17,7 +17,7 @@ import org.eclipse.microprofile.config.Config;
 import java.util.Properties;
 
 @ApplicationScoped
-public class LHBeans {
+public class LHExternalBeans {
 
     @Produces
     @DefaultBean

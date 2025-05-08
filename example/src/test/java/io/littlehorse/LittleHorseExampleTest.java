@@ -31,7 +31,7 @@ import java.util.UUID;
 
 @QuarkusTest
 @QuarkusTestResource(ContainersTestResource.class)
-class GreetingsResourceTest {
+class LittleHorseExampleTest {
 
     @InjectLittleHorseBlockingStub
     LittleHorseBlockingStub blockingStub;
