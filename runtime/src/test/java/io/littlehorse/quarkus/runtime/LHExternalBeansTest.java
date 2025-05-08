@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-class LHBeansTest {
+class LHExternalBeansTest {
     LHExternalBeans lhBeans;
     Config mockConfig;
 
