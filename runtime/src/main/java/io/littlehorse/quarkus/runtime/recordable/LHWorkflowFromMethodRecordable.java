@@ -1,28 +1,29 @@
-package io.littlehorse.quarkus.recordable;
+package io.littlehorse.quarkus.runtime.recordable;
 
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class LHWorkflowFromMethodRecordable implements LHWorkflowRecordable {
 
-    private final String beanClassName;
+    private final Class<?> beanClass;
     private final String beanMethodName;
     private final String wfSpecName;
 
     @RecordableConstructor
     public LHWorkflowFromMethodRecordable(
-            String beanClassName, String beanMethodName, String wfSpecName) {
-        this.beanClassName = beanClassName;
+            Class<?> beanClass, String beanMethodName, String wfSpecName) {
+        this.beanClass = beanClass;
         this.beanMethodName = beanMethodName;
         this.wfSpecName = wfSpecName;
     }
 
-    public String getBeanClassName() {
-        return beanClassName;
+    public Class<?> getBeanClass() {
+        return beanClass;
     }
 
     public String getBeanMethodName() {
@@ -35,14 +36,12 @@ public class LHWorkflowFromMethodRecordable implements LHWorkflowRecordable {
     }
 
     @Override
-    public void getWorkflowThread(WorkflowThread workflowThread) {
+    public void buildWorkflowThread(WorkflowThread workflowThread) {
         try {
-            Class<?> beanClass =
-                    Thread.currentThread().getContextClassLoader().loadClass(beanClassName);
             Object bean = CDI.current().select(beanClass).get();
             Method method = beanClass.getMethod(beanMethodName, WorkflowThread.class);
             method.invoke(bean, workflowThread);
-        } catch (Exception e) {
+        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

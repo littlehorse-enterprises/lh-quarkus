@@ -29,6 +29,14 @@ import java.util.Objects;
 
 class LHServiceProcessor {
 
+    private static Class<?> loadClass(String className) {
+        try {
+            return Thread.currentThread().getContextClassLoader().loadClass(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @BuildStep
     void scanLHTasks(
             BuildProducer<LHTaskMethodBuildItem> producer,
@@ -38,13 +46,13 @@ class LHServiceProcessor {
                 .filter(classInfo -> classInfo.methods().stream()
                         .anyMatch(methodInfo -> methodInfo.hasAnnotation(LHTaskMethod.class)))
                 .map(ClassInfo::toString)
-                .map(className -> LHClassLoader.load(className).getLoadedClass())
-                .forEach(clazz -> Arrays.stream(clazz.getMethods())
+                .map(LHServiceProcessor::loadClass)
+                .forEach(beanClass -> Arrays.stream(beanClass.getMethods())
                         .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
                         .map(method -> method.getAnnotation(LHTaskMethod.class))
                         .filter(Objects::nonNull)
                         .map(LHTaskMethod::value)
-                        .map(name -> new LHTaskMethodBuildItem(clazz, name))
+                        .map(taskDefName -> new LHTaskMethodBuildItem(beanClass, taskDefName))
                         .forEach(producer::produce));
     }
 
@@ -60,9 +68,10 @@ class LHServiceProcessor {
                         .interfaceNames()
                         .contains(DotName.createSimple(LHWorkflowConsumer.class)))
                 .map(annotated -> {
-                    String className = annotated.target().asClass().toString();
+                    String beanClassName = annotated.target().asClass().toString();
                     String wfSpecName = annotated.value().asString();
-                    return new LHWorkflowConsumerBuildItem(className, wfSpecName);
+                    Class<?> beanClass = loadClass(beanClassName);
+                    return new LHWorkflowConsumerBuildItem(beanClass, wfSpecName);
                 })
                 .forEach(producer::produce);
     }
@@ -75,10 +84,11 @@ class LHServiceProcessor {
                 .filter(annotated -> annotated.target().kind().equals(Kind.METHOD))
                 .map(annotated -> {
                     MethodInfo methodInfo = annotated.target().asMethod();
-                    String className = methodInfo.declaringClass().toString();
-                    String methodName = methodInfo.name();
-                    String workflowName = annotated.value().asString();
-                    return new LHWorkflowFromMethodBuildItem(className, methodName, workflowName);
+                    String beanClassName = methodInfo.declaringClass().toString();
+                    String beanMethodName = methodInfo.name();
+                    String wfSpecName = annotated.value().asString();
+                    Class<?> beanClass = loadClass(beanClassName);
+                    return new LHWorkflowFromMethodBuildItem(beanClass, beanMethodName, wfSpecName);
                 })
                 .forEach(producer::produce);
     }
@@ -88,10 +98,12 @@ class LHServiceProcessor {
             BuildProducer<LHUserTaskFormBuildItem> producer,
             BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHUserTaskForm.class).stream()
-                .map(annotated -> new LHUserTaskFormBuildItem(
-                        LHClassLoader.load(annotated.target().asClass().toString())
-                                .getLoadedClass(),
-                        annotated.value().asString()))
+                .map(annotated -> {
+                    String beanClassName = annotated.target().asClass().toString();
+                    String userTaskDefName = annotated.value().asString();
+                    Class<?> beanClass = loadClass(beanClassName);
+                    return new LHUserTaskFormBuildItem(beanClass, userTaskDefName);
+                })
                 .forEach(producer::produce);
     }
 
@@ -100,22 +112,24 @@ class LHServiceProcessor {
     ServiceStartBuildItem startLH(
             LHRecorder recorder,
             ShutdownContextBuildItem shutdownContext,
-            List<LHTaskMethodBuildItem> taskBuildItems,
+            List<LHTaskMethodBuildItem> taskMethodBuildItems,
             List<LHUserTaskFormBuildItem> userTaskFromBuildItems,
-            List<LHWorkflowConsumerBuildItem> workflowBuildItems,
-            List<LHWorkflowFromMethodBuildItem> workflowMethodsBuildItems) {
+            List<LHWorkflowConsumerBuildItem> workflowConsumerBuildItems,
+            List<LHWorkflowFromMethodBuildItem> workflowFromMethodBuildItems) {
 
-        taskBuildItems.forEach(buildItem -> recorder.startLHTaskMethod(
-                buildItem.getBeanClass(), buildItem.getName(), shutdownContext));
+        taskMethodBuildItems.stream()
+                .map(LHTaskMethodBuildItem::toRecordable)
+                .forEach(recordable -> recorder.startLHTaskMethod(recordable, shutdownContext));
 
-        userTaskFromBuildItems.forEach(buildItem ->
-                recorder.registerLHUserTaskForm(buildItem.getBeanClass(), buildItem.getName()));
+        userTaskFromBuildItems.stream()
+                .map(LHUserTaskFormBuildItem::toRecordable)
+                .forEach(recorder::registerLHUserTaskForm);
 
-        workflowBuildItems.stream()
+        workflowConsumerBuildItems.stream()
                 .map(LHWorkflowConsumerBuildItem::toRecordable)
                 .forEach(recorder::registerLHWorkflow);
 
-        workflowMethodsBuildItems.stream()
+        workflowFromMethodBuildItems.stream()
                 .map(LHWorkflowFromMethodBuildItem::toRecordable)
                 .forEach(recorder::registerLHWorkflow);
 

@@ -1,21 +1,26 @@
 package io.littlehorse.quarkus.deployment.items;
 
+import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
 import io.quarkus.builder.item.MultiBuildItem;
 
 public final class LHTaskMethodBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
-    private final String name;
+    private final String taskDefName;
 
-    public LHTaskMethodBuildItem(Class<?> beanClass, String name) {
-        this.name = name;
+    public LHTaskMethodBuildItem(Class<?> beanClass, String taskDefName) {
+        this.taskDefName = taskDefName;
         this.beanClass = beanClass;
     }
 
-    public String getName() {
-        return name;
+    public String getTaskDefName() {
+        return taskDefName;
     }
 
     public Class<?> getBeanClass() {
         return beanClass;
+    }
+
+    public LHTaskMethodRecordable toRecordable() {
+        return new LHTaskMethodRecordable(beanClass, taskDefName);
     }
 }

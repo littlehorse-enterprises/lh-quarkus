@@ -1,26 +1,26 @@
 package io.littlehorse.quarkus.deployment.items;
 
-import io.littlehorse.quarkus.recordable.LHWorkflowConsumerRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowConsumerRecordable;
 import io.quarkus.builder.item.MultiBuildItem;
 
 public final class LHWorkflowConsumerBuildItem extends MultiBuildItem {
-    private final String beanClassName;
+    private final Class<?> beanClass;
     private final String wfSpecName;
 
-    public LHWorkflowConsumerBuildItem(String beanClassName, String wfSpecName) {
+    public LHWorkflowConsumerBuildItem(Class<?> beanClass, String wfSpecName) {
         this.wfSpecName = wfSpecName;
-        this.beanClassName = beanClassName;
+        this.beanClass = beanClass;
     }
 
     public String getWfSpecName() {
         return wfSpecName;
     }
 
-    public String getBeanClassName() {
-        return beanClassName;
+    public Class<?> getBeanClass() {
+        return beanClass;
     }
 
     public LHWorkflowConsumerRecordable toRecordable() {
-        return new LHWorkflowConsumerRecordable(beanClassName, wfSpecName);
+        return new LHWorkflowConsumerRecordable(beanClass, wfSpecName);
     }
 }

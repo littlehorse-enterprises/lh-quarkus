@@ -1,10 +1,8 @@
 package io.littlehorse.quarkus.runtime;
 
-import io.littlehorse.quarkus.recordable.LHWorkflowRecordable;
-import io.littlehorse.quarkus.task.LHUserTaskForm;
-import io.littlehorse.sdk.common.config.LHConfig;
-import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
-import io.littlehorse.sdk.usertask.UserTaskSchema;
+import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHUserTaskRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHTaskWorker;
 import io.quarkus.runtime.ShutdownContext;
@@ -21,34 +19,27 @@ public class LHRecorder {
     private static final Logger log = LoggerFactory.getLogger(LHRecorder.class);
 
     public void startLHTaskMethod(
-            Class<?> classBean, String name, ShutdownContext shutdownContext) {
-        Object bean = CDI.current().select(classBean).get();
-        LHConfig config = CDI.current().select(LHConfig.class).get();
-
-        LHTaskWorker worker = new LHTaskWorker(bean, name, config);
+            LHTaskMethodRecordable recordable, ShutdownContext shutdownContext) {
+        LHTaskWorker worker = recordable.initTaskWorker();
         shutdownContext.addShutdownTask(new CloseRunnable(worker));
 
-        log.debug("Registering {}: {}", LHTaskMethod.class.getSimpleName(), name);
+        log.debug(
+                "Registering {}: {}", LHTaskMethod.class.getSimpleName(), worker.getTaskDefName());
         worker.registerTaskDef();
 
-        log.debug("Starting {}: {}", LHTaskMethod.class.getSimpleName(), name);
+        log.debug("Starting {}: {}", LHTaskMethod.class.getSimpleName(), worker.getTaskDefName());
         worker.start();
     }
 
     public void registerLHWorkflow(LHWorkflowRecordable recordable) {
         LHWorkflowRegister register =
                 CDI.current().select(LHWorkflowRegister.class).get();
-        register.registerWorkflow(recordable.getWfSpecName(), recordable::getWorkflowThread);
+        register.registerWorkflow(recordable.getWfSpecName(), recordable::buildWorkflowThread);
     }
 
-    public void registerLHUserTaskForm(Class<?> classBean, String name) {
-        Object bean = CDI.current().select(classBean).get();
-        LittleHorseBlockingStub stub =
-                CDI.current().select(LittleHorseBlockingStub.class).get();
-
-        UserTaskSchema schema = new UserTaskSchema(bean, name);
-
-        log.debug("Registering {}: {}", LHUserTaskForm.class.getSimpleName(), name);
-        stub.putUserTaskDef(schema.compile());
+    public void registerLHUserTaskForm(LHUserTaskRecordable recordable) {
+        LHUserTaskRegister register =
+                CDI.current().select(LHUserTaskRegister.class).get();
+        register.registerUserTask(recordable.getBean(), recordable.getUserTaskDefName());
     }
 }
