@@ -2,13 +2,13 @@ package io.littlehorse.quarkus.deployment.processors;
 
 import io.littlehorse.quarkus.deployment.items.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHUserTaskFormBuildItem;
-import io.littlehorse.quarkus.deployment.items.LHWorkflowConsumerBuildItem;
+import io.littlehorse.quarkus.deployment.items.LHWorkflowDefinitionBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHWorkflowFromMethodBuildItem;
 import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
-import io.littlehorse.quarkus.workflow.LHWorkflowConsumer;
+import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -57,8 +57,8 @@ class LHServiceProcessor {
     }
 
     @BuildStep
-    void scanLHWorkflowConsumer(
-            BuildProducer<LHWorkflowConsumerBuildItem> producer,
+    void scanLHWorkflowDefinition(
+            BuildProducer<LHWorkflowDefinitionBuildItem> producer,
             BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHWorkflow.class).stream()
                 .filter(annotated -> annotated.target().kind().equals(Kind.CLASS))
@@ -66,12 +66,12 @@ class LHServiceProcessor {
                         .target()
                         .asClass()
                         .interfaceNames()
-                        .contains(DotName.createSimple(LHWorkflowConsumer.class)))
+                        .contains(DotName.createSimple(LHWorkflowDefinition.class)))
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
                     String wfSpecName = annotated.value().asString();
                     Class<?> beanClass = loadClass(beanClassName);
-                    return new LHWorkflowConsumerBuildItem(beanClass, wfSpecName);
+                    return new LHWorkflowDefinitionBuildItem(beanClass, wfSpecName);
                 })
                 .forEach(producer::produce);
     }
@@ -114,7 +114,7 @@ class LHServiceProcessor {
             ShutdownContextBuildItem shutdownContext,
             List<LHTaskMethodBuildItem> taskMethodBuildItems,
             List<LHUserTaskFormBuildItem> userTaskFromBuildItems,
-            List<LHWorkflowConsumerBuildItem> workflowConsumerBuildItems,
+            List<LHWorkflowDefinitionBuildItem> workflowDefinitionBuildItems,
             List<LHWorkflowFromMethodBuildItem> workflowFromMethodBuildItems) {
 
         taskMethodBuildItems.stream()
@@ -125,8 +125,8 @@ class LHServiceProcessor {
                 .map(LHUserTaskFormBuildItem::toRecordable)
                 .forEach(recorder::registerLHUserTaskForm);
 
-        workflowConsumerBuildItems.stream()
-                .map(LHWorkflowConsumerBuildItem::toRecordable)
+        workflowDefinitionBuildItems.stream()
+                .map(LHWorkflowDefinitionBuildItem::toRecordable)
                 .forEach(recorder::registerLHWorkflow);
 
         workflowFromMethodBuildItems.stream()

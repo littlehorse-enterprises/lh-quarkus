@@ -111,14 +111,14 @@ and [Tasks and Task Workers](https://littlehorse.io/docs/server/concepts/tasks).
 ## Registering a Workflow
 
 As well as with tasks, for workflows you have to create a class and add the `@LHWorkflow` annotation.
-Additionally, you have to implement the `LHWorkflowConsumer` interface.
+Additionally, you have to implement the `LHWorkflowDefinition` interface.
 
 ```java
 @LHWorkflow("greetings")
-public class GreetingsWorkflow implements LHWorkflowConsumer {
+public class GreetingsWorkflow implements LHWorkflowDefinition {
 
     @Override
-    public void accept(WorkflowThread wf) {
+    public void define(WorkflowThread wf) {
         WfRunVariable name = wf.declareStr("name");
         wf.execute("greetings-task", name);
     }
