@@ -128,3 +128,7 @@ Optional version identifier. Intended to be informative. Useful when you're runn
 * Importance: medium
 
 ## LittleHorse Extension Configurations
+
+### Buildtime Configurations
+
+### Runtime Configurations

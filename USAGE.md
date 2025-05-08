@@ -220,6 +220,24 @@ public class GreetingsResource {
 
 ## Enabling Task Health Checks
 
+Add `quarkus-smallrye-health` to your project.
+
+```groovy
+implementation "io.quarkus:quarkus-smallrye-health"
+```
+
+This extension will automatically add all [LHTaskWorker::healthStatus](https://github.com/littlehorse-enterprises/littlehorse/blob/master/sdk-java/src/main/java/io/littlehorse/sdk/worker/LHTaskWorker.java#L254)
+to the quarkus health checks.
+
+To disable this feature, you have to pass `quarkus.littlehorse.health.enabled=false`
+config at build time (either `jar` or `native`). Example:
+
+```shell
+./gradlew build -Dquarkus.littlehorse.health.enabled=false
+```
+
+More about quarkus healthy checks at: [Smallrey Health](https://quarkus.io/guides/smallrye-health).
+
 ## Native Build
 
 This extension fully support native build.

@@ -108,6 +108,20 @@ lhctl execute userTaskRun <wfRunId> <userTaskGuid>
 /gradlew quarkusDev -Dquarkus.log.level=DEBUG
 ```
 
+## Health Checks
+
+```shell
+http :8080/q/health
+```
+
+```shell
+http :8080/q/health/ready
+```
+
+```shell
+http :8080/q/health/live
+```
+
 ## Apply Code Style
 
 ```shell
