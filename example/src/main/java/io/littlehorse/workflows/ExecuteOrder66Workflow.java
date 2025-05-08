@@ -8,7 +8,7 @@ import io.littlehorse.sdk.common.proto.Comparator;
 import io.littlehorse.sdk.wfsdk.UserTaskOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
-import io.littlehorse.workers.PrintTask;
+import io.littlehorse.tasks.PrintTask;
 
 @LHWorkflow("execute-order-66")
 public class ExecuteOrder66Workflow implements LHWorkflowConsumer {

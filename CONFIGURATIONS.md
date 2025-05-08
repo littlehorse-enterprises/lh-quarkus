@@ -83,8 +83,7 @@ Time in milliseconds to configure the timeout for the keepalive pings on the grp
 * Importance: low
 
 ``lhc.oauth.access.token.url``
-Optional Access Token URL provided by the OAuth Authorization Server. Used by the Worker to obtain a token using client
-credentials flow.
+Optional Access Token URL provided by the OAuth Authorization Server. Used by the Worker to obtain a token using client credentials flow.
 
 * Type: string
 * Default: null
@@ -98,8 +97,7 @@ Optional OAuth2 Client Id. Used by the Worker to identify itself at an Authoriza
 * Importance: low
 
 ``lhc.oauth.client.secret``
-Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Authorization Server. Client Credentials
-Flow.
+Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Authorization Server. Client Credentials Flow.
 
 * Type: password
 * Default: null
@@ -123,6 +121,7 @@ Unique identifier for the Task Worker. It is used by the LittleHorse cluster to 
 
 ``lhw.task.worker.version``
 Optional version identifier. Intended to be informative. Useful when you're running different version of a worker. Along with the `lhw.task.worker.id`, this is journalled on every `TaskAttempt`.
+
 * Type: string
 * Default: ""
 * Importance: medium
@@ -130,5 +129,12 @@ Optional version identifier. Intended to be informative. Useful when you're runn
 ## LittleHorse Extension Configurations
 
 ### Buildtime Configurations
+
+``quarkus.littlehorse.health.enabled``
+Enable health checks for the running `LHTaskWorker` list.
+
+* Type: boolean
+* Default: true
+* Importance: low
 
 ### Runtime Configurations

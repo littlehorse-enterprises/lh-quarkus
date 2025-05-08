@@ -1,7 +1,7 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.workers.GreetingsTask.TASK_GREETINGS;
-import static io.littlehorse.workers.PrintTask.TASK_PRINT;
+import static io.littlehorse.tasks.GreetingsTask.TASK_GREETINGS;
+import static io.littlehorse.tasks.PrintTask.TASK_PRINT;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowConsumer;
