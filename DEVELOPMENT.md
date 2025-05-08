@@ -98,6 +98,16 @@ lhctl execute userTaskRun <wfRunId> <userTaskGuid>
 ./example/build/example-runner
 ```
 
+## Log level
+
+```shell
+./example/build/example-runner -Dquarkus.log.level=DEBUG
+```
+
+```shell
+/gradlew quarkusDev -Dquarkus.log.level=DEBUG
+```
+
 ## Apply Code Style
 
 ```shell
