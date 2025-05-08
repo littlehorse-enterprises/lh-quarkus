@@ -38,7 +38,7 @@ class LHServiceProcessor {
     }
 
     @BuildStep
-    void scanLHTasks(
+    void scanLHTaskMethod(
             BuildProducer<LHTaskMethodBuildItem> producer,
             BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHTask.class).stream()
@@ -77,7 +77,7 @@ class LHServiceProcessor {
     }
 
     @BuildStep
-    void scanLHWorkflow(
+    void scanLHWorkflowFromMethod(
             BuildProducer<LHWorkflowFromMethodBuildItem> producer,
             BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHWorkflow.class).stream()
@@ -109,7 +109,7 @@ class LHServiceProcessor {
 
     @BuildStep
     @Record(ExecutionTime.RUNTIME_INIT)
-    ServiceStartBuildItem startLH(
+    ServiceStartBuildItem startLittleHorseService(
             LHRecorder recorder,
             ShutdownContextBuildItem shutdownContext,
             List<LHTaskMethodBuildItem> taskMethodBuildItems,

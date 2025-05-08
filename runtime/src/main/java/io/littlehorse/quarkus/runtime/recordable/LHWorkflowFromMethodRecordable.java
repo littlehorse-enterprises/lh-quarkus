@@ -8,22 +8,15 @@ import jakarta.enterprise.inject.spi.CDI;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class LHWorkflowFromMethodRecordable implements LHWorkflowRecordable {
+public class LHWorkflowFromMethodRecordable extends LHWorkflowRecordable {
 
-    private final Class<?> beanClass;
     private final String beanMethodName;
-    private final String wfSpecName;
 
     @RecordableConstructor
     public LHWorkflowFromMethodRecordable(
             Class<?> beanClass, String beanMethodName, String wfSpecName) {
-        this.beanClass = beanClass;
+        super(beanClass, wfSpecName);
         this.beanMethodName = beanMethodName;
-        this.wfSpecName = wfSpecName;
-    }
-
-    public Class<?> getBeanClass() {
-        return beanClass;
     }
 
     public String getBeanMethodName() {
@@ -31,15 +24,10 @@ public class LHWorkflowFromMethodRecordable implements LHWorkflowRecordable {
     }
 
     @Override
-    public String getWfSpecName() {
-        return wfSpecName;
-    }
-
-    @Override
     public void buildWorkflowThread(WorkflowThread workflowThread) {
         try {
-            Object bean = CDI.current().select(beanClass).get();
-            Method method = beanClass.getMethod(beanMethodName, WorkflowThread.class);
+            Object bean = CDI.current().select(getBeanClass()).get();
+            Method method = getBeanClass().getMethod(beanMethodName, WorkflowThread.class);
             method.invoke(bean, workflowThread);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);

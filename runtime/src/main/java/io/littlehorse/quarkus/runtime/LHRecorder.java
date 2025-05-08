@@ -6,8 +6,6 @@ import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.quarkus.runtime.ShutdownContext;
 import io.quarkus.runtime.annotations.Recorder;
 
-import jakarta.enterprise.inject.spi.CDI;
-
 @Recorder
 public class LHRecorder {
 
@@ -17,9 +15,7 @@ public class LHRecorder {
     }
 
     public void registerLHWorkflow(LHWorkflowRecordable recordable) {
-        LHWorkflowRegister register =
-                CDI.current().select(LHWorkflowRegister.class).get();
-        register.registerWorkflow(recordable.getWfSpecName(), recordable::buildWorkflowThread);
+        recordable.registerWorkflow();
     }
 
     public void registerLHUserTaskForm(LHUserTaskRecordable recordable) {

@@ -9,6 +9,7 @@ import io.quarkus.runtime.annotations.RecordableConstructor;
 import jakarta.enterprise.inject.spi.CDI;
 
 public class LHTaskMethodRecordable {
+
     private final Class<?> beanClass;
     private final String taskDefName;
 
