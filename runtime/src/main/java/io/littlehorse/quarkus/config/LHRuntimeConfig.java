@@ -16,4 +16,12 @@ public interface LHRuntimeConfig {
     @WithName("tasks.register.enabled")
     @WithDefault("true")
     boolean tasksRegisterEnabled();
+
+    @WithName("workflows.register.enabled")
+    @WithDefault("true")
+    boolean workflowsRegisterEnabled();
+
+    @WithName("user-tasks.register.enabled")
+    @WithDefault("true")
+    boolean userTaskRegisterEnabled();
 }

@@ -15,10 +15,10 @@ import org.eclipse.microprofile.health.Readiness;
 @LookupIfProperty(name = "quarkus.littlehorse.tasks.start.enabled", stringValue = "true")
 public class LHTaskWorkersHealthCheck implements HealthCheck {
 
-    private final LHTaskWorkersContainer workerContainer;
+    private final LHTaskWorkerRegister workerRegister;
 
-    public LHTaskWorkersHealthCheck(LHTaskWorkersContainer workerContainer) {
-        this.workerContainer = workerContainer;
+    public LHTaskWorkersHealthCheck(LHTaskWorkerRegister workerRegister) {
+        this.workerRegister = workerRegister;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class LHTaskWorkersHealthCheck implements HealthCheck {
 
     private boolean isHealthy() {
         try {
-            return workerContainer.getTaskWorkers().stream()
+            return workerRegister.getTaskWorkers().stream()
                     .map(LHTaskWorker::healthStatus)
                     .allMatch(LHTaskWorkerHealth::isHealthy);
         } catch (Exception e) {

@@ -16,13 +16,13 @@ import java.util.List;
 
 @ApplicationScoped
 @Unremovable
-public class LHTaskWorkersContainer {
+public class LHTaskWorkerRegister {
 
-    private static final Logger log = LoggerFactory.getLogger(LHTaskWorkersContainer.class);
+    private static final Logger log = LoggerFactory.getLogger(LHTaskWorkerRegister.class);
     private final List<LHTaskWorker> taskWorkers = Collections.synchronizedList(new ArrayList<>());
     private final LHRuntimeConfig config;
 
-    public LHTaskWorkersContainer(LHRuntimeConfig config) {
+    public LHTaskWorkerRegister(LHRuntimeConfig config) {
         this.config = config;
     }
 
@@ -30,7 +30,7 @@ public class LHTaskWorkersContainer {
         return taskWorkers;
     }
 
-    public void startTaskWorker(LHTaskWorker worker) {
+    public void registerTaskWorker(LHTaskWorker worker) {
         if (config.tasksRegisterEnabled()) {
             log.info(
                     "Registering {}: {}",

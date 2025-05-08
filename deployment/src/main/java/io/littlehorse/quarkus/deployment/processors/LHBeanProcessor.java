@@ -1,7 +1,7 @@
 package io.littlehorse.quarkus.deployment.processors;
 
 import io.littlehorse.quarkus.runtime.LHExternalBeans;
-import io.littlehorse.quarkus.runtime.LHTaskWorkersContainer;
+import io.littlehorse.quarkus.runtime.LHTaskWorkerRegister;
 import io.littlehorse.quarkus.runtime.LHUserTaskRegister;
 import io.littlehorse.quarkus.runtime.LHWorkflowRegister;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
@@ -31,9 +31,9 @@ public class LHBeanProcessor {
     }
 
     @BuildStep
-    AdditionalBeanBuildItem produceLHTaskWorkerContainer() {
+    AdditionalBeanBuildItem produceLHTaskWorkerRegister() {
         return AdditionalBeanBuildItem.builder()
-                .addBeanClasses(LHTaskWorkersContainer.class)
+                .addBeanClasses(LHTaskWorkerRegister.class)
                 .build();
     }
 }

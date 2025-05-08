@@ -138,3 +138,31 @@ Enable health checks for the running `LHTaskWorker` list.
 * Importance: low
 
 ### Runtime Configurations
+
+``quarkus.littlehorse.tasks.start.enabled``
+Automatically starts all `LHTaskWorker` found.
+
+* Type: boolean
+* Default: true
+* Importance: medium
+
+``quarkus.littlehorse.tasks.register.enabled``
+Register all `TaskDef` found when starting the application.
+
+* Type: boolean
+* Default: true
+* Importance: medium
+
+``quarkus.littlehorse.workflows.register.enabled``
+Register all `WfSpec` found when starting the application.
+
+* Type: boolean
+* Default: true
+* Importance: medium
+
+``quarkus.littlehorse.user-tasks.register.enabled``
+Register all `UserTaskDef` found when starting the application.
+
+* Type: boolean
+* Default: true
+* Importance: medium
