@@ -1,5 +1,6 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
+import io.littlehorse.quarkus.runtime.LHUserTaskRegister;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
@@ -23,7 +24,10 @@ public class LHUserTaskRecordable {
         return userTaskDefName;
     }
 
-    public Object getBean() {
-        return CDI.current().select(beanClass).get();
+    public void registerUserTask() {
+        Object bean = CDI.current().select(beanClass).get();
+        LHUserTaskRegister register =
+                CDI.current().select(LHUserTaskRegister.class).get();
+        register.registerUserTask(bean, userTaskDefName);
     }
 }

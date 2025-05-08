@@ -57,7 +57,7 @@ class LHServiceProcessor {
     }
 
     @BuildStep
-    void scanLHWorkflowConsumerClasses(
+    void scanLHWorkflowConsumer(
             BuildProducer<LHWorkflowConsumerBuildItem> producer,
             BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHWorkflow.class).stream()
