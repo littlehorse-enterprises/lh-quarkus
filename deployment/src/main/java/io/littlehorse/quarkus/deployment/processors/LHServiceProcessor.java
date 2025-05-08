@@ -59,10 +59,11 @@ class LHServiceProcessor {
                         .asClass()
                         .interfaceNames()
                         .contains(DotName.createSimple(LHWorkflowConsumer.class)))
-                .map(annotated -> new LHWorkflowConsumerBuildItem(
-                        LHClassLoader.load(annotated.target().asClass().toString())
-                                .getLoadedClass(),
-                        annotated.value().asString()))
+                .map(annotated -> {
+                    String className = annotated.target().asClass().toString();
+                    String wfSpecName = annotated.value().asString();
+                    return new LHWorkflowConsumerBuildItem(className, wfSpecName);
+                })
                 .forEach(producer::produce);
     }
 
@@ -75,13 +76,9 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     MethodInfo methodInfo = annotated.target().asMethod();
                     String className = methodInfo.declaringClass().toString();
-                    //                    LHClassLoader classLoader = LHClassLoader.load(className);
-                    //                    Class<?> beanClass = classLoader.getLoadedClass();
-                    //                    Method method = classLoader.loadMethod(methodInfo.name(),
-                    // WorkflowThread.class);
+                    String methodName = methodInfo.name();
                     String workflowName = annotated.value().asString();
-                    return new LHWorkflowFromMethodBuildItem(
-                            className, methodInfo.name(), workflowName);
+                    return new LHWorkflowFromMethodBuildItem(className, methodName, workflowName);
                 })
                 .forEach(producer::produce);
     }
@@ -114,12 +111,13 @@ class LHServiceProcessor {
         userTaskFromBuildItems.forEach(buildItem ->
                 recorder.registerLHUserTaskForm(buildItem.getBeanClass(), buildItem.getName()));
 
-        workflowBuildItems.forEach(buildItem ->
-                recorder.registerLHWorkflow(buildItem.getBeanClass(), buildItem.getName()));
+        workflowBuildItems.stream()
+                .map(LHWorkflowConsumerBuildItem::toRecordable)
+                .forEach(recorder::registerLHWorkflow);
 
         workflowMethodsBuildItems.stream()
                 .map(LHWorkflowFromMethodBuildItem::toRecordable)
-                .forEach(recorder::registerLHWorkflowFromMethod);
+                .forEach(recorder::registerLHWorkflow);
 
         return new ServiceStartBuildItem("LittleHorse");
     }

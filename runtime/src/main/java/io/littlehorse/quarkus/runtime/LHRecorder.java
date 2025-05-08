@@ -1,16 +1,10 @@
 package io.littlehorse.quarkus.runtime;
 
-import io.littlehorse.quarkus.recordable.LHWorkflowFromMethodRecordable;
+import io.littlehorse.quarkus.recordable.LHWorkflowRecordable;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
-import io.littlehorse.quarkus.workflow.LHWorkflow;
-import io.littlehorse.quarkus.workflow.LHWorkflowConsumer;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
-import io.littlehorse.sdk.common.proto.PutExternalEventDefRequest;
-import io.littlehorse.sdk.common.proto.PutWorkflowEventDefRequest;
 import io.littlehorse.sdk.usertask.UserTaskSchema;
-import io.littlehorse.sdk.wfsdk.ThreadFunc;
-import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHTaskWorker;
 import io.quarkus.runtime.ShutdownContext;
@@ -25,25 +19,6 @@ import org.slf4j.LoggerFactory;
 @Recorder
 public class LHRecorder {
     private static final Logger log = LoggerFactory.getLogger(LHRecorder.class);
-
-    private static void registerWorkflow(
-            String name, ThreadFunc threadFunc, LittleHorseBlockingStub stub) {
-        Workflow workflow = Workflow.newWorkflow(name, threadFunc);
-        workflow.getRequiredWorkflowEventDefNames().forEach(wfEvent -> {
-            log.debug("Registering WorkflowEvent: {}", wfEvent);
-            stub.putWorkflowEventDef(
-                    PutWorkflowEventDefRequest.newBuilder().setName(name).build());
-        });
-
-        workflow.getRequiredExternalEventDefNames().forEach(exEvent -> {
-            log.debug("Registering ExternalEvent: {}", exEvent);
-            stub.putExternalEventDef(
-                    PutExternalEventDefRequest.newBuilder().setName(name).build());
-        });
-
-        log.debug("Registering {}: {}", LHWorkflow.class.getSimpleName(), name);
-        workflow.registerWfSpec(stub);
-    }
 
     public void startLHTaskMethod(
             Class<?> classBean, String name, ShutdownContext shutdownContext) {
@@ -60,18 +35,10 @@ public class LHRecorder {
         worker.start();
     }
 
-    public void registerLHWorkflow(Class<?> classBean, String name) {
-        LHWorkflowConsumer bean =
-                (LHWorkflowConsumer) CDI.current().select(classBean).get();
-        LittleHorseBlockingStub stub =
-                CDI.current().select(LittleHorseBlockingStub.class).get();
-        registerWorkflow(name, bean::accept, stub);
-    }
-
-    public void registerLHWorkflowFromMethod(LHWorkflowFromMethodRecordable recordable) {
+    public void registerLHWorkflow(LHWorkflowRecordable recordable) {
         LHWorkflowRegister register =
                 CDI.current().select(LHWorkflowRegister.class).get();
-        register.registerWorkflow(recordable.getWfSpecName(), recordable::invokeMethod);
+        register.registerWorkflow(recordable.getWfSpecName(), recordable::getWorkflowThread);
     }
 
     public void registerLHUserTaskForm(Class<?> classBean, String name) {

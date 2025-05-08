@@ -1,32 +1,24 @@
 package io.littlehorse.quarkus.recordable;
 
+import io.littlehorse.quarkus.workflow.LHWorkflowConsumer;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
 
-import java.lang.reflect.Method;
-
-public class LHWorkflowFromMethodRecordable implements LHWorkflowRecordable {
+public class LHWorkflowConsumerRecordable implements LHWorkflowRecordable {
 
     private final String beanClassName;
-    private final String beanMethodName;
     private final String wfSpecName;
 
     @RecordableConstructor
-    public LHWorkflowFromMethodRecordable(
-            String beanClassName, String beanMethodName, String wfSpecName) {
+    public LHWorkflowConsumerRecordable(String beanClassName, String wfSpecName) {
         this.beanClassName = beanClassName;
-        this.beanMethodName = beanMethodName;
         this.wfSpecName = wfSpecName;
     }
 
     public String getBeanClassName() {
         return beanClassName;
-    }
-
-    public String getBeanMethodName() {
-        return beanMethodName;
     }
 
     @Override
@@ -39,9 +31,9 @@ public class LHWorkflowFromMethodRecordable implements LHWorkflowRecordable {
         try {
             Class<?> beanClass =
                     Thread.currentThread().getContextClassLoader().loadClass(beanClassName);
-            Object bean = CDI.current().select(beanClass).get();
-            Method method = beanClass.getMethod(beanMethodName, WorkflowThread.class);
-            method.invoke(bean, workflowThread);
+            LHWorkflowConsumer bean =
+                    (LHWorkflowConsumer) CDI.current().select(beanClass).get();
+            bean.accept(workflowThread);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
