@@ -105,7 +105,7 @@ lhctl execute userTaskRun <wfRunId> <userTaskGuid>
 ```
 
 ```shell
-/gradlew quarkusDev -Dquarkus.log.level=DEBUG
+./gradlew quarkusDev -Dquarkus.log.level=DEBUG
 ```
 
 ## Health Checks

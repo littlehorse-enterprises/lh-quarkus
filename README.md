@@ -31,7 +31,7 @@
 
 ## Installation
 
-<img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-quarkus?label=latest">
+<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-quarkus?label=latest"></a>
 
 This extension is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus).
 
@@ -59,7 +59,7 @@ and the `patch` digit indicates the extension version.
 
 - `major` LittleHorse Server `major` version compatibility.
 - `minor` LittleHorse Server `minor` version compatibility.
-- `patch` **LittleHorse Extension** bundle version.
+- `patch` **LittleHorse Extension** build number.
 
 ## Interoperability Table
 
