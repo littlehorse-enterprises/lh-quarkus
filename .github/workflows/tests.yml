@@ -1,5 +1,4 @@
 name: tests
-run-name: Running Tests for Branch ${{ github.head_ref }}
 on:
   workflow_call:
 
