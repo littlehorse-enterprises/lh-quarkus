@@ -85,6 +85,6 @@ For development instructions go to [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## License
 
-<a href="https://www.gnu.org/licenses/agpl-3.0.en.html"><img alt="AGPLv3 License" src="https://img.shields.io/badge/covered%20by-AGPLv3-blue"></a>
+<a href="https://github.com/littlehorse-enterprises/lh-quarkus/blob/main/LICENSE.md"><img alt="Apache-2.0" src="https://img.shields.io/github/license/littlehorse-enterprises/lh-quarkus?label=covered%20by"></a>
 
-All code in this repository is licensed by the [GNU Affero General Public License, Version 3](https://www.gnu.org/licenses/agpl-3.0.en.html) and is copyright of LittleHorse Enterprises LLC.
+All code in this repository is licensed by the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) and is copyright of LittleHorse Enterprises LLC.
