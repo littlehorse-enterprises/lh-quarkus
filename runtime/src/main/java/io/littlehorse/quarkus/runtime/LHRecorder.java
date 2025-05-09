@@ -9,7 +9,7 @@ import io.quarkus.runtime.annotations.Recorder;
 @Recorder
 public class LHRecorder {
 
-    public void startLHTaskMethod(
+    public void registerAndStartTaskWorker(
             LHTaskMethodRecordable recordable, ShutdownContext shutdownContext) {
         recordable.registerAndStartTaskWorker(shutdownContext);
     }
