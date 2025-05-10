@@ -1,6 +1,8 @@
-package io.littlehorse.quarkus.runtime;
+package io.littlehorse.quarkus.runtime.register;
 
 import io.littlehorse.quarkus.config.LHRuntimeConfig;
+import io.littlehorse.quarkus.runtime.LHTaskStatusesContainer;
+import io.littlehorse.quarkus.runtime.health.LHTaskStatus;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHTaskWorker;
 import io.quarkus.arc.Unremovable;
@@ -10,27 +12,20 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 @ApplicationScoped
 @Unremovable
-public class LHTaskWorkerRegister {
+public class LHTaskRegister {
 
-    private static final Logger log = LoggerFactory.getLogger(LHTaskWorkerRegister.class);
-    private final List<LHTaskWorker> taskWorkers = Collections.synchronizedList(new ArrayList<>());
+    private static final Logger log = LoggerFactory.getLogger(LHTaskRegister.class);
     private final LHRuntimeConfig config;
+    private final LHTaskStatusesContainer taskStatusesContainer;
 
-    public LHTaskWorkerRegister(LHRuntimeConfig config) {
+    public LHTaskRegister(LHRuntimeConfig config, LHTaskStatusesContainer taskStatusesContainer) {
         this.config = config;
+        this.taskStatusesContainer = taskStatusesContainer;
     }
 
-    public List<LHTaskWorker> getTaskWorkers() {
-        return taskWorkers;
-    }
-
-    public void registerAndStartTaskWorker(LHTaskWorker worker) {
+    public void registerAndStartTask(LHTaskWorker worker) {
         if (config.tasksRegisterEnabled()) {
             log.info(
                     "Registering {}: {}",
@@ -40,7 +35,7 @@ public class LHTaskWorkerRegister {
         }
 
         if (config.tasksStartEnabled()) {
-            taskWorkers.add(worker);
+            taskStatusesContainer.add(new LHTaskStatus(worker));
             log.info(
                     "Starting {}: {}", LHTaskMethod.class.getSimpleName(), worker.getTaskDefName());
             worker.start();

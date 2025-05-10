@@ -119,8 +119,7 @@ class LHServiceProcessor {
 
         taskMethodBuildItems.stream()
                 .map(LHTaskMethodBuildItem::toRecordable)
-                .forEach(recordable ->
-                        recorder.registerAndStartTaskWorker(recordable, shutdownContext));
+                .forEach(recordable -> recorder.registerAndStartTask(recordable, shutdownContext));
 
         userTaskFromBuildItems.stream()
                 .map(LHUserTaskFormBuildItem::toRecordable)

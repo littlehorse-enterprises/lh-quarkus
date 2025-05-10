@@ -1,6 +1,6 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
-import io.littlehorse.quarkus.runtime.LHWorkflowRegister;
+import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
 import jakarta.enterprise.inject.spi.CDI;

@@ -1,9 +1,10 @@
 package io.littlehorse.quarkus.deployment.processors;
 
 import io.littlehorse.quarkus.runtime.LHExternalBeans;
-import io.littlehorse.quarkus.runtime.LHTaskWorkerRegister;
-import io.littlehorse.quarkus.runtime.LHUserTaskRegister;
-import io.littlehorse.quarkus.runtime.LHWorkflowRegister;
+import io.littlehorse.quarkus.runtime.LHTaskStatusesContainer;
+import io.littlehorse.quarkus.runtime.register.LHTaskRegister;
+import io.littlehorse.quarkus.runtime.register.LHUserTaskRegister;
+import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.deployment.annotations.BuildStep;
 
@@ -31,9 +32,16 @@ public class LHBeanProcessor {
     }
 
     @BuildStep
-    AdditionalBeanBuildItem produceLHTaskWorkerRegister() {
+    AdditionalBeanBuildItem produceLHTaskRegister() {
         return AdditionalBeanBuildItem.builder()
-                .addBeanClasses(LHTaskWorkerRegister.class)
+                .addBeanClasses(LHTaskRegister.class)
+                .build();
+    }
+
+    @BuildStep
+    AdditionalBeanBuildItem produceLHTaskStatusesContainer() {
+        return AdditionalBeanBuildItem.builder()
+                .addBeanClasses(LHTaskStatusesContainer.class)
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.runtime;
+package io.littlehorse.quarkus.runtime.register;
 
 import io.littlehorse.quarkus.config.LHRuntimeConfig;
 import io.littlehorse.quarkus.task.LHUserTaskForm;

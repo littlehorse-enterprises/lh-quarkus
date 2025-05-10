@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.with;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 
 import io.littlehorse.sdk.common.LHLibUtil;
@@ -99,6 +100,16 @@ class LittleHorseExampleTest {
                     assertThat(results.getResultsCount()).isEqualTo(1);
                     assertThat(results).isEqualTo(expectedResult);
                 });
+    }
+
+    @Test
+    void shouldGetStatusUp() {
+        given().when()
+                .get("/q/health")
+                .then()
+                .statusCode(200)
+                .body("checks.name", hasItems("LH Tasks", "LH Server"))
+                .body("checks.status", hasItems("UP", "UP"));
     }
 
     @ParameterizedTest

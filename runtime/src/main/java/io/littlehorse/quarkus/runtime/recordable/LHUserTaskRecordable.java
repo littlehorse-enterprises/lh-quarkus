@@ -1,6 +1,6 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
-import io.littlehorse.quarkus.runtime.LHUserTaskRegister;
+import io.littlehorse.quarkus.runtime.register.LHUserTaskRegister;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
