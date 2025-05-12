@@ -240,7 +240,7 @@ More about quarkus healthy checks at: [Smallrey Health](https://quarkus.io/guide
 
 ## Native Build
 
-This extension fully support native build.
+This extension fully supports native build.
 
 Run next command in your project root folder:
 
