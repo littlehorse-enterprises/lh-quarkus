@@ -4,11 +4,11 @@ More about configurations at: [Configuration Reference Guide](https://quarkus.io
 
 ## Passing Configurations
 
-Quarkus support multiple configuration sources.
+Quarkus supports multiple configuration sources.
 
 Some examples could be:
 
-* **Environment Variables:** Adding a variable (ex: `LHC_API_PORT=2023`) to the OS/Cotainer.
+* **Environment Variables:** Adding a variable (ex: `LHC_API_PORT=2023`) to the OS/Container.
 * **System Properties:** Adding a `-D` property (ex: `-Dlhc.api.port=2023`) to the command line when running the
   artifact.
 * **Property File:** Adding a property entry (ex: `lhc.api.port=2023`) into the `application.properties` file.
@@ -106,7 +106,7 @@ Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Autho
 ### Task Worker
 
 ``lhw.num.worker.threads``
-The number of worker threads to run. It allows you to improve the task execution performance parallelizing the tasks assigned to this worker.
+The number of worker threads to run. It allows you to improve the task execution's performance parallelizing the tasks assigned to this worker.
 
 * Type: int
 * Default: 8
@@ -120,7 +120,7 @@ Unique identifier for the Task Worker. It is used by the LittleHorse cluster to 
 * Importance: medium
 
 ``lhw.task.worker.version``
-Optional version identifier. Intended to be informative. Useful when you're running different version of a worker. Along with the `lhw.task.worker.id`, this is journalled on every `TaskAttempt`.
+Optional version identifier. Intended to be informative. Useful when you're running different versions of a worker. Along with the `lhw.task.worker.id`, this is journalled on every `TaskAttempt`.
 
 * Type: string
 * Default: ""
@@ -131,7 +131,7 @@ Optional version identifier. Intended to be informative. Useful when you're runn
 ### Buildtime Configurations
 
 ``quarkus.littlehorse.health.enabled``
-Enable health checks for the running `LHTaskWorker` list.
+Enables health checks for the running `LHTaskWorker` list.
 
 * Type: boolean
 * Default: true
@@ -147,21 +147,21 @@ Automatically starts all `LHTaskWorker` found.
 * Importance: medium
 
 ``quarkus.littlehorse.tasks.register.enabled``
-Register all `TaskDef` found when starting the application.
+Registers all `TaskDef` found when starting the application.
 
 * Type: boolean
 * Default: true
 * Importance: medium
 
 ``quarkus.littlehorse.workflows.register.enabled``
-Register all `WfSpec` found when starting the application.
+Registers all `WfSpec` found when starting the application.
 
 * Type: boolean
 * Default: true
 * Importance: medium
 
 ``quarkus.littlehorse.user-tasks.register.enabled``
-Register all `UserTaskDef` found when starting the application.
+Registers all `UserTaskDef` found when starting the application.
 
 * Type: boolean
 * Default: true
