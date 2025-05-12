@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.runtime;
+package io.littlehorse.quarkus.runtime.health;
 
 import com.google.protobuf.Empty;
 

@@ -1,6 +1,6 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
-import io.littlehorse.quarkus.runtime.LHTaskWorkerRegister;
+import io.littlehorse.quarkus.runtime.register.LHTaskRegister;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.worker.LHTaskWorker;
 import io.quarkus.runtime.ShutdownContext;
@@ -27,13 +27,12 @@ public class LHTaskMethodRecordable {
         return taskDefName;
     }
 
-    public void registerAndStartTaskWorker(ShutdownContext shutdownContext) {
+    public void registerAndStartTask(ShutdownContext shutdownContext) {
         LHConfig config = CDI.current().select(LHConfig.class).get();
-        LHTaskWorkerRegister workerRegister =
-                CDI.current().select(LHTaskWorkerRegister.class).get();
+        LHTaskRegister taskRegister = CDI.current().select(LHTaskRegister.class).get();
         Object bean = CDI.current().select(beanClass).get();
         LHTaskWorker worker = new LHTaskWorker(bean, taskDefName, config);
         shutdownContext.addShutdownTask(new ShutdownContext.CloseRunnable(worker));
-        workerRegister.registerAndStartTaskWorker(worker);
+        taskRegister.registerAndStartTask(worker);
     }
 }
