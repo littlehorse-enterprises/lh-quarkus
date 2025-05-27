@@ -48,6 +48,6 @@ jobs:
           distribution: "corretto"
           java-version: "17"
       - name: Jar Tests
-        run: ./gradlew example:quarkusIntTest
+        run: ./gradlew quarkusIntTest
       - name: Native Tests
-        run: ./gradlew example:testNative
+        run: ./gradlew testNative

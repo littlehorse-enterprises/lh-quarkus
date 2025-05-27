@@ -135,17 +135,35 @@ public class WorkflowProducer {
 
     @LHWorkflow("hello-world")
     public void helloWorld(WorkflowThread wf) {
-        wf.execute(PrintTask.TASK_PRINT, "Hello World!");
+        wf.execute("print", "Hello World!");
     }
 
     @LHWorkflow("test")
     public void test(WorkflowThread wf) {
-        wf.execute(PrintTask.TASK_PRINT, "This is a test!");
+        wf.execute("print", "This is a test!");
     }
 }
 ```
 
 As you can see in the example above, you can add methods as workflows, this could be useful in some cases.
+
+A final example with both task and workflow:
+
+```java
+@LHTask
+public class HelloWorldWorker {
+
+    @LHWorkflow("hello-world")
+    public void helloWorldWorkflow(WorkflowThread wf) {
+        wf.execute("hello-world", wf.declareStr("name"));
+    }
+
+    @LHTaskMethod("hello-world")
+    public void helloWorldTask(String name) {
+        log.info("Hello {}!", name);
+    }
+}
+```
 
 More about workflows at: [Your First WfSpec](https://littlehorse.io/docs/getting-started/your-first-wfspec)
 and [Workflows](https://littlehorse.io/docs/server/concepts/workflows).
@@ -318,6 +336,6 @@ dependencies {
 }
 ```
 
-For a test example go to the [example](example) folder.
+For a test example go to the [src](src) folder.
 
 More about tests at: [Testing Your Quarkus Application](https://quarkus.io/guides/getting-started-testing).

@@ -3,7 +3,11 @@ plugins {
     id "java-library"
     id "maven-publish"
     id "signing"
+    id "com.diffplug.spotless"
 }
+
+group = "io.littlehorse"
+version = "${lhVersion}"
 
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
@@ -18,6 +22,14 @@ dependencies {
     testImplementation "io.rest-assured:rest-assured"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
+}
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = "full"
+    }
+    systemProperty "lhVersion", "${lhVersion}"
 }
 
 tasks.register("javadocJar", Jar) {
@@ -90,4 +102,30 @@ signing {
 javadoc {
     excludes = []
     options.memberLevel = JavadocMemberLevel.PUBLIC
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava {
+    options.encoding = "UTF-8"
+    options.compilerArgs << "-parameters"
+}
+
+compileTestJava {
+    options.encoding = "UTF-8"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+spotless {
+    java {
+        removeUnusedImports()
+        palantirJavaFormat().style("AOSP")
+    }
 }
