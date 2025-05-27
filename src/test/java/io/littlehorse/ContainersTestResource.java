@@ -24,7 +24,7 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
     public Map<String, String> start() {
         cluster.start();
         blockingStub = LHConfig.newBuilder().loadFromMap(getConfigs()).build().getBlockingStub();
-        // return cluster.getClientConfig();
+        // TODO: return cluster.getClientConfig();
         return getConfigs();
     }
 

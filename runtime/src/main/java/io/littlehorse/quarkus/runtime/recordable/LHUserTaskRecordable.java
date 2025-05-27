@@ -13,7 +13,7 @@ public class LHUserTaskRecordable extends LHRecordable {
     }
 
     public void registerUserTask() {
-        if (!doesExist()) return;
+        if (!exists()) return;
 
         LHUserTaskRegister register =
                 CDI.current().select(LHUserTaskRegister.class).get();

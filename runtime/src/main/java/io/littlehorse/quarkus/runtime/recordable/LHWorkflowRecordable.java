@@ -14,7 +14,7 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     public abstract void buildWorkflowThread(WorkflowThread workflowThread);
 
     public void registerWorkflow() {
-        if (!doesExist()) return;
+        if (!exists()) return;
 
         LHWorkflowRegister register =
                 CDI.current().select(LHWorkflowRegister.class).get();

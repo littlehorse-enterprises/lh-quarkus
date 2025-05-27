@@ -16,7 +16,7 @@ public class LHTaskMethodRecordable extends LHRecordable {
     }
 
     public void registerAndStartTask(ShutdownContext shutdownContext) {
-        if (!doesExist()) return;
+        if (!exists()) return;
 
         LHConfig config = CDI.current().select(LHConfig.class).get();
         LHTaskRegister taskRegister = CDI.current().select(LHTaskRegister.class).get();

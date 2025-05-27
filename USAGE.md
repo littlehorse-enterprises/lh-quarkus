@@ -160,7 +160,7 @@ public class HelloWorldWorker {
 
     @LHTaskMethod("hello-world")
     public void helloWorldTask(String name) {
-        log.info("Hello {}!", name);
+        System.out.println("Hello " + name);
     }
 }
 ```

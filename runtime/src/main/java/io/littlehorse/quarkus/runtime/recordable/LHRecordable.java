@@ -20,7 +20,7 @@ public abstract class LHRecordable {
         return name;
     }
 
-    public boolean doesExist() {
+    public boolean exists() {
         return CDI.current().select(getBeanClass()).isResolvable();
     }
 
