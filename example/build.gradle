@@ -30,7 +30,18 @@ dependencies {
 }
 
 test {
-    systemProperty "java.util.logging.manager", "org.jboss.logmanager.LogManager"
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = "full"
+    }
+    systemProperty "lhVersion", "${lhVersion}"
+}
+
+quarkusIntTest {
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = "full"
+    }
     systemProperty "lhVersion", "${lhVersion}"
 }
 
@@ -39,4 +50,5 @@ testNative {
         events "passed", "skipped", "failed"
         exceptionFormat = "full"
     }
+    systemProperty "lhVersion", "${lhVersion}"
 }

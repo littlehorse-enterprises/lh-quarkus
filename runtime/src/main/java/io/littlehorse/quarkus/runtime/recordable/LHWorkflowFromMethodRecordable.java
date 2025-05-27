@@ -3,8 +3,6 @@ package io.littlehorse.quarkus.runtime.recordable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
-import jakarta.enterprise.inject.spi.CDI;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -13,9 +11,8 @@ public class LHWorkflowFromMethodRecordable extends LHWorkflowRecordable {
     private final String beanMethodName;
 
     @RecordableConstructor
-    public LHWorkflowFromMethodRecordable(
-            Class<?> beanClass, String beanMethodName, String wfSpecName) {
-        super(beanClass, wfSpecName);
+    public LHWorkflowFromMethodRecordable(Class<?> beanClass, String name, String beanMethodName) {
+        super(beanClass, name);
         this.beanMethodName = beanMethodName;
     }
 
@@ -26,9 +23,8 @@ public class LHWorkflowFromMethodRecordable extends LHWorkflowRecordable {
     @Override
     public void buildWorkflowThread(WorkflowThread workflowThread) {
         try {
-            Object bean = CDI.current().select(getBeanClass()).get();
-            Method method = getBeanClass().getMethod(beanMethodName, WorkflowThread.class);
-            method.invoke(bean, workflowThread);
+            Method method = getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
+            method.invoke(getBean(), workflowThread);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

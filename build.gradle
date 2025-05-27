@@ -15,11 +15,11 @@ allprojects {
     }
 
     test {
-        useJUnitPlatform()
         testLogging {
             events "passed", "skipped", "failed"
             exceptionFormat = "full"
         }
+        systemProperty "lhVersion", "${lhVersion}"
     }
 
     compileJava {

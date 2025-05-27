@@ -8,30 +8,19 @@ import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
 
-public class LHTaskMethodRecordable {
-
-    private final Class<?> beanClass;
-    private final String taskDefName;
+public class LHTaskMethodRecordable extends LHRecordable {
 
     @RecordableConstructor
-    public LHTaskMethodRecordable(Class<?> beanClass, String taskDefName) {
-        this.beanClass = beanClass;
-        this.taskDefName = taskDefName;
-    }
-
-    public Class<?> getBeanClass() {
-        return beanClass;
-    }
-
-    public String getTaskDefName() {
-        return taskDefName;
+    public LHTaskMethodRecordable(Class<?> beanClass, String name) {
+        super(beanClass, name);
     }
 
     public void registerAndStartTask(ShutdownContext shutdownContext) {
+        if (!doesExist()) return;
+
         LHConfig config = CDI.current().select(LHConfig.class).get();
         LHTaskRegister taskRegister = CDI.current().select(LHTaskRegister.class).get();
-        Object bean = CDI.current().select(beanClass).get();
-        LHTaskWorker worker = new LHTaskWorker(bean, taskDefName, config);
+        LHTaskWorker worker = new LHTaskWorker(getBean(), getName(), config);
         shutdownContext.addShutdownTask(new ShutdownContext.CloseRunnable(worker));
         taskRegister.registerAndStartTask(worker);
     }
