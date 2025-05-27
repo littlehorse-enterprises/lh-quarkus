@@ -5,30 +5,19 @@ import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
 import jakarta.enterprise.inject.spi.CDI;
 
-public abstract class LHWorkflowRecordable {
+public abstract class LHWorkflowRecordable extends LHRecordable {
 
-    private final Class<?> beanClass;
-    private final String wfSpecName;
-
-    public LHWorkflowRecordable(Class<?> beanClass, String wfSpecName) {
-        this.beanClass = beanClass;
-        this.wfSpecName = wfSpecName;
-    }
-
-    public Class<?> getBeanClass() {
-        return beanClass;
-    }
-
-    public String getWfSpecName() {
-        return wfSpecName;
+    public LHWorkflowRecordable(Class<?> beanClass, String name) {
+        super(beanClass, name);
     }
 
     public abstract void buildWorkflowThread(WorkflowThread workflowThread);
 
     public void registerWorkflow() {
-        if (CDI.current().select(beanClass).isUnsatisfied()) return;
+        if (!exists()) return;
+
         LHWorkflowRegister register =
                 CDI.current().select(LHWorkflowRegister.class).get();
-        register.registerWorkflow(wfSpecName, this::buildWorkflowThread);
+        register.registerWorkflow(getName(), this::buildWorkflowThread);
     }
 }

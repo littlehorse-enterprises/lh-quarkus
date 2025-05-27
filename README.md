@@ -53,13 +53,7 @@ Maven:
 
 ## Versioning
 
-We use [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-where `major.minor` numbers indicate littlehorse version compatibility,
-and the `patch` digit indicates the extension version.
-
-- `major` LittleHorse Server `major` version compatibility.
-- `minor` LittleHorse Server `minor` version compatibility.
-- `patch` **LittleHorse Extension** build number.
+This extension keeps the same versioning as [LittleHorse](https://github.com/littlehorse-enterprises/littlehorse/releases).
 
 ## Interoperability Table
 
@@ -77,7 +71,7 @@ For LittleHorse and LittleHorse Extension configurations go to [CONFIGURATIONS.m
 
 ## Example Project
 
-For an example project go to the [example](example) folder.
+For an example project go to the [src](src) folder.
 
 ## Development
 

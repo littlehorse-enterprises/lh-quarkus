@@ -30,19 +30,22 @@ docker compose up -d
 | Kafka                 | 9092 |
 | LittleHorse Dashboard | 3000 |
 
-## Tests
+## Unit Tests
 
 ```shell
 ./gradlew test
 ```
 
+## Integration Tests
+
+```shell
+./gradlew quarkusIntTest
+```
+
 ## Native Tests
 
 ```shell
-./gradlew build testNative \
--Dquarkus.native.enabled=true \
--Dquarkus.package.jar.enabled=false \
--Dquarkus.package.output-name=example
+./gradlew testNative
 ```
 
 ## Publish Locally
@@ -95,13 +98,13 @@ lhctl execute userTaskRun <wfRunId> <userTaskGuid>
 ```
 
 ```shell
-./example/build/example-runner
+./build/example-runner
 ```
 
 ## Log level
 
 ```shell
-./example/build/example-runner -Dquarkus.log.level=DEBUG
+./build/example-runner -Dquarkus.log.level=DEBUG
 ```
 
 ```shell

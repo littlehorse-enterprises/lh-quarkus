@@ -5,29 +5,18 @@ import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
 
-public class LHUserTaskRecordable {
-
-    private final Class<?> beanClass;
-    private final String userTaskDefName;
+public class LHUserTaskRecordable extends LHRecordable {
 
     @RecordableConstructor
-    public LHUserTaskRecordable(Class<?> beanClass, String userTaskDefName) {
-        this.beanClass = beanClass;
-        this.userTaskDefName = userTaskDefName;
-    }
-
-    public Class<?> getBeanClass() {
-        return beanClass;
-    }
-
-    public String getUserTaskDefName() {
-        return userTaskDefName;
+    public LHUserTaskRecordable(Class<?> beanClass, String name) {
+        super(beanClass, name);
     }
 
     public void registerUserTask() {
-        Object bean = CDI.current().select(beanClass).get();
+        if (!exists()) return;
+
         LHUserTaskRegister register =
                 CDI.current().select(LHUserTaskRegister.class).get();
-        register.registerUserTask(bean, userTaskDefName);
+        register.registerUserTask(getBean(), getName());
     }
 }

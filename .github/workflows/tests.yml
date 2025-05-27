@@ -34,7 +34,7 @@ jobs:
       - name: Tests
         run: ./gradlew -x spotlessJavaCheck test
 
-  tests-native:
+  integration-tests:
     runs-on: ubuntu-latest
     needs:
       - format
@@ -47,9 +47,7 @@ jobs:
         with:
           distribution: "corretto"
           java-version: "17"
-      - name: Tests
-        run: >
-          ./gradlew -x test -x spotlessJavaCheck build testNative
-          -Dquarkus.native.enabled=true
-          -Dquarkus.package.jar.enabled=false
-          -Dquarkus.package.output-name=example
+      - name: Jar Tests
+        run: ./gradlew quarkusIntTest
+      - name: Native Tests
+        run: ./gradlew testNative

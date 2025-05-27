@@ -11,4 +11,4 @@ pluginManagement {
     }
 }
 rootProject.name = "littlehorse-quarkus"
-include "runtime", "deployment", "example"
+include "runtime", "deployment"
