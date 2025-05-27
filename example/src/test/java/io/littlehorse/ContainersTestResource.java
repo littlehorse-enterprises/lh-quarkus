@@ -12,21 +12,24 @@ import java.util.stream.Collectors;
 
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
+    public static final String LH_VERSION = System.getProperty("lhVersion", "latest");
     private final LittleHorseCluster cluster = LittleHorseCluster.newBuilder()
             .withKafkaImage("apache/kafka:4.0.0")
-            .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:"
-                    + System.getProperty("lhVersion", "latest"))
+            .withLittlehorseImage(
+                    "ghcr.io/littlehorse-enterprises/littlehorse/lh-server:" + LH_VERSION)
             .build();
+    private LittleHorseBlockingStub blockingStub;
 
     @Override
     public Map<String, String> start() {
         cluster.start();
-        //        return cluster.getClientConfig();
-        return lhConfig();
+        blockingStub = LHConfig.newBuilder().loadFromMap(getConfigs()).build().getBlockingStub();
+        // return cluster.getClientConfig();
+        return getConfigs();
     }
 
     // TODO: remove it in the next release
-    private Map<String, String> lhConfig() {
+    private Map<String, String> getConfigs() {
         Properties clientProperties = cluster.getClientProperties();
         return clientProperties.keySet().stream()
                 .collect(Collectors.toMap(
@@ -40,9 +43,8 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
 
     @Override
     public void inject(TestInjector testInjector) {
-        LHConfig config = LHConfig.newBuilder().loadFromMap(lhConfig()).build();
         testInjector.injectIntoFields(
-                config.getBlockingStub(),
+                blockingStub,
                 new AnnotatedAndMatchesType(
                         InjectLittleHorseBlockingStub.class, LittleHorseBlockingStub.class));
     }
