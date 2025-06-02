@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.littlehorse"
-version = "${lhVersion}"
+version = "0.14.0-SNAPSHOT"
 
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
@@ -43,16 +43,6 @@ tasks.register("sourcesJar", Jar) {
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "ossrh"
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username = findProperty("ossrhUsername")
-                password = findProperty("ossrhPassword")
-            }
-        }
-    }
 
     publications {
         mavenJava(MavenPublication) {
