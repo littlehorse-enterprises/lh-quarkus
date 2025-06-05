@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.littlehorse"
-version = "${lhVersion}"
+version = "${lhVersion}-SNAPSHOT"
 
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
