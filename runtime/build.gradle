@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.littlehorse"
-version = "0.14.0-SNAPSHOT"
+version = "${lhVersion}"
 
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
@@ -43,7 +43,6 @@ tasks.register("sourcesJar", Jar) {
 }
 
 publishing {
-
     publications {
         mavenJava(MavenPublication) {
             groupId = group
