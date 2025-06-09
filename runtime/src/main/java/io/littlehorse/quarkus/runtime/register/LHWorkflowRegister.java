@@ -33,14 +33,14 @@ public class LHWorkflowRegister {
         Workflow workflow = Workflow.newWorkflow(name, threadFunc);
         workflow.getRequiredWorkflowEventDefNames().forEach(wfEvent -> {
             PutWorkflowEventDefRequest request =
-                    PutWorkflowEventDefRequest.newBuilder().setName(name).build();
+                    PutWorkflowEventDefRequest.newBuilder().setName(wfEvent).build();
             log.info("Registering WorkflowEvent: {}", wfEvent);
             blockingStub.putWorkflowEventDef(request);
         });
 
         workflow.getRequiredExternalEventDefNames().forEach(exEvent -> {
             PutExternalEventDefRequest request =
-                    PutExternalEventDefRequest.newBuilder().setName(name).build();
+                    PutExternalEventDefRequest.newBuilder().setName(exEvent).build();
             log.info("Registering ExternalEvent: {}", exEvent);
             blockingStub.putExternalEventDef(request);
         });

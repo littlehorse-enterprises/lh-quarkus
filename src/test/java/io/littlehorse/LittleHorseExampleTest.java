@@ -24,8 +24,6 @@ import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -54,10 +52,13 @@ class LittleHorseExampleTest {
                                     WfSpecId.newBuilder().setName("greetings").build())
                             .addResults(
                                     WfSpecId.newBuilder().setName("hello-world").build())
+                            .addResults(WfSpecId.newBuilder()
+                                    .setName("reactive-workflow")
+                                    .build())
                             .addResults(WfSpecId.newBuilder().setName("test").build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(4);
+                    assertThat(results.getResultsCount()).isEqualTo(5);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }
@@ -112,18 +113,42 @@ class LittleHorseExampleTest {
                 .body("checks.status", hasItems("UP", "UP"));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"/hello", "/hello/reactive"})
-    void testHelloEndpoint(String path) {
+    @Test
+    void testHelloEndpoint() {
         String expectedId = UUID.randomUUID().toString();
 
         given().queryParam("id", expectedId)
                 .queryParam("name", "Anakin")
                 .when()
-                .get(path)
+                .get("/hello")
                 .then()
                 .statusCode(200)
                 .body(is(expectedId));
+
+        with().pollInterval(Duration.ofSeconds(1))
+                .ignoreExceptions()
+                .await()
+                .atMost(Duration.ofSeconds(30))
+                .untilAsserted(() -> {
+                    WfRun result = blockingStub.getWfRun(LHLibUtil.wfRunIdFromString(expectedId));
+
+                    assertThat(result.getId().getId()).isEqualTo(expectedId);
+                    assertThat(result.getStatus()).isEqualTo(LHStatus.COMPLETED);
+                });
+    }
+
+    @Test
+    void testReactiveEndpoint() {
+        String expectedId = UUID.randomUUID().toString();
+        String expectedMessage = "Hello Anakin";
+
+        given().queryParam("id", expectedId)
+                .queryParam("message", expectedMessage)
+                .when()
+                .get("/print")
+                .then()
+                .statusCode(200)
+                .body(is(expectedMessage));
 
         with().pollInterval(Duration.ofSeconds(1))
                 .ignoreExceptions()

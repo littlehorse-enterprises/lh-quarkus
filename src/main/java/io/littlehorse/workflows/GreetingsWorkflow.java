@@ -1,7 +1,7 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.tasks.GreetingsTask.TASK_GREETINGS;
-import static io.littlehorse.tasks.PrintTask.TASK_PRINT;
+import static io.littlehorse.tasks.GreetingsTask.GREETINGS_TASK;
+import static io.littlehorse.tasks.PrintTask.PRINT_TASK;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
@@ -9,16 +9,16 @@ import io.littlehorse.sdk.wfsdk.TaskNodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
-@LHWorkflow(GreetingsWorkflow.WF_GREETINGS)
+@LHWorkflow(GreetingsWorkflow.GREETINGS_WORKFLOW)
 public class GreetingsWorkflow implements LHWorkflowDefinition {
 
-    public static final String VAR_NAME = "name";
-    public static final String WF_GREETINGS = "greetings";
+    public static final String NAME_VARIABLE = "name";
+    public static final String GREETINGS_WORKFLOW = "greetings";
 
     @Override
     public void define(WorkflowThread wf) {
-        WfRunVariable name = wf.declareStr(VAR_NAME);
-        TaskNodeOutput message = wf.execute(TASK_GREETINGS, name);
-        wf.execute(TASK_PRINT, message);
+        WfRunVariable name = wf.declareStr(NAME_VARIABLE);
+        TaskNodeOutput message = wf.execute(GREETINGS_TASK, name);
+        wf.execute(PRINT_TASK, message);
     }
 }

@@ -7,7 +7,7 @@ import io.littlehorse.services.GreetingsService;
 @LHTask
 public class GreetingsTask {
 
-    public static final String TASK_GREETINGS = "greetings";
+    public static final String GREETINGS_TASK = "greetings";
 
     private final GreetingsService service;
 
@@ -15,7 +15,7 @@ public class GreetingsTask {
         this.service = service;
     }
 
-    @LHTaskMethod(TASK_GREETINGS)
+    @LHTaskMethod(GREETINGS_TASK)
     public String greetings(String name) {
         return service.sayHello(name);
     }
