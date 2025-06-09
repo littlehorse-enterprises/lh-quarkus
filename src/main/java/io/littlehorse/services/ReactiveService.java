@@ -40,9 +40,7 @@ public class ReactiveService {
 
         return Uni.createFrom()
                 .future(futureStub.runWf(request))
-                .onItem()
-                .transformToUni(requestAwait ->
-                        Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)))
+                .chain(() -> Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)))
                 .map(wfEvent -> wfEvent.getContent().getStr());
     }
 }
