@@ -23,22 +23,26 @@ public class ReactiveService {
     }
 
     public Uni<String> runWf(String id, String message) {
+        String wfRunId =
+                StringUtils.isBlank(id) ? UUID.randomUUID().toString().replace("-", "") : id;
+
         RunWfRequest request = RunWfRequest.newBuilder()
                 .setWfSpecName(ReactiveWorkflow.REACTIVE_WORKFLOW)
                 .putVariables(ReactiveWorkflow.MESSAGE_VARIABLE, LHLibUtil.objToVarVal(message))
-                .setId(StringUtils.isBlank(id) ? UUID.randomUUID().toString().replace("-", "") : id)
+                .setId(wfRunId)
+                .build();
+
+        AwaitWorkflowEventRequest awaitEvent = AwaitWorkflowEventRequest.newBuilder()
+                .addEventDefIds(
+                        WorkflowEventDefId.newBuilder().setName(ReactiveWorkflow.NOTIFY_EVENT))
+                .setWfRunId(LHLibUtil.wfRunIdFromString(wfRunId))
                 .build();
 
         return Uni.createFrom()
                 .future(futureStub.runWf(request))
-                .map(wfRun -> AwaitWorkflowEventRequest.newBuilder()
-                        .addEventDefIds(WorkflowEventDefId.newBuilder()
-                                .setName(ReactiveWorkflow.NOTIFY_EVENT))
-                        .setWfRunId(wfRun.getId())
-                        .build())
                 .onItem()
                 .transformToUni(requestAwait ->
-                        Uni.createFrom().future(futureStub.awaitWorkflowEvent(requestAwait)))
+                        Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)))
                 .map(wfEvent -> wfEvent.getContent().getStr());
     }
 }

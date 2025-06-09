@@ -21,11 +21,15 @@ public class GreetingsService {
     }
 
     public String runWf(String id, String name) {
+        String wfRunId =
+                StringUtils.isBlank(id) ? UUID.randomUUID().toString().replace("-", "") : id;
+
         RunWfRequest request = RunWfRequest.newBuilder()
                 .setWfSpecName(GreetingsWorkflow.GREETINGS_WORKFLOW)
                 .putVariables(GreetingsWorkflow.NAME_VARIABLE, LHLibUtil.objToVarVal(name))
-                .setId(StringUtils.isBlank(id) ? UUID.randomUUID().toString().replace("-", "") : id)
+                .setId(wfRunId)
                 .build();
+
         return blockingStub.runWf(request).getId().getId();
     }
 
