@@ -25,8 +25,8 @@ public class ExecuteOrder66Workflow implements LHWorkflowDefinition {
         wf.doIfElse(
                 wf.condition(isApproved, Comparator.EQUALS, true),
                 ifBody ->
-                        ifBody.execute(PrintTask.TASK_PRINT, wf.format("Well done {0}", executor)),
+                        ifBody.execute(PrintTask.PRINT_TASK, wf.format("Well done {0}", executor)),
                 elseBody -> elseBody.execute(
-                        PrintTask.TASK_PRINT, wf.format("Very bad {0}", executor)));
+                        PrintTask.PRINT_TASK, wf.format("Very bad {0}", executor)));
     }
 }

@@ -11,11 +11,11 @@ public class WorkflowProducer {
 
     @LHWorkflow("hello-world")
     public void helloWorld(WorkflowThread wf) {
-        wf.execute(PrintTask.TASK_PRINT, "Hello World!");
+        wf.execute(PrintTask.PRINT_TASK, "Hello World!");
     }
 
     @LHWorkflow("test")
     public void test(WorkflowThread wf) {
-        wf.execute(PrintTask.TASK_PRINT, "This is a test!");
+        wf.execute(PrintTask.PRINT_TASK, "This is a test!");
     }
 }

@@ -1,7 +1,6 @@
 package io.littlehorse.resources;
 
 import io.littlehorse.services.GreetingsService;
-import io.smallrye.mutiny.Uni;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -22,12 +21,5 @@ public class GreetingsResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String hello(@QueryParam("id") String id, @QueryParam("name") String name) {
         return service.runWf(id, name);
-    }
-
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    @Path("/reactive")
-    public Uni<String> reactiveHello(@QueryParam("id") String id, @QueryParam("name") String name) {
-        return service.runWfReactive(id, name);
     }
 }

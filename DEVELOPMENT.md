@@ -58,18 +58,22 @@ docker compose up -d
 
 ## Run
 
+Run server:
 ```shell
 ./gradlew quarkusDev
 ```
 
+Test blocking stub:
 ```shell
-http -v :8080/hello name==Luck id==my-workflow-1
+http -v :8080/hello name==Luke id==my-workflow-1
 ```
 
+Test quarkus reactive:
 ```shell
-http -v :8080/hello/reactive name==Anakin
+http -v :8080/print message=="Hello Anakin" id==my-message-1
 ```
 
+Test from lhctl:
 ```shell
 lhctl run greetings name Leia
 ```
