@@ -7,8 +7,6 @@ import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager.TestInjector.AnnotatedAndMatchesType;
 
 import java.util.Map;
-import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
@@ -23,17 +21,11 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
     @Override
     public Map<String, String> start() {
         cluster.start();
-        blockingStub = LHConfig.newBuilder().loadFromMap(getConfigs()).build().getBlockingStub();
-        // TODO: return cluster.getClientConfig();
-        return getConfigs();
-    }
-
-    // TODO: remove it in the next release
-    private Map<String, String> getConfigs() {
-        Properties clientProperties = cluster.getClientProperties();
-        return clientProperties.keySet().stream()
-                .collect(Collectors.toMap(
-                        Object::toString, key -> clientProperties.get(key).toString()));
+        blockingStub = LHConfig.newBuilder()
+                .loadFromMap(cluster.getClientConfig())
+                .build()
+                .getBlockingStub();
+        return cluster.getClientConfig();
     }
 
     @Override
