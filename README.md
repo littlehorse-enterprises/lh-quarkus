@@ -17,6 +17,7 @@
   * [Configurations](#configurations)
   * [Example Project](#example-project)
   * [Development](#development)
+  * [Troubleshooting](#troubleshooting)
   * [License](#license)
 <!-- TOC -->
 
@@ -76,6 +77,10 @@ For an example project go to the [src](src) folder.
 ## Development
 
 For development instructions go to [DEVELOPMENT.md](DEVELOPMENT.md).
+
+## Troubleshooting
+
+For solving common problems go to [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 ## License
 
