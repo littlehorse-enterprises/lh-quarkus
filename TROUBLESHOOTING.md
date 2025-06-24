@@ -7,7 +7,7 @@ It is also very common to use framework like [Hibernate](https://quarkus.io/guid
 or, in the case of Quarkus, [Panache](https://quarkus.io/guides/hibernate-orm-panache).
 
 As it is now, every `@LHTaskMethod` needs an [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
-which are created and managed by the LH Quarkus extension. A LHTaskWorker runs inside
+which are created and managed by the LH Quarkus extension. An LHTaskWorker runs inside
 its own thread and outside the Quarkus CDI (read more at [Manage Non-CDI Service](https://quarkus.io/guides/writing-extensions#manage-non-cdi-service)).
 Therefore, you could receive `ContextNotActiveException`, example:
 
@@ -49,7 +49,7 @@ public class MyTask {
 
 ## Missing LHTaskMethod Annotation
 
-In LH a [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
+In LH an [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
 uses [Reflection](https://www.oracle.com/technical-resources/articles/java/javareflection.html)
 to identify the `@LHTaskMethod` to run. Quarkus lists these classes
 and then register them for reflection (more at [Registering for reflection](https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection)).
