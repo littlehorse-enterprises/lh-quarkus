@@ -1,8 +1,8 @@
 package io.littlehorse.services;
 
+import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.AwaitWorkflowEventRequest;
-import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
 import io.littlehorse.sdk.common.proto.WorkflowEventDefId;
 import io.littlehorse.workflows.ReactiveWorkflow;
@@ -16,10 +16,10 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class ReactiveService {
-    private final LittleHorseFutureStub futureStub;
+    private final LittleHorseReactiveStub reactiveStub;
 
-    public ReactiveService(LittleHorseFutureStub futureStub) {
-        this.futureStub = futureStub;
+    public ReactiveService(LittleHorseReactiveStub reactiveStub) {
+        this.reactiveStub = reactiveStub;
     }
 
     public Uni<String> runWf(String id, String message) {
@@ -38,9 +38,9 @@ public class ReactiveService {
                 .setWfRunId(LHLibUtil.wfRunIdFromString(wfRunId))
                 .build();
 
-        return Uni.createFrom()
-                .future(futureStub.runWf(request))
-                .chain(() -> Uni.createFrom().future(futureStub.awaitWorkflowEvent(awaitEvent)))
+        return reactiveStub
+                .runWf(request)
+                .chain(() -> reactiveStub.awaitWorkflowEvent(awaitEvent))
                 .map(wfEvent -> wfEvent.getContent().getStr());
     }
 }
