@@ -6,7 +6,7 @@ It is very common to persist data into relational databases inside `@LHTaskMetho
 It is also very common to use framework like [Hibernate](https://quarkus.io/guides/hibernate-orm),
 or, in the case of Quarkus, [Panache](https://quarkus.io/guides/hibernate-orm-panache).
 
-As it is now, every `@LHTaskMethod` needs a [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
+As it is now, every `@LHTaskMethod` needs an [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
 which are created and managed by the LH Quarkus extension. A LHTaskWorker runs inside
 its own thread and outside the Quarkus CDI (read more at [Manage Non-CDI Service](https://quarkus.io/guides/writing-extensions#manage-non-cdi-service)).
 Therefore, you could receive `ContextNotActiveException`, example:
@@ -51,7 +51,7 @@ public class MyTask {
 
 In LH a [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
 uses [Reflection](https://www.oracle.com/technical-resources/articles/java/javareflection.html)
-to identify the `@LHTaskMethod` to run. Quarkus list these classes
+to identify the `@LHTaskMethod` to run. Quarkus lists these classes
 and then register them for reflection (more at [Registering for reflection](https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection)).
 
 But, there are some annotations which could change this behavior. An example of this
@@ -72,8 +72,8 @@ public class MyTask {
 ```
 
 When adding the annotation `@Transactional` quarkus creates a
-[Class Proxies](https://quarkus.io/guides/cdi#client_proxies),
-making it impossible to LH to find the `@LHTaskMethod` under the hood.
+[Class Proxy](https://quarkus.io/guides/cdi#client_proxies),
+making it impossible for LH to find the `@LHTaskMethod` under the hood.
 You will receive a `TaskSchemaMismatchError`, example:
 
 ```
