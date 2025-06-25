@@ -22,7 +22,7 @@ This extension provides [default beans](https://quarkus.io/guides/cdi-reference#
 - `io.littlehorse.sdk.common.config.LHConfig`: This class is used to configure gRPC clients and LH tasks.
 - `io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub`: LH gRPC blocking client.
 - `io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub`: LH gRPC async client.
-- `io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseReactiveStub`: LH gRPC reactive client.
+- `io.littlehorse.quarkus.reactive.LittleHorseReactiveStub`: LH gRPC reactive client.
 
 Examples:
 
