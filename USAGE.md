@@ -22,6 +22,7 @@ This extension provides [default beans](https://quarkus.io/guides/cdi-reference#
 - `io.littlehorse.sdk.common.config.LHConfig`: This class is used to configure gRPC clients and LH tasks.
 - `io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub`: LH gRPC blocking client.
 - `io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub`: LH gRPC async client.
+- `io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseReactiveStub`: LH gRPC reactive client.
 
 Examples:
 
@@ -213,24 +214,24 @@ public class GreetingsResource {
 ```
 
 In case you are developing a [Reactive Application](https://quarkus.io/guides/getting-started-reactive),
-you can inject a `LittleHorseFutureStub` into your REST resource, and use `Uni.createFrom().future()`
-to create an object `io.smallrye.mutiny.Uni`:
+you can inject a `LittleHorseReactiveStub`:
 
 ```java
 @Path("/hello")
 public class GreetingsResource {
 
     @Inject
-    private LittleHorseFutureStub futureStub;
+    private LittleHorseReactiveStub reactiveStub;
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public Uni<String> hello(@QueryParam("name") String name) {
         RunWfRequest request = RunWfRequest.newBuilder()
                 .setWfSpecName("greetings")
-                .putVariables("name", LHLibUtil.objToVarVal(name)).build();
-        return Uni.createFrom()
-                .future(futureStub.runWf(request))
+                .putVariables("name", LHLibUtil.objToVarVal(name))
+                .build();
+
+        return reactiveStub.runWf(request)
                 .map(wfRun -> wfRun.getId().getId());
     }
 }
