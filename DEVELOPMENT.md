@@ -65,11 +65,13 @@ Run server:
 
 Test blocking stub:
 ```shell
+http -v :8080/hello name==Luke
 http -v :8080/hello name==Luke id==my-workflow-1
 ```
 
 Test quarkus reactive:
 ```shell
+http -v :8080/print message=="Hello Anakin"
 http -v :8080/print message=="Hello Anakin" id==my-message-1
 ```
 

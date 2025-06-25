@@ -1,8 +1,5 @@
 package io.littlehorse.quarkus.deployment.processors;
 
-import com.google.protobuf.GeneratedMessageV3;
-import com.google.protobuf.ProtocolMessageEnum;
-
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
@@ -36,36 +33,6 @@ public class LHReflectionProcessor {
                 .map(MethodInfo::declaringClass)
                 .map(ClassInfo::toString)
                 .distinct()
-                .map(newBuildItem)
-                .forEach(producer::produce);
-    }
-
-    @BuildStep
-    void registerGeneratedMessageV3(
-            BuildProducer<ReflectiveClassBuildItem> producer,
-            CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAllKnownSubclasses(GeneratedMessageV3.class).stream()
-                .map(ClassInfo::toString)
-                .map(newBuildItem)
-                .forEach(producer::produce);
-    }
-
-    @BuildStep
-    void registerGeneratedMessageV3Builder(
-            BuildProducer<ReflectiveClassBuildItem> producer,
-            CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAllKnownSubclasses(GeneratedMessageV3.Builder.class).stream()
-                .map(ClassInfo::toString)
-                .map(newBuildItem)
-                .forEach(producer::produce);
-    }
-
-    @BuildStep
-    void registerProtocolMessageEnum(
-            BuildProducer<ReflectiveClassBuildItem> producer,
-            CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAllKnownImplementations(ProtocolMessageEnum.class).stream()
-                .map(ClassInfo::toString)
                 .map(newBuildItem)
                 .forEach(producer::produce);
     }
