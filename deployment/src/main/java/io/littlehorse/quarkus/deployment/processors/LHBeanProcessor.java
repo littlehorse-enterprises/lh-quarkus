@@ -1,5 +1,6 @@
 package io.littlehorse.quarkus.deployment.processors;
 
+import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.quarkus.runtime.LHExternalBeans;
 import io.littlehorse.quarkus.runtime.LHTaskStatusesContainer;
 import io.littlehorse.quarkus.runtime.register.LHTaskRegister;
@@ -42,6 +43,13 @@ public class LHBeanProcessor {
     AdditionalBeanBuildItem produceLHTaskStatusesContainer() {
         return AdditionalBeanBuildItem.builder()
                 .addBeanClasses(LHTaskStatusesContainer.class)
+                .build();
+    }
+
+    @BuildStep
+    AdditionalBeanBuildItem produceLittleHorseReactiveStub() {
+        return AdditionalBeanBuildItem.builder()
+                .addBeanClasses(LittleHorseReactiveStub.class)
                 .build();
     }
 }
