@@ -3,7 +3,6 @@ package io.littlehorse.quarkus.runtime.register;
 import io.littlehorse.quarkus.config.LHRuntimeConfig;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
-import io.littlehorse.sdk.common.proto.PutWorkflowEventDefRequest;
 import io.littlehorse.sdk.wfsdk.ThreadFunc;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.quarkus.arc.Unremovable;
@@ -30,14 +29,6 @@ public class LHWorkflowRegister {
         if (!config.workflowsRegisterEnabled()) return;
 
         Workflow workflow = Workflow.newWorkflow(name, threadFunc);
-
-        // TODO; remove this
-        workflow.getRequiredWorkflowEventDefNames().forEach(wfEvent -> {
-            PutWorkflowEventDefRequest request =
-                    PutWorkflowEventDefRequest.newBuilder().setName(wfEvent).build();
-            log.info("Registering WorkflowEvent: {}", wfEvent);
-            blockingStub.putWorkflowEventDef(request);
-        });
 
         log.info("Registering {}: {}", LHWorkflow.class.getSimpleName(), name);
         workflow.registerWfSpec(blockingStub);

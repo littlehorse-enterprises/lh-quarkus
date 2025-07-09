@@ -32,15 +32,14 @@ public class ReactiveService {
                 .setId(wfRunId)
                 .build();
 
-        AwaitWorkflowEventRequest awaitEvent = AwaitWorkflowEventRequest.newBuilder()
-                .addEventDefIds(
-                        WorkflowEventDefId.newBuilder().setName(ReactiveWorkflow.NOTIFY_EVENT))
-                .setWfRunId(LHLibUtil.wfRunIdFromString(wfRunId))
-                .build();
-
         return reactiveStub
                 .runWf(request)
-                .chain(() -> reactiveStub.awaitWorkflowEvent(awaitEvent))
+                .map(wfRun -> AwaitWorkflowEventRequest.newBuilder()
+                        .addEventDefIds(WorkflowEventDefId.newBuilder()
+                                .setName(ReactiveWorkflow.NOTIFY_EVENT))
+                        .setWfRunId(wfRun.getId())
+                        .build())
+                .chain(reactiveStub::awaitWorkflowEvent)
                 .map(wfEvent -> wfEvent.getContent().getStr());
     }
 }

@@ -7,6 +7,8 @@ import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
+import java.util.Map;
+
 @LHWorkflow(ReactiveWorkflow.REACTIVE_WORKFLOW)
 public class ReactiveWorkflow implements LHWorkflowDefinition {
 
@@ -18,6 +20,6 @@ public class ReactiveWorkflow implements LHWorkflowDefinition {
     public void define(WorkflowThread wf) {
         WfRunVariable message = wf.declareStr(MESSAGE_VARIABLE);
         wf.execute(PRINT_TASK, message);
-        wf.throwEvent(NOTIFY_EVENT, message);
+        wf.throwEvent(NOTIFY_EVENT, message).registeredAs(Map.class);
     }
 }

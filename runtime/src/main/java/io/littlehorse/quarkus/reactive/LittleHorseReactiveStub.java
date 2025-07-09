@@ -502,4 +502,14 @@ public class LittleHorseReactiveStub {
             com.google.protobuf.Empty request) {
         return Uni.createFrom().future(futureStub.whoami(request));
     }
+
+    public Uni<com.google.protobuf.Empty> deleteCorrelatedEvent(
+            io.littlehorse.sdk.common.proto.DeleteCorrelatedEventRequest request) {
+        return Uni.createFrom().future(futureStub.deleteCorrelatedEvent(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.CorrelatedEventIdList> searchCorrelatedEvent(
+            io.littlehorse.sdk.common.proto.SearchCorrelatedEventRequest request) {
+        return Uni.createFrom().future(futureStub.searchCorrelatedEvent(request));
+    }
 }
