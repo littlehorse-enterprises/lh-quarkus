@@ -60,7 +60,7 @@ This extension keeps the same versioning as [LittleHorse](https://github.com/lit
 
 | LittleHorse Extension Version | Quarkus Version |
 |-------------------------------|-----------------|
-| `0.13.*`                      | `3.22.*`        |
+| `0.14.*`                      | `3.24.*`        |
 
 ## Usage
 
