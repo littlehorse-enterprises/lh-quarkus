@@ -10,7 +10,7 @@ version = "${lhVersion}"
 
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
-    implementation project(":runtime")
+    implementation project(":littlehorse-quarkus-runtime")
     implementation "io.quarkus:quarkus-grpc-common-deployment"
     implementation "io.quarkus:quarkus-smallrye-health-spi"
 }

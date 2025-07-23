@@ -1,5 +1,5 @@
-artifact: ${project.groupId}:${project.artifactId}:${project.version}
 name: LittleHorse Quarkus
+description: This is the base Quarkus extension for LittleHorse
 metadata:
   keywords:
     - littlehorse

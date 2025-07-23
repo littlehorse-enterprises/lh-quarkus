@@ -9,6 +9,10 @@ plugins {
 group = "io.littlehorse"
 version = "${lhVersion}"
 
+quarkusExtension {
+    deploymentModule = "littlehorse-quarkus-deployment"
+}
+
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
     implementation "io.quarkus:quarkus-grpc-common"

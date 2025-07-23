@@ -140,6 +140,7 @@ http :8080/q/health/live
 ## Links
 
 - [Writing a Quarkus Extensions](https://quarkus.io/guides/writing-extensions)
+- [Quarkus Extension Metadata](https://quarkus.io/guides/extension-metadata)
 - [Quarkus Configuration Guide](https://quarkus.io/guides/config-reference)
 - [Context and Dependency Injection](https://quarkus.io/guides/cdi-reference)
-- [Writing Native Apps](https://quarkus.io/guides/writing-native-applications-tips)
+- [Writing Native Application Tips](https://quarkus.io/guides/writing-native-applications-tips)

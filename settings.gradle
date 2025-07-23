@@ -11,5 +11,12 @@ pluginManagement {
         id "io.github.gradle-nexus.publish-plugin" version "${nexusVersion}"
     }
 }
-rootProject.name = "littlehorse-quarkus"
-include "runtime", "deployment"
+rootProject.name = "littlehorse-quarkus-extensions"
+
+def extensions = ["quarkus"]
+
+extensions.each { extension ->
+    include "littlehorse-$extension-runtime", "littlehorse-$extension-deployment"
+    project(":littlehorse-$extension-runtime").projectDir = file("extensions/littlehorse-$extension/runtime")
+    project(":littlehorse-$extension-deployment").projectDir = file("extensions/littlehorse-$extension/deployment")
+}

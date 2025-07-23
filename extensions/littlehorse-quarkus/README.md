@@ -1,10 +1,14 @@
-# Usage
+# LittleHorse Quarkus Extension
 
-## Table of Content
+This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
+
+# Table of Content
 
 <!-- TOC -->
+* [LittleHorse Quarkus Extension](#littlehorse-quarkus-extension)
+* [Table of Content](#table-of-content)
+* [Installation](#installation)
 * [Usage](#usage)
-  * [Table of Content](#table-of-content)
   * [Default Beans](#default-beans)
   * [Creating a Task](#creating-a-task)
   * [Registering a Workflow](#registering-a-workflow)
@@ -13,7 +17,42 @@
   * [Enabling Task Health Checks](#enabling-task-health-checks)
   * [Native Build](#native-build)
   * [Tests](#tests)
+* [Troubleshooting](#troubleshooting)
+  * [Transactional LHTaskMethod](#transactional-lhtaskmethod)
+  * [Missing LHTaskMethod Annotation](#missing-lhtaskmethod-annotation)
+* [Configurations](#configurations)
+  * [Passing Configurations](#passing-configurations)
+  * [LittleHorse Client Configurations](#littlehorse-client-configurations)
+    * [Client](#client)
+    * [Task Worker](#task-worker)
+  * [LittleHorse Extension Configurations](#littlehorse-extension-configurations)
+    * [Buildtime Configurations](#buildtime-configurations)
+    * [Runtime Configurations](#runtime-configurations)
 <!-- TOC -->
+
+# Installation
+
+<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-quarkus?label=latest"></a>
+
+This extension is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus).
+
+Gradle:
+
+```groovy
+implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
+```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>io.littlehorse</groupId>
+    <artifactId>littlehorse-quarkus</artifactId>
+    <version>${lhVersion}</version>
+</dependency>
+```
+
+# Usage
 
 ## Default Beans
 
@@ -337,6 +376,258 @@ dependencies {
 }
 ```
 
-For a test example go to the [src](src) folder.
-
 More about tests at: [Testing Your Quarkus Application](https://quarkus.io/guides/getting-started-testing).
+
+# Troubleshooting
+
+## Transactional LHTaskMethod
+
+It is very common to persist data into relational databases inside `@LHTaskMethods`.
+It is also very common to use framework like [Hibernate](https://quarkus.io/guides/hibernate-orm),
+or, in the case of Quarkus, [Panache](https://quarkus.io/guides/hibernate-orm-panache).
+
+As it is now, every `@LHTaskMethod` needs an [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
+which are created and managed by the LH Quarkus extension. An LHTaskWorker runs inside
+its own thread and outside the Quarkus CDI (read more at [Manage Non-CDI Service](https://quarkus.io/guides/writing-extensions#manage-non-cdi-service)).
+Therefore, you could receive `ContextNotActiveException`, example:
+
+```
+jakarta.enterprise.context.ContextNotActiveException: Cannot use the EntityManager/Session because neither
+a transaction nor a CDI request context is active. Consider adding @Transactional to your method to
+automatically activate a transaction, or @ActivateRequestContext if you have valid reasons not to use transactions.
+```
+
+To avoid this, you should add `@Transactional` to your service method, example:
+
+```java
+@ApplicationScoped
+public class MyService {
+    @Inject
+    private MyRepository repository;
+
+    @Transactional
+    public void saveEntity(MyEntity myEntity) {
+        repository.persist(myEntity);
+    }
+}
+```
+
+And, you should invoke this service in your task, example:
+
+```java
+@LHTask
+public class MyTask {
+    @Inject
+    private MyService service;
+
+    @LHTaskMethod("my-task")
+    public void persist(MyEntity myEntity) {
+        service.saveEntity(name);
+    }
+}
+```
+
+## Missing LHTaskMethod Annotation
+
+In LH an [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
+uses [Reflection](https://www.oracle.com/technical-resources/articles/java/javareflection.html)
+to identify the `@LHTaskMethod` to run. Quarkus lists these classes
+and then register them for reflection (more at [Registering for reflection](https://quarkus.io/guides/writing-native-applications-tips#registering-for-reflection)).
+
+But, there are some annotations which could change this behavior. An example of this
+is adding the annotation `@Transactional` to a `@LHTaskMethod`:
+
+```java
+@LHTask
+public class MyTask {
+    @Inject
+    private MyService service;
+
+    @LHTaskMethod("my-task")
+    @Transactional
+    public void persist(MyEntity myEntity) {
+        service.saveEntity(name);
+    }
+}
+```
+
+When adding the annotation `@Transactional` quarkus creates a
+[Class Proxy](https://quarkus.io/guides/cdi#client_proxies),
+making it impossible for LH to find the `@LHTaskMethod` under the hood.
+You will receive a `TaskSchemaMismatchError`, example:
+
+```
+io.littlehorse.sdk.common.exception.TaskSchemaMismatchError: Couldn't find annotated
+@LHTaskMethod for taskDef greetings on class io.littlehorse.tasks.MyTask_Subclass
+```
+
+For that reason, it is recommended to move the annotation `@Transactional` into a service class.
+
+# Configurations
+
+More about configurations at: [Configuration Reference Guide](https://quarkus.io/guides/config-reference).
+
+## Passing Configurations
+
+Quarkus supports multiple configuration sources.
+
+Some examples could be:
+
+* **Environment Variables:** Adding a variable (ex: `LHC_API_PORT=2023`) to the OS/Container.
+* **System Properties:** Adding a `-D` property (ex: `-Dlhc.api.port=2023`) to the command line when running the
+  artifact.
+* **Property File:** Adding a property entry (ex: `lhc.api.port=2023`) into the `application.properties` file.
+
+## LittleHorse Client Configurations
+
+More about LH Configurations at: [Workers/Clients Configurations](https://littlehorse.io/docs/server/operations/client-configuration)
+and [Configuring the Clients](https://littlehorse.io/docs/server/developer-guide/client-configuration).
+
+### Client
+
+``lhc.api.host``
+The bootstrap host for the LittleHorse Server.
+
+* Type: string
+* Importance: high
+
+``lhc.api.port``
+The bootstrap port for the LittleHorse Server.
+
+* Type: int
+* Importance: high
+
+``lhc.api.protocol``
+The bootstrap protocol for the LittleHorse Server.
+
+* Type: string
+* Default: PLAINTEXT
+* Valid Values: [PLAINTEXT, TLS]
+* Importance: high
+
+``lhc.tenant.id``
+Tenant ID which represents a logically isolated environment within LittleHorse.
+
+* Type: string
+* Default: default
+* Importance: medium
+
+``lhc.ca.cert``
+Optional location of CA Cert file that issued the server side certificates. For TLS and mTLS connection.
+
+* Type: string
+* Default: null
+* Importance: low
+
+``lhc.client.cert``
+Optional location of Client Cert file for mTLS connection.
+
+* Type: string
+* Default: null
+* Importance: low
+
+``lhc.client.key``
+Optional location of Client Private Key file for mTLS connection.
+
+* Type: string
+* Default: null
+* Importance: low
+
+``lhc.grpc.keepalive.time.ms``
+Time in milliseconds to configure keepalive pings on the grpc client.
+
+* Type: long
+* Default: 45000 (45 seconds)
+* Importance: low
+
+``lhc.grpc.keepalive.timeout.ms``
+Time in milliseconds to configure the timeout for the keepalive pings on the grpc client.
+
+* Type: long
+* Default: 5000 (5 seconds)
+* Importance: low
+
+``lhc.oauth.access.token.url``
+Optional Access Token URL provided by the OAuth Authorization Server. Used by the Worker to obtain a token using client credentials flow.
+
+* Type: string
+* Default: null
+* Importance: low
+
+``lhc.oauth.client.id``
+Optional OAuth2 Client Id. Used by the Worker to identify itself at an Authorization Server. Client Credentials Flow.
+
+* Type: string
+* Default: null
+* Importance: low
+
+``lhc.oauth.client.secret``
+Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Authorization Server. Client Credentials Flow.
+
+* Type: password
+* Default: null
+* Importance: low
+
+### Task Worker
+
+``lhw.num.worker.threads``
+The number of worker threads to run. It allows you to improve the task execution's performance parallelizing the tasks assigned to this worker.
+
+* Type: int
+* Default: 8
+* Importance: medium
+
+``lhw.task.worker.id``
+Unique identifier for the Task Worker. It is used by the LittleHorse cluster to load balance the worker requests across all servers. Additionally, it is journalled on every `TaskAttempt` run by the Task Worker, so that you can more easily debug where a request was executed from. It is recommended to set this value for production environments.
+
+* Type: string
+* Default: a random value
+* Importance: medium
+
+``lhw.task.worker.version``
+Optional version identifier. Intended to be informative. Useful when you're running different versions of a worker. Along with the `lhw.task.worker.id`, this is journalled on every `TaskAttempt`.
+
+* Type: string
+* Default: ""
+* Importance: medium
+
+## LittleHorse Extension Configurations
+
+### Buildtime Configurations
+
+``quarkus.littlehorse.health.enabled``
+Enables health checks for the running `LHTaskWorker` list.
+
+* Type: boolean
+* Default: true
+* Importance: low
+
+### Runtime Configurations
+
+``quarkus.littlehorse.tasks.start.enabled``
+Automatically starts all `LHTaskWorker` found.
+
+* Type: boolean
+* Default: true
+* Importance: medium
+
+``quarkus.littlehorse.tasks.register.enabled``
+Registers all `TaskDef` found when starting the application.
+
+* Type: boolean
+* Default: true
+* Importance: medium
+
+``quarkus.littlehorse.workflows.register.enabled``
+Registers all `WfSpec` found when starting the application.
+
+* Type: boolean
+* Default: true
+* Importance: medium
+
+``quarkus.littlehorse.user-tasks.register.enabled``
+Registers all `UserTaskDef` found when starting the application.
+
+* Type: boolean
+* Default: true
+* Importance: medium

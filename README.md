@@ -1,4 +1,4 @@
-# LittleHorse Extension for Quarkus
+# LittleHorse Extensions for Quarkus
 
 <a href="https://github.com/littlehorse-enterprises/lh-quarkus"><img alt="github" src="https://img.shields.io/badge/GitHub-blue?logo=github&logoColor=white"></a>
 <a href="https://quarkus.io/"><img alt="quarkus" src="https://img.shields.io/badge/Quarkus-ff004a?logo=quarkus&logoColor=white"/></a>
@@ -7,68 +7,30 @@
 ## Table of Content
 
 <!-- TOC -->
-* [LittleHorse Extension for Quarkus](#littlehorse-extension-for-quarkus)
+* [LittleHorse Extensions for Quarkus](#littlehorse-extensions-for-quarkus)
   * [Table of Content](#table-of-content)
-  * [Features](#features)
-  * [Installation](#installation)
+  * [Extensions](#extensions)
   * [Versioning](#versioning)
   * [Interoperability Table](#interoperability-table)
-  * [Usage](#usage)
-  * [Configurations](#configurations)
   * [Example Project](#example-project)
   * [Development](#development)
-  * [Troubleshooting](#troubleshooting)
   * [License](#license)
 <!-- TOC -->
 
-## Features
 
-- Register and start tasks
-- Register workflows
-- Register user tasks
-- Health checks
-- Default LH beans
-- Native build support
+## Extensions
 
-## Installation
-
-<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-quarkus?label=latest"></a>
-
-This extension is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus).
-
-Gradle:
-
-```groovy
-implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
-```
-
-Maven:
-
-```xml
-<dependency>
-    <groupId>io.littlehorse</groupId>
-    <artifactId>littlehorse-quarkus</artifactId>
-    <version>${lhVersion}</version>
-</dependency>
-```
+- [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on LittleHorse.
 
 ## Versioning
 
-This extension keeps the same versioning as [LittleHorse](https://github.com/littlehorse-enterprises/littlehorse/releases).
+These extensions follow the same versioning conventions as [LittleHorse](https://github.com/littlehorse-enterprises/littlehorse/releases).
 
 ## Interoperability Table
 
 | LittleHorse Extension Version | Quarkus Version |
 |-------------------------------|-----------------|
 | `0.14.*`                      | `3.24.*`        |
-
-## Usage
-
-For instructions about how to use this extension go to [USAGE.md](USAGE.md).
-
-## Configurations
-
-For LittleHorse and LittleHorse Extension configurations go to [CONFIGURATIONS.md](CONFIGURATIONS.md).
 
 ## Example Project
 
@@ -77,10 +39,6 @@ For an example project go to the [src](src) folder.
 ## Development
 
 For development instructions go to [DEVELOPMENT.md](DEVELOPMENT.md).
-
-## Troubleshooting
-
-For solving common problems go to [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 ## License
 

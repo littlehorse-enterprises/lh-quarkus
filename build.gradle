@@ -15,7 +15,7 @@ dependencies {
     implementation "org.apache.commons:commons-lang3"
 
     // quarkus extension
-    implementation project(":runtime")
+    implementation project(":littlehorse-quarkus-runtime")
 
     // logs
     implementation "org.jboss.logging:commons-logging-jboss-logging"
