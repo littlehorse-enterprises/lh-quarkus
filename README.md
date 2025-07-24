@@ -10,31 +10,31 @@
 * [LittleHorse Extensions for Quarkus](#littlehorse-extensions-for-quarkus)
   * [Table of Content](#table-of-content)
   * [Extensions](#extensions)
+  * [Examples](#examples)
   * [Versioning](#versioning)
-  * [Interoperability Table](#interoperability-table)
-  * [Example Project](#example-project)
   * [Development](#development)
   * [License](#license)
 <!-- TOC -->
 
-
 ## Extensions
 
-- [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on LittleHorse.
+- [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on Quarkus and LittleHorse.
+
+## Examples
+
+- [Basic Example](examples/basic): How to run a task and register a workflow.
+- [Integration Tests](examples/integration-tests): How to perform integration tests with LH Testcontainers.
+- [Reactive](examples/reactive): How to use `LittleHorseReactiveStub` object.
+- [Rest](examples/rest): How to run a wf run request from a rest endpoint.
+- [User Tasks](examples/user-tasks): How to use and register user tasks.
 
 ## Versioning
 
 These extensions follow the same versioning conventions as [LittleHorse](https://github.com/littlehorse-enterprises/littlehorse/releases).
 
-## Interoperability Table
-
 | LittleHorse Extension Version | Quarkus Version |
 |-------------------------------|-----------------|
 | `0.14.*`                      | `3.24.*`        |
-
-## Example Project
-
-For an example project go to the [src](src) folder.
 
 ## Development
 
