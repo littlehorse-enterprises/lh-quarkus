@@ -1,36 +1,8 @@
-plugins {
-    id "java-library"
-    id "maven-publish"
-    id "signing"
-    id "com.diffplug.spotless"
-}
-
-group = "io.littlehorse"
-version = "${lhVersion}"
-
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
     implementation project(":littlehorse-quarkus-runtime")
     implementation "io.quarkus:quarkus-grpc-common-deployment"
     implementation "io.quarkus:quarkus-smallrye-health-spi"
-}
-
-test {
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = "full"
-    }
-    systemProperty "lhVersion", "${lhVersion}"
-}
-
-tasks.register("javadocJar", Jar) {
-    archiveClassifier = "javadoc"
-    from javadoc
-}
-
-tasks.register("sourcesJar", Jar) {
-    archiveClassifier = "sources"
-    from sourceSets.main.allSource
 }
 
 publishing {
@@ -77,35 +49,4 @@ signing {
     useInMemoryPgpKeys(signingKey, signingPassword)
 
     sign publishing.publications.mavenJava
-}
-
-javadoc {
-    excludes = []
-    options.memberLevel = JavadocMemberLevel.PUBLIC
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-compileJava {
-    options.encoding = "UTF-8"
-    options.compilerArgs << "-parameters"
-}
-
-compileTestJava {
-    options.encoding = "UTF-8"
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
-spotless {
-    java {
-        removeUnusedImports()
-        palantirJavaFormat().style("AOSP")
-    }
 }
