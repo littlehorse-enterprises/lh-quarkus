@@ -1,0 +1,68 @@
+plugins {
+    id "io.quarkus.extension"
+}
+
+quarkusExtension {
+    deploymentModule = "littlehorse-quarkus-deployment"
+}
+
+dependencies {
+    implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
+    implementation "io.quarkus:quarkus-grpc-common"
+    compileOnly "io.quarkus:quarkus-smallrye-health"
+    api("io.littlehorse:littlehorse-client:${lhVersion}") {
+        exclude group: "io.grpc", module: "grpc-netty-shaded"
+        exclude group: "io.grpc", module: "grpc-services"
+    }
+    testImplementation "io.quarkus:quarkus-junit5"
+    testImplementation "io.quarkus:quarkus-junit5-mockito"
+    testImplementation "io.rest-assured:rest-assured"
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = group
+            artifactId = "littlehorse-quarkus"
+            version = version
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = "LittleHorse Quarkus Extension"
+                description = "LittleHorse Quarkus Extension"
+                url = "https://github.com/littlehorse-enterprises/littlehorse"
+                licenses {
+                    license {
+                        name = "Apache License, Version 2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0"
+                    }
+                }
+                developers {
+                    developer {
+                        name = "LittleHorse Engineering"
+                        email = "engineering@littlehorse.io"
+                    }
+                }
+                scm {
+                    url = "https://github.com/littlehorse-enterprises/lh-quarkus"
+                    connection = "scm:git:git//github.com/littlehorse-enterprises/lh-quarkus.git"
+                    developerConnection = "scm:git:ssh://github.com/littlehorse-enterprises/lh-quarkus.git"
+                }
+                packaging = "jar"
+            }
+        }
+    }
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("publish") }
+
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+
+    sign publishing.publications.mavenJava
+}

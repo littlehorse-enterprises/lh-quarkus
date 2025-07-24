@@ -1,0 +1,10 @@
+name: LittleHorse Quarkus
+description: This is the base Quarkus extension for LittleHorse
+metadata:
+  keywords:
+    - littlehorse
+  categories:
+    - "workflow"
+    - "workflow engine"
+    - "microservices"
+  status: "preview"

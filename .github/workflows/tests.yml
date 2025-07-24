@@ -48,6 +48,10 @@ jobs:
           distribution: "corretto"
           java-version: "17"
       - name: Jar Tests
-        run: ./gradlew quarkusIntTest
+        run: >-
+          ./gradlew example-integration-tests:quarkusIntTest
       - name: Native Tests
-        run: ./gradlew testNative
+        run: >-
+          ./gradlew example-integration-tests:quarkusIntTest
+          -Dquarkus.native.enabled=true
+          -Dquarkus.package.jar.enabled=false

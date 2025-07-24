@@ -36,18 +36,6 @@ docker compose up -d
 ./gradlew test
 ```
 
-## Integration Tests
-
-```shell
-./gradlew quarkusIntTest
-```
-
-## Native Tests
-
-```shell
-./gradlew testNative
-```
-
 ## Publish Locally
 
 ```shell
@@ -55,81 +43,6 @@ docker compose up -d
 ```
 
 > Optionally you can pass `-Pversion=<version>`
-
-## Run
-
-Run server:
-```shell
-./gradlew quarkusDev
-```
-
-Test blocking stub:
-```shell
-http -v :8080/hello name==Luke
-http -v :8080/hello name==Luke id==my-workflow-1
-```
-
-Test quarkus reactive:
-```shell
-http -v :8080/print message=="Hello Anakin"
-http -v :8080/print message=="Hello Anakin" id==my-message-1
-```
-
-Test from lhctl:
-```shell
-lhctl run greetings name Leia
-```
-
-## Run User Task
-
-```shell
-./gradlew quarkusDev
-```
-
-```shell
-lhctl run execute-order-66 executor Anakin
-```
-
-```shell
-lhctl execute userTaskRun <wfRunId> <userTaskGuid>
-```
-
-## Run Native
-
-```shell
-./gradlew build \
--Dquarkus.native.enabled=true \
--Dquarkus.package.jar.enabled=false \
--Dquarkus.package.output-name=example
-```
-
-```shell
-./build/example-runner
-```
-
-## Log level
-
-```shell
-./build/example-runner -Dquarkus.log.level=DEBUG
-```
-
-```shell
-./gradlew quarkusDev -Dquarkus.log.level=DEBUG
-```
-
-## Health Checks
-
-```shell
-http :8080/q/health
-```
-
-```shell
-http :8080/q/health/ready
-```
-
-```shell
-http :8080/q/health/live
-```
 
 ## Apply Code Style
 
@@ -140,6 +53,7 @@ http :8080/q/health/live
 ## Links
 
 - [Writing a Quarkus Extensions](https://quarkus.io/guides/writing-extensions)
+- [Quarkus Extension Metadata](https://quarkus.io/guides/extension-metadata)
 - [Quarkus Configuration Guide](https://quarkus.io/guides/config-reference)
 - [Context and Dependency Injection](https://quarkus.io/guides/cdi-reference)
-- [Writing Native Apps](https://quarkus.io/guides/writing-native-applications-tips)
+- [Writing Native Application Tips](https://quarkus.io/guides/writing-native-applications-tips)
