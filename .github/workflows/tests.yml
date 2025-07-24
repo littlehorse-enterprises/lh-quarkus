@@ -49,11 +49,9 @@ jobs:
           java-version: "17"
       - name: Jar Tests
         run: >-
-          ./gradlew example-user-tasks:quarkusIntTest
-          -Dquarkus.native.enabled=false
-          -Dquarkus.package.jar.enabled=true
+          ./gradlew example-integration-tests:quarkusIntTest
       - name: Native Tests
         run: >-
-          ./gradlew example-user-tasks:testNative
+          ./gradlew example-integration-tests:quarkusIntTest
           -Dquarkus.native.enabled=true
           -Dquarkus.package.jar.enabled=false
