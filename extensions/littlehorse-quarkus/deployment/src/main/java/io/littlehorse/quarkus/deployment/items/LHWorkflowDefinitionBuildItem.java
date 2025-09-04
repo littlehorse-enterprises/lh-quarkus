@@ -6,10 +6,16 @@ import io.quarkus.builder.item.MultiBuildItem;
 public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
     private final String wfSpecName;
+    private final String parent;
 
-    public LHWorkflowDefinitionBuildItem(Class<?> beanClass, String wfSpecName) {
+    public LHWorkflowDefinitionBuildItem(Class<?> beanClass, String wfSpecName, String parent) {
         this.wfSpecName = wfSpecName;
         this.beanClass = beanClass;
+        this.parent = parent;
+    }
+
+    public String getParent() {
+        return parent;
     }
 
     public String getWfSpecName() {
@@ -21,6 +27,6 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
     }
 
     public LHWorkflowDefinitionRecordable toRecordable() {
-        return new LHWorkflowDefinitionRecordable(beanClass, wfSpecName);
+        return new LHWorkflowDefinitionRecordable(beanClass, wfSpecName, parent);
     }
 }

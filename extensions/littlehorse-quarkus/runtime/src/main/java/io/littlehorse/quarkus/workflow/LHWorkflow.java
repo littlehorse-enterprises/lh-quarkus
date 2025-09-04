@@ -12,4 +12,6 @@ public @interface LHWorkflow {
      * Workflow name (WfSpec).
      */
     String value();
+
+    String parent() default "";
 }

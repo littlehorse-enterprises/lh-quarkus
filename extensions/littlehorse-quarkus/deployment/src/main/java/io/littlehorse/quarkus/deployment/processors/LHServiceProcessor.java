@@ -19,6 +19,7 @@ import io.quarkus.deployment.builditem.ServiceStartBuildItem;
 import io.quarkus.deployment.builditem.ShutdownContextBuildItem;
 
 import org.jboss.jandex.AnnotationTarget.Kind;
+import org.jboss.jandex.AnnotationValue;
 import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
@@ -26,6 +27,7 @@ import org.jboss.jandex.MethodInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 class LHServiceProcessor {
 
@@ -69,9 +71,12 @@ class LHServiceProcessor {
                         .contains(DotName.createSimple(LHWorkflowDefinition.class)))
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
-                    String wfSpecName = annotated.value().asString();
                     Class<?> beanClass = loadClass(beanClassName);
-                    return new LHWorkflowDefinitionBuildItem(beanClass, wfSpecName);
+                    String wfSpecName = annotated.value().asString();
+                    String parent = Optional.ofNullable(annotated.value("parent"))
+                            .map(AnnotationValue::asString)
+                            .orElse(null);
+                    return new LHWorkflowDefinitionBuildItem(beanClass, wfSpecName, parent);
                 })
                 .forEach(producer::produce);
     }
@@ -85,10 +90,14 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     MethodInfo methodInfo = annotated.target().asMethod();
                     String beanClassName = methodInfo.declaringClass().toString();
+                    Class<?> beanClass = loadClass(beanClassName);
                     String beanMethodName = methodInfo.name();
                     String wfSpecName = annotated.value().asString();
-                    Class<?> beanClass = loadClass(beanClassName);
-                    return new LHWorkflowFromMethodBuildItem(beanClass, beanMethodName, wfSpecName);
+                    String parent = Optional.ofNullable(annotated.value("parent"))
+                            .map(AnnotationValue::asString)
+                            .orElse(null);
+                    return new LHWorkflowFromMethodBuildItem(
+                            beanClass, beanMethodName, wfSpecName, parent);
                 })
                 .forEach(producer::produce);
     }

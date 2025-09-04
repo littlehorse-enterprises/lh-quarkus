@@ -9,8 +9,8 @@ import jakarta.enterprise.inject.spi.CDI;
 public class LHWorkflowDefinitionRecordable extends LHWorkflowRecordable {
 
     @RecordableConstructor
-    public LHWorkflowDefinitionRecordable(Class<?> beanClass, String name) {
-        super(beanClass, name);
+    public LHWorkflowDefinitionRecordable(Class<?> beanClass, String name, String parent) {
+        super(beanClass, name, parent);
     }
 
     @Override

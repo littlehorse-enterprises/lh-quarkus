@@ -7,12 +7,18 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
     private final String beanMethodName;
     private final String wfSpecName;
+    private final String parent;
 
     public LHWorkflowFromMethodBuildItem(
-            Class<?> beanClass, String beanMethodName, String wfSpecName) {
+            Class<?> beanClass, String beanMethodName, String wfSpecName, String parent) {
         this.wfSpecName = wfSpecName;
         this.beanClass = beanClass;
         this.beanMethodName = beanMethodName;
+        this.parent = parent;
+    }
+
+    public String getParent() {
+        return parent;
     }
 
     public String getWfSpecName() {
@@ -28,6 +34,6 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
     }
 
     public LHWorkflowFromMethodRecordable toRecordable() {
-        return new LHWorkflowFromMethodRecordable(beanClass, wfSpecName, beanMethodName);
+        return new LHWorkflowFromMethodRecordable(beanClass, wfSpecName, beanMethodName, parent);
     }
 }
