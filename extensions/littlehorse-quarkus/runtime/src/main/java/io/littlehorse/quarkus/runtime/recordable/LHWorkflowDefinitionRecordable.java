@@ -9,8 +9,9 @@ import jakarta.enterprise.inject.spi.CDI;
 public class LHWorkflowDefinitionRecordable extends LHWorkflowRecordable {
 
     @RecordableConstructor
-    public LHWorkflowDefinitionRecordable(Class<?> beanClass, String name, String parent) {
-        super(beanClass, name, parent);
+    public LHWorkflowDefinitionRecordable(
+            Class<?> beanClass, String name, String parent, String defaultTaskTimeout) {
+        super(beanClass, name, parent, defaultTaskTimeout);
     }
 
     @Override

@@ -19,14 +19,15 @@ public final class LHWorkflowAnnotationDescriptor {
 
     public static LHWorkflowAnnotationDescriptor describe(AnnotationInstance annotationInstance) {
         String value = annotationInstance.value().asString();
-        String parent = Optional.ofNullable(annotationInstance.value("parent"))
-                .map(AnnotationValue::asString)
-                .orElse(null);
-        String defaultTaskTimeout = Optional.ofNullable(
-                        annotationInstance.value("defaultTaskTimeout"))
-                .map(AnnotationValue::asString)
-                .orElse(null);
+        String parent = extractValue(annotationInstance, "parent");
+        String defaultTaskTimeout = extractValue(annotationInstance, "defaultTaskTimeout");
         return new LHWorkflowAnnotationDescriptor(value, parent, defaultTaskTimeout);
+    }
+
+    private static String extractValue(AnnotationInstance annotationInstance, String name) {
+        return Optional.ofNullable(annotationInstance.value(name))
+                .map(AnnotationValue::asString)
+                .orElse(null);
     }
 
     public String wfSpecName() {

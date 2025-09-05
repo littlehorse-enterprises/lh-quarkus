@@ -10,10 +10,17 @@ import jakarta.enterprise.inject.spi.CDI;
 public abstract class LHWorkflowRecordable extends LHRecordable {
 
     private final String parent;
+    private final String defaultTaskTimeout;
 
-    public LHWorkflowRecordable(Class<?> beanClass, String name, String parent) {
+    public LHWorkflowRecordable(
+            Class<?> beanClass, String name, String parent, String defaultTaskTimeout) {
         super(beanClass, name);
         this.parent = parent;
+        this.defaultTaskTimeout = defaultTaskTimeout;
+    }
+
+    public String getDefaultTaskTimeout() {
+        return defaultTaskTimeout;
     }
 
     public String getParent() {
@@ -29,13 +36,18 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
                 CDI.current().select(LHWorkflowRegister.class).get();
 
         Workflow workflow = Workflow.newWorkflow(getName(), this::buildWorkflowThread);
+
         if (parent != null) {
             workflow.setParent(ConfigExpression.expand(parent).asString());
         }
 
+        if (defaultTaskTimeout != null) {
+            workflow.setDefaultTaskTimeout(
+                    ConfigExpression.expand(defaultTaskTimeout).asInt());
+        }
+
         //        workflow.setDefaultTaskExponentialBackoffPolicy();
-        //                workflow.setDefaultTaskRetries();
-        //        workflow.setDefaultTaskTimeout();
+        //        workflow.setDefaultTaskRetries();
         //
         //        workflow.withRetentionPolicy();
         //        workflow.withDefaultThreadRetentionPolicy();

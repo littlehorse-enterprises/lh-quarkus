@@ -54,6 +54,7 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
     }
 
     public LHWorkflowFromMethodRecordable toRecordable() {
-        return new LHWorkflowFromMethodRecordable(beanClass, wfSpecName, beanMethodName, parent);
+        return new LHWorkflowFromMethodRecordable(
+                beanClass, wfSpecName, beanMethodName, parent, defaultTaskTimeout);
     }
 }

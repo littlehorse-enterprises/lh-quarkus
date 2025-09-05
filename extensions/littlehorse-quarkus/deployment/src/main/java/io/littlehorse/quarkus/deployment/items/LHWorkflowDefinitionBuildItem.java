@@ -43,6 +43,7 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
     }
 
     public LHWorkflowDefinitionRecordable toRecordable() {
-        return new LHWorkflowDefinitionRecordable(beanClass, wfSpecName, parent);
+        return new LHWorkflowDefinitionRecordable(
+                beanClass, wfSpecName, parent, defaultTaskTimeout);
     }
 }

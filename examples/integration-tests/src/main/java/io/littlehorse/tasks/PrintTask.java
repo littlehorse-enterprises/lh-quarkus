@@ -6,9 +6,7 @@ import io.littlehorse.sdk.worker.LHTaskMethod;
 @LHTask
 public class PrintTask {
 
-    public static final String PRINT_TASK = "print";
-
-    @LHTaskMethod(PRINT_TASK)
+    @LHTaskMethod("${task.print.name}")
     public void print(String message) {
         System.out.println(message);
     }
