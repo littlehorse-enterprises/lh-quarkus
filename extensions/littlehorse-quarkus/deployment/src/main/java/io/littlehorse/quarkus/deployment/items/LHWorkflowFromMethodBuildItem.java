@@ -10,27 +10,39 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
     private final String wfSpecName;
     private final String parent;
     private final String defaultTaskTimeout;
+    private final String defaultTaskRetries;
+    private final String updateType;
 
     public LHWorkflowFromMethodBuildItem(
             Class<?> beanClass,
             String beanMethodName,
             String wfSpecName,
             String parent,
-            String defaultTaskTimeout) {
+            String defaultTaskTimeout,
+            String defaultTaskRetries,
+            String updateType) {
         this.beanClass = beanClass;
         this.beanMethodName = beanMethodName;
         this.wfSpecName = wfSpecName;
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
+        this.defaultTaskRetries = defaultTaskRetries;
+        this.updateType = updateType;
     }
 
     public LHWorkflowFromMethodBuildItem(
             Class<?> beanClass, String beanMethodName, LHWorkflowAnnotationDescriptor descriptor) {
         this.beanClass = beanClass;
         this.beanMethodName = beanMethodName;
-        this.wfSpecName = descriptor.wfSpecName();
-        this.parent = descriptor.parent();
-        this.defaultTaskTimeout = descriptor.defaultTaskTimeout();
+        this.wfSpecName = descriptor.getWfSpecName();
+        this.parent = descriptor.getParent();
+        this.defaultTaskTimeout = descriptor.getDefaultTaskTimeout();
+        this.defaultTaskRetries = descriptor.getDefaultTaskRetries();
+        this.updateType = descriptor.getUpdateType();
+    }
+
+    public String getDefaultTaskRetries() {
+        return defaultTaskRetries;
     }
 
     public String getParent() {
@@ -55,6 +67,12 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
 
     public LHWorkflowFromMethodRecordable toRecordable() {
         return new LHWorkflowFromMethodRecordable(
-                beanClass, wfSpecName, beanMethodName, parent, defaultTaskTimeout);
+                beanClass,
+                wfSpecName,
+                beanMethodName,
+                parent,
+                defaultTaskTimeout,
+                defaultTaskRetries,
+                updateType);
     }
 }

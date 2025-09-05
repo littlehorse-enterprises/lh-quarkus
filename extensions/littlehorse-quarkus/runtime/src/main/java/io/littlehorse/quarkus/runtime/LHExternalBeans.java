@@ -29,7 +29,8 @@ public class LHExternalBeans {
                 .map(propertyName -> new ServerConfig(
                         propertyName, config.getConfigValue(propertyName).getValue()))
                 .filter(ServerConfig::isValid)
-                .forEach(serverConfig -> properties.put(serverConfig.key(), serverConfig.value()));
+                .forEach(serverConfig ->
+                        properties.put(serverConfig.getKey(), serverConfig.getValue()));
 
         return LHConfig.newBuilder().loadFromProperties(properties).build();
     }
@@ -67,11 +68,11 @@ public class LHExternalBeans {
             return LHConfig.configNames().contains(key);
         }
 
-        public String key() {
+        public String getKey() {
             return key;
         }
 
-        public Object value() {
+        public Object getValue() {
             return value;
         }
     }

@@ -16,7 +16,7 @@ class ConfigExpressionTest {
 
         assertThat(expanded.isExpression()).isFalse();
         assertThat(expanded.asString()).isEqualTo("my-value");
-        assertThat(expanded.members()).isEqualTo(Map.of());
+        assertThat(expanded.getMembers()).isEqualTo(Map.of());
     }
 
     @Test
@@ -33,7 +33,7 @@ class ConfigExpressionTest {
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("this-is-a-test");
-        assertThat(expanded.members()).isEqualTo(Map.of("my.config.test", "this-is-a-test"));
+        assertThat(expanded.getMembers()).isEqualTo(Map.of("my.config.test", "this-is-a-test"));
     }
 
     @Test
@@ -43,7 +43,7 @@ class ConfigExpressionTest {
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("default-value");
-        assertThat(expanded.members()).isEqualTo(Map.of("not.a.config", "default-value"));
+        assertThat(expanded.getMembers()).isEqualTo(Map.of("not.a.config", "default-value"));
     }
 
     @Test
@@ -53,7 +53,7 @@ class ConfigExpressionTest {
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("concatenation-this-is-a-test");
-        assertThat(expanded.members()).isEqualTo(Map.of("my.config.test", "this-is-a-test"));
+        assertThat(expanded.getMembers()).isEqualTo(Map.of("my.config.test", "this-is-a-test"));
     }
 
     @Test
@@ -63,7 +63,7 @@ class ConfigExpressionTest {
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("this-is-a-test-this-is-a-second-test");
-        assertThat(expanded.members())
+        assertThat(expanded.getMembers())
                 .isEqualTo(Map.of(
                         "my.config.test",
                         "this-is-a-test",
@@ -78,7 +78,7 @@ class ConfigExpressionTest {
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("compose-this-is-a-test");
-        assertThat(expanded.members())
+        assertThat(expanded.getMembers())
                 .isEqualTo(Map.of(
                         "my.compose.config", "my.config.test", "my.config.test", "this-is-a-test"));
     }

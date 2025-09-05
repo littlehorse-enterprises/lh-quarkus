@@ -10,8 +10,13 @@ public class LHWorkflowDefinitionRecordable extends LHWorkflowRecordable {
 
     @RecordableConstructor
     public LHWorkflowDefinitionRecordable(
-            Class<?> beanClass, String name, String parent, String defaultTaskTimeout) {
-        super(beanClass, name, parent, defaultTaskTimeout);
+            Class<?> beanClass,
+            String name,
+            String parent,
+            String defaultTaskTimeout,
+            String defaultTaskRetries,
+            String updateType) {
+        super(beanClass, name, parent, defaultTaskTimeout, defaultTaskRetries, updateType);
     }
 
     @Override

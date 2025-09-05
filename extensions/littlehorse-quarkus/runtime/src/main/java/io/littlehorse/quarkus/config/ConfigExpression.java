@@ -64,7 +64,7 @@ public final class ConfigExpression {
         return Float.parseFloat(result);
     }
 
-    public Map<String, String> members() {
+    public Map<String, String> getMembers() {
         return members;
     }
 }

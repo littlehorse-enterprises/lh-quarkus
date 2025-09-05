@@ -27,6 +27,7 @@
 - [Reactive](examples/reactive): How to use `LittleHorseReactiveStub` object.
 - [Rest](examples/rest): How to run a wf run request from a rest endpoint.
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
+- [Child Workflow](examples/child-workflow): How to build parent and child workflows.
 
 ## Versioning
 

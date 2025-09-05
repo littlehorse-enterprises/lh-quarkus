@@ -16,8 +16,10 @@ public class LHWorkflowFromMethodRecordable extends LHWorkflowRecordable {
             String name,
             String beanMethodName,
             String parent,
-            String defaultTaskTimeout) {
-        super(beanClass, name, parent, defaultTaskTimeout);
+            String defaultTaskTimeout,
+            String defaultTaskRetries,
+            String updateType) {
+        super(beanClass, name, parent, defaultTaskTimeout, defaultTaskRetries, updateType);
         this.beanMethodName = beanMethodName;
     }
 
