@@ -39,4 +39,9 @@ public @interface LHWorkflow {
      * NO_UPDATES: Fail with the ALREADY_EXISTS response code.
      */
     String updateType() default "";
+
+    /**
+     * Delete all WfRun's X seconds (as int) after they terminate, regardless of status.
+     */
+    String retentionAfterTermination() default "";
 }

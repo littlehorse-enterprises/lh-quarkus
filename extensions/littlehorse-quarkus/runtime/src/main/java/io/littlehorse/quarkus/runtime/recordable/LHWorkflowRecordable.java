@@ -3,6 +3,7 @@ package io.littlehorse.quarkus.runtime.recordable;
 import io.littlehorse.quarkus.config.ConfigExpression;
 import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
+import io.littlehorse.sdk.common.proto.WorkflowRetentionPolicy;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
@@ -14,6 +15,7 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
     private final String updateType;
+    private final String retentionAfterTermination;
 
     public LHWorkflowRecordable(
             Class<?> beanClass,
@@ -21,12 +23,14 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
             String parent,
             String defaultTaskTimeout,
             String defaultTaskRetries,
-            String updateType) {
+            String updateType,
+            String retentionAfterTermination) {
         super(beanClass, name);
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
+        this.retentionAfterTermination = retentionAfterTermination;
     }
 
     public String getDefaultTaskRetries() {
@@ -39,6 +43,14 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
 
     public String getParent() {
         return parent;
+    }
+
+    public String getUpdateType() {
+        return updateType;
+    }
+
+    public String getRetentionAfterTermination() {
+        return retentionAfterTermination;
     }
 
     public abstract void buildWorkflowThread(WorkflowThread workflowThread);
@@ -71,8 +83,14 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
                     ConfigExpression.expand(defaultTaskRetries).asString().toUpperCase()));
         }
 
+        if (retentionAfterTermination != null) {
+            workflow.withRetentionPolicy(WorkflowRetentionPolicy.newBuilder()
+                    .setSecondsAfterWfTermination(
+                            ConfigExpression.expand(retentionAfterTermination).asLong())
+                    .build());
+        }
+
         //                workflow.setDefaultTaskExponentialBackoffPolicy();
-        //                workflow.withRetentionPolicy();
         //                workflow.withDefaultThreadRetentionPolicy();
 
         register.registerWorkflow(workflow);

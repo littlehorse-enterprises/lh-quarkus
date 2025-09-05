@@ -15,8 +15,16 @@ public class LHWorkflowDefinitionRecordable extends LHWorkflowRecordable {
             String parent,
             String defaultTaskTimeout,
             String defaultTaskRetries,
-            String updateType) {
-        super(beanClass, name, parent, defaultTaskTimeout, defaultTaskRetries, updateType);
+            String updateType,
+            String retentionAfterTermination) {
+        super(
+                beanClass,
+                name,
+                parent,
+                defaultTaskTimeout,
+                defaultTaskRetries,
+                updateType,
+                retentionAfterTermination);
     }
 
     @Override

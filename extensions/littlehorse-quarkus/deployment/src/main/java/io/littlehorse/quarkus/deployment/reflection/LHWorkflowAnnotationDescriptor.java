@@ -11,18 +11,21 @@ public final class LHWorkflowAnnotationDescriptor {
     private final String wfSpecName;
     private final String defaultTaskRetries;
     private final String updateType;
+    private final String retentionAfterTermination;
 
     private LHWorkflowAnnotationDescriptor(
             String wfSpecName,
             String parent,
             String defaultTaskTimeout,
             String defaultTaskRetries,
-            String updateType) {
+            String updateType,
+            String retentionAfterTermination) {
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.wfSpecName = wfSpecName;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
+        this.retentionAfterTermination = retentionAfterTermination;
     }
 
     private static final class AnnotationHelper {
@@ -52,7 +55,8 @@ public final class LHWorkflowAnnotationDescriptor {
                 annotationHelper.extractValue("parent"),
                 annotationHelper.extractValue("defaultTaskTimeout"),
                 annotationHelper.extractValue("defaultTaskRetries"),
-                annotationHelper.extractValue("updateType"));
+                annotationHelper.extractValue("updateType"),
+                annotationHelper.extractValue("retentionAfterTermination"));
     }
 
     public String getWfSpecName() {
@@ -73,5 +77,9 @@ public final class LHWorkflowAnnotationDescriptor {
 
     public String getUpdateType() {
         return updateType;
+    }
+
+    public String getRetentionAfterTermination() {
+        return retentionAfterTermination;
     }
 }

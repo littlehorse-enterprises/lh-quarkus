@@ -11,6 +11,7 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
     private final String updateType;
+    private final String retentionAfterTermination;
 
     public LHWorkflowDefinitionBuildItem(
             Class<?> beanClass,
@@ -18,13 +19,15 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
             String parent,
             String defaultTaskTimeout,
             String defaultTaskRetries,
-            String updateType) {
+            String updateType,
+            String retentionAfterTermination) {
         this.beanClass = beanClass;
         this.wfSpecName = wfSpecName;
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
+        this.retentionAfterTermination = retentionAfterTermination;
     }
 
     public LHWorkflowDefinitionBuildItem(
@@ -35,10 +38,15 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
         this.defaultTaskTimeout = descriptor.getDefaultTaskTimeout();
         this.defaultTaskRetries = descriptor.getDefaultTaskRetries();
         this.updateType = descriptor.getUpdateType();
+        this.retentionAfterTermination = descriptor.getRetentionAfterTermination();
     }
 
     public String getDefaultTaskRetries() {
         return defaultTaskRetries;
+    }
+
+    public String getRetentionAfterTermination() {
+        return retentionAfterTermination;
     }
 
     public String getParent() {
@@ -63,6 +71,12 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
 
     public LHWorkflowDefinitionRecordable toRecordable() {
         return new LHWorkflowDefinitionRecordable(
-                beanClass, wfSpecName, parent, defaultTaskTimeout, defaultTaskRetries, updateType);
+                beanClass,
+                wfSpecName,
+                parent,
+                defaultTaskTimeout,
+                defaultTaskRetries,
+                updateType,
+                retentionAfterTermination);
     }
 }

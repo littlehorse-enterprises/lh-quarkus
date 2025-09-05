@@ -67,4 +67,8 @@ public final class ConfigExpression {
     public Map<String, String> getMembers() {
         return members;
     }
+
+    public long asLong() {
+        return Long.parseLong(result);
+    }
 }

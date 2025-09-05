@@ -12,6 +12,7 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
     private final String updateType;
+    private final String retentionAfterTermination;
 
     public LHWorkflowFromMethodBuildItem(
             Class<?> beanClass,
@@ -20,7 +21,8 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
             String parent,
             String defaultTaskTimeout,
             String defaultTaskRetries,
-            String updateType) {
+            String updateType,
+            String retentionAfterTermination) {
         this.beanClass = beanClass;
         this.beanMethodName = beanMethodName;
         this.wfSpecName = wfSpecName;
@@ -28,6 +30,7 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
+        this.retentionAfterTermination = retentionAfterTermination;
     }
 
     public LHWorkflowFromMethodBuildItem(
@@ -39,6 +42,15 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
         this.defaultTaskTimeout = descriptor.getDefaultTaskTimeout();
         this.defaultTaskRetries = descriptor.getDefaultTaskRetries();
         this.updateType = descriptor.getUpdateType();
+        this.retentionAfterTermination = descriptor.getRetentionAfterTermination();
+    }
+
+    public String getUpdateType() {
+        return updateType;
+    }
+
+    public String getRetentionAfterTermination() {
+        return retentionAfterTermination;
     }
 
     public String getDefaultTaskRetries() {
@@ -73,6 +85,7 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
                 parent,
                 defaultTaskTimeout,
                 defaultTaskRetries,
-                updateType);
+                updateType,
+                retentionAfterTermination);
     }
 }
