@@ -13,5 +13,13 @@ public @interface LHWorkflow {
      */
     String value();
 
+    /**
+     * The name of the parent wfSpec.
+     */
     String parent() default "";
+
+    /**
+     * Sets the default timeout in seconds for all TaskRun's in this workflow.
+     */
+    String defaultTaskTimeout() default "";
 }

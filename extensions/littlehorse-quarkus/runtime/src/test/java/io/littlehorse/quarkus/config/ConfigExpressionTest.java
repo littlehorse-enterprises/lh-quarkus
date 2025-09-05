@@ -3,8 +3,6 @@ package io.littlehorse.quarkus.config;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.littlehorse.quarkus.config.ConfigExpression.ConfigExpressionResult;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -14,7 +12,7 @@ class ConfigExpressionTest {
     @Test
     void shouldReadConfig() {
         String expression = "my-value";
-        ConfigExpressionResult expanded = ConfigExpression.expand(expression);
+        ConfigExpression expanded = ConfigExpression.expand(expression);
 
         assertThat(expanded.isExpression()).isFalse();
         assertThat(expanded.asString()).isEqualTo("my-value");
@@ -31,7 +29,7 @@ class ConfigExpressionTest {
     @Test
     void shouldExpandConfig() {
         String expression = "${my.config.test}";
-        ConfigExpressionResult expanded = ConfigExpression.expand(expression);
+        ConfigExpression expanded = ConfigExpression.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("this-is-a-test");
@@ -41,7 +39,7 @@ class ConfigExpressionTest {
     @Test
     void shouldExpandDefaultConfig() {
         String expression = "${not.a.config:default-value}";
-        ConfigExpressionResult expanded = ConfigExpression.expand(expression);
+        ConfigExpression expanded = ConfigExpression.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("default-value");
@@ -51,7 +49,7 @@ class ConfigExpressionTest {
     @Test
     void shouldExpandConcatenatedConfig() {
         String expression = "concatenation-${my.config.test}";
-        ConfigExpressionResult expanded = ConfigExpression.expand(expression);
+        ConfigExpression expanded = ConfigExpression.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("concatenation-this-is-a-test");
@@ -61,7 +59,7 @@ class ConfigExpressionTest {
     @Test
     void shouldExpandMultipleConfig() {
         String expression = "${my.config.test}-${my.second.config.test}";
-        ConfigExpressionResult expanded = ConfigExpression.expand(expression);
+        ConfigExpression expanded = ConfigExpression.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("this-is-a-test-this-is-a-second-test");
@@ -76,7 +74,7 @@ class ConfigExpressionTest {
     @Test
     void shouldComposeConfig() {
         String expression = "compose-${${my.compose.config}}";
-        ConfigExpressionResult expanded = ConfigExpression.expand(expression);
+        ConfigExpression expanded = ConfigExpression.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
         assertThat(expanded.asString()).isEqualTo("compose-this-is-a-test");

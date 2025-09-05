@@ -50,10 +50,12 @@ public class LHExternalBeans {
         return config.getFutureStub();
     }
 
-    record ServerConfig(String key, Object value) {
+    private static final class ServerConfig {
         private static final String CONFIG_PREFIX_REGEX = "^(LHC_|LHW_)[A-Z_]+";
+        private final String key;
+        private final Object value;
 
-        ServerConfig(String key, Object value) {
+        private ServerConfig(String key, Object value) {
             this.value = value;
             this.key = key == null ? null : key.strip().toUpperCase().replaceAll("[.-]", "_");
         }
@@ -63,6 +65,14 @@ public class LHExternalBeans {
             if (key == null) return false;
             if (!key.matches(CONFIG_PREFIX_REGEX)) return false;
             return LHConfig.configNames().contains(key);
+        }
+
+        public String key() {
+            return key;
+        }
+
+        public Object value() {
+            return value;
         }
     }
 }

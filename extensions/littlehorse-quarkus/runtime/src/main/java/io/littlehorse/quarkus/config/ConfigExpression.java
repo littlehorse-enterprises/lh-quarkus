@@ -10,32 +10,22 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class ConfigExpression {
-    private final String expression;
-    private final SmallRyeConfig config;
-    private final Expression compiledExpression;
+public final class ConfigExpression {
 
-    private ConfigExpression(String expression) {
-        this.config = ConfigProvider.getConfig().unwrap(SmallRyeConfig.class);
-        this.expression = expression;
-        this.compiledExpression = Expression.compile(
+    private final String result;
+    private final Map<String, String> members;
+
+    private ConfigExpression(String result, Map<String, String> members) {
+        this.result = result;
+        this.members = members;
+    }
+
+    public static ConfigExpression expand(String expression) {
+        SmallRyeConfig config = ConfigProvider.getConfig().unwrap(SmallRyeConfig.class);
+        Expression compiledExpression = Expression.compile(
                 expression, Expression.Flag.LENIENT_SYNTAX, Expression.Flag.NO_TRIM);
-    }
 
-    public static ConfigExpressionResult expand(String expression) {
-        ConfigExpression configExpression = new ConfigExpression(expression);
-        return configExpression.expand();
-    }
-
-    public boolean hasConfig() {
-        if (this.expression == null) {
-            return false;
-        }
-        return expression.matches(".*\\$\\{.*}.*");
-    }
-
-    public ConfigExpressionResult expand() {
-        if (hasConfig()) {
+        if (expression.matches(".*\\$\\{.*}.*")) {
             Map<String, String> configs = new HashMap<>();
             String result = compiledExpression.evaluate((resolveContext, stringBuilder) -> {
                 Optional<String> resolve =
@@ -52,35 +42,29 @@ public class ConfigExpression {
                 }
             });
 
-            return new ConfigExpressionResult(result, Map.copyOf(configs));
+            return new ConfigExpression(result, Map.copyOf(configs));
         }
 
-        return new ConfigExpressionResult(expression, Map.of());
+        return new ConfigExpression(expression, Map.of());
     }
 
-    public static final class ConfigExpressionResult {
-        private final String result;
-        private final Map<String, String> members;
+    public boolean isExpression() {
+        return members != null && !members.isEmpty();
+    }
 
-        private ConfigExpressionResult(String result, Map<String, String> members) {
-            this.result = result;
-            this.members = members;
-        }
+    public String asString() {
+        return result;
+    }
 
-        public boolean isExpression() {
-            return members != null && !members.isEmpty();
-        }
+    public int asInt() {
+        return Integer.parseInt(result);
+    }
 
-        public String asString() {
-            return result;
-        }
+    public float asFloat() {
+        return Float.parseFloat(result);
+    }
 
-        public int asInt() {
-            return Integer.parseInt(result);
-        }
-
-        public Map<String, String> members() {
-            return members;
-        }
+    public Map<String, String> members() {
+        return members;
     }
 }
