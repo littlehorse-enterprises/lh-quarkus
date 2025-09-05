@@ -1,5 +1,6 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
+import io.littlehorse.quarkus.config.ConfigExpression;
 import io.littlehorse.quarkus.runtime.register.LHUserTaskRegister;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
@@ -17,6 +18,6 @@ public class LHUserTaskRecordable extends LHRecordable {
 
         LHUserTaskRegister register =
                 CDI.current().select(LHUserTaskRegister.class).get();
-        register.registerUserTask(getBean(), getName());
+        register.registerUserTask(getBean(), ConfigExpression.expand(getName()).asString());
     }
 }

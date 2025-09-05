@@ -35,7 +35,8 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
         LHWorkflowRegister register =
                 CDI.current().select(LHWorkflowRegister.class).get();
 
-        Workflow workflow = Workflow.newWorkflow(getName(), this::buildWorkflowThread);
+        Workflow workflow = Workflow.newWorkflow(
+                ConfigExpression.expand(getName()).asString(), this::buildWorkflowThread);
 
         if (parent != null) {
             workflow.setParent(ConfigExpression.expand(parent).asString());
