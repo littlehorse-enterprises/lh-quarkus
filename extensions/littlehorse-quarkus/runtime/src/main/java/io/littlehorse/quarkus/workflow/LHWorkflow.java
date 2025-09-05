@@ -43,5 +43,10 @@ public @interface LHWorkflow {
     /**
      * Delete all WfRun's X seconds (as int) after they terminate, regardless of status.
      */
-    String retentionAfterTermination() default "";
+    String retention() default "";
+
+    /**
+     * Delete associated ThreadRun's X seconds (as int) after they terminate, regardless of status.
+     */
+    String defaultThreadRetention() default "";
 }

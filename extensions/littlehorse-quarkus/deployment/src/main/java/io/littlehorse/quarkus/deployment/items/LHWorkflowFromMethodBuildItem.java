@@ -12,7 +12,8 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
     private final String updateType;
-    private final String retentionAfterTermination;
+    private final String retention;
+    private final String defaultThreadRetention;
 
     public LHWorkflowFromMethodBuildItem(
             Class<?> beanClass,
@@ -22,7 +23,8 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
             String defaultTaskTimeout,
             String defaultTaskRetries,
             String updateType,
-            String retentionAfterTermination) {
+            String retention,
+            String defaultThreadRetention) {
         this.beanClass = beanClass;
         this.beanMethodName = beanMethodName;
         this.wfSpecName = wfSpecName;
@@ -30,7 +32,8 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
-        this.retentionAfterTermination = retentionAfterTermination;
+        this.retention = retention;
+        this.defaultThreadRetention = defaultThreadRetention;
     }
 
     public LHWorkflowFromMethodBuildItem(
@@ -42,15 +45,16 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
         this.defaultTaskTimeout = descriptor.getDefaultTaskTimeout();
         this.defaultTaskRetries = descriptor.getDefaultTaskRetries();
         this.updateType = descriptor.getUpdateType();
-        this.retentionAfterTermination = descriptor.getRetentionAfterTermination();
+        this.retention = descriptor.getRetention();
+        this.defaultThreadRetention = descriptor.getDefaultThreadRetention();
     }
 
     public String getUpdateType() {
         return updateType;
     }
 
-    public String getRetentionAfterTermination() {
-        return retentionAfterTermination;
+    public String getRetention() {
+        return retention;
     }
 
     public String getDefaultTaskRetries() {
@@ -77,6 +81,10 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
         return defaultTaskTimeout;
     }
 
+    public String getDefaultThreadRetention() {
+        return defaultThreadRetention;
+    }
+
     public LHWorkflowFromMethodRecordable toRecordable() {
         return new LHWorkflowFromMethodRecordable(
                 beanClass,
@@ -86,6 +94,7 @@ public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
                 defaultTaskTimeout,
                 defaultTaskRetries,
                 updateType,
-                retentionAfterTermination);
+                retention,
+                defaultThreadRetention);
     }
 }

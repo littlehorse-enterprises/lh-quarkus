@@ -11,7 +11,8 @@ public final class LHWorkflowAnnotationDescriptor {
     private final String wfSpecName;
     private final String defaultTaskRetries;
     private final String updateType;
-    private final String retentionAfterTermination;
+    private final String retention;
+    private final String defaultThreadRetention;
 
     private LHWorkflowAnnotationDescriptor(
             String wfSpecName,
@@ -19,13 +20,15 @@ public final class LHWorkflowAnnotationDescriptor {
             String defaultTaskTimeout,
             String defaultTaskRetries,
             String updateType,
-            String retentionAfterTermination) {
+            String retention,
+            String defaultThreadRetention) {
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.wfSpecName = wfSpecName;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
-        this.retentionAfterTermination = retentionAfterTermination;
+        this.retention = retention;
+        this.defaultThreadRetention = defaultThreadRetention;
     }
 
     private static final class AnnotationHelper {
@@ -56,7 +59,8 @@ public final class LHWorkflowAnnotationDescriptor {
                 annotationHelper.extractValue("defaultTaskTimeout"),
                 annotationHelper.extractValue("defaultTaskRetries"),
                 annotationHelper.extractValue("updateType"),
-                annotationHelper.extractValue("retentionAfterTermination"));
+                annotationHelper.extractValue("retention"),
+                annotationHelper.extractValue("defaultThreadRetention"));
     }
 
     public String getWfSpecName() {
@@ -79,7 +83,11 @@ public final class LHWorkflowAnnotationDescriptor {
         return updateType;
     }
 
-    public String getRetentionAfterTermination() {
-        return retentionAfterTermination;
+    public String getRetention() {
+        return retention;
+    }
+
+    public String getDefaultThreadRetention() {
+        return defaultThreadRetention;
     }
 }

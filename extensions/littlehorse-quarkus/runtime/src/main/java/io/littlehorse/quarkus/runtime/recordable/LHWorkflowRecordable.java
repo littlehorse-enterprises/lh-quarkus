@@ -3,6 +3,7 @@ package io.littlehorse.quarkus.runtime.recordable;
 import io.littlehorse.quarkus.config.ConfigExpression;
 import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
+import io.littlehorse.sdk.common.proto.ThreadRetentionPolicy;
 import io.littlehorse.sdk.common.proto.WorkflowRetentionPolicy;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
@@ -15,7 +16,8 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
     private final String updateType;
-    private final String retentionAfterTermination;
+    private final String retention;
+    private final String defaultThreadRetention;
 
     public LHWorkflowRecordable(
             Class<?> beanClass,
@@ -24,13 +26,15 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
             String defaultTaskTimeout,
             String defaultTaskRetries,
             String updateType,
-            String retentionAfterTermination) {
+            String retention,
+            String defaultThreadRetention) {
         super(beanClass, name);
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
-        this.retentionAfterTermination = retentionAfterTermination;
+        this.retention = retention;
+        this.defaultThreadRetention = defaultThreadRetention;
     }
 
     public String getDefaultTaskRetries() {
@@ -49,8 +53,12 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
         return updateType;
     }
 
-    public String getRetentionAfterTermination() {
-        return retentionAfterTermination;
+    public String getRetention() {
+        return retention;
+    }
+
+    public String getDefaultThreadRetention() {
+        return defaultThreadRetention;
     }
 
     public abstract void buildWorkflowThread(WorkflowThread workflowThread);
@@ -83,15 +91,21 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
                     ConfigExpression.expand(defaultTaskRetries).asString().toUpperCase()));
         }
 
-        if (retentionAfterTermination != null) {
+        if (retention != null) {
             workflow.withRetentionPolicy(WorkflowRetentionPolicy.newBuilder()
                     .setSecondsAfterWfTermination(
-                            ConfigExpression.expand(retentionAfterTermination).asLong())
+                            ConfigExpression.expand(retention).asLong())
                     .build());
         }
 
-        //                workflow.setDefaultTaskExponentialBackoffPolicy();
-        //                workflow.withDefaultThreadRetentionPolicy();
+        if (defaultThreadRetention != null) {
+            workflow.withDefaultThreadRetentionPolicy(ThreadRetentionPolicy.newBuilder()
+                    .setSecondsAfterThreadTermination(
+                            ConfigExpression.expand(defaultThreadRetention).asLong())
+                    .build());
+        }
+
+        //                        workflow.setDefaultTaskExponentialBackoffPolicy();
 
         register.registerWorkflow(workflow);
     }

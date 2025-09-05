@@ -11,7 +11,8 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
     private final String updateType;
-    private final String retentionAfterTermination;
+    private final String retention;
+    private final String defaultThreadRetention;
 
     public LHWorkflowDefinitionBuildItem(
             Class<?> beanClass,
@@ -20,14 +21,16 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
             String defaultTaskTimeout,
             String defaultTaskRetries,
             String updateType,
-            String retentionAfterTermination) {
+            String retention,
+            String defaultThreadRetention) {
         this.beanClass = beanClass;
         this.wfSpecName = wfSpecName;
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
         this.updateType = updateType;
-        this.retentionAfterTermination = retentionAfterTermination;
+        this.retention = retention;
+        this.defaultThreadRetention = defaultThreadRetention;
     }
 
     public LHWorkflowDefinitionBuildItem(
@@ -38,15 +41,16 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
         this.defaultTaskTimeout = descriptor.getDefaultTaskTimeout();
         this.defaultTaskRetries = descriptor.getDefaultTaskRetries();
         this.updateType = descriptor.getUpdateType();
-        this.retentionAfterTermination = descriptor.getRetentionAfterTermination();
+        this.retention = descriptor.getRetention();
+        this.defaultThreadRetention = descriptor.getDefaultThreadRetention();
     }
 
     public String getDefaultTaskRetries() {
         return defaultTaskRetries;
     }
 
-    public String getRetentionAfterTermination() {
-        return retentionAfterTermination;
+    public String getRetention() {
+        return retention;
     }
 
     public String getParent() {
@@ -69,6 +73,10 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
         return updateType;
     }
 
+    public String getDefaultThreadRetention() {
+        return defaultThreadRetention;
+    }
+
     public LHWorkflowDefinitionRecordable toRecordable() {
         return new LHWorkflowDefinitionRecordable(
                 beanClass,
@@ -77,6 +85,7 @@ public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
                 defaultTaskTimeout,
                 defaultTaskRetries,
                 updateType,
-                retentionAfterTermination);
+                retention,
+                defaultThreadRetention);
     }
 }
