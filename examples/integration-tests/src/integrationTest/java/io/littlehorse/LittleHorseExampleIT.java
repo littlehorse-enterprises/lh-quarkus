@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 
 import io.littlehorse.sdk.common.LHLibUtil;
+import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.SearchTaskDefRequest;
@@ -15,9 +16,11 @@ import io.littlehorse.sdk.common.proto.SearchUserTaskDefRequest;
 import io.littlehorse.sdk.common.proto.SearchWfSpecRequest;
 import io.littlehorse.sdk.common.proto.TaskDefId;
 import io.littlehorse.sdk.common.proto.TaskDefIdList;
+import io.littlehorse.sdk.common.proto.TaskNode;
 import io.littlehorse.sdk.common.proto.UserTaskDefId;
 import io.littlehorse.sdk.common.proto.UserTaskDefIdList;
 import io.littlehorse.sdk.common.proto.WfRun;
+import io.littlehorse.sdk.common.proto.WfSpec;
 import io.littlehorse.sdk.common.proto.WfSpecId;
 import io.littlehorse.sdk.common.proto.WfSpecIdList;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -44,13 +47,28 @@ class LittleHorseExampleIT {
                 .untilAsserted(() -> {
                     WfSpecIdList results = blockingStub.searchWfSpec(
                             SearchWfSpecRequest.newBuilder().build());
-                    WfSpecIdList expectedResult = WfSpecIdList.newBuilder()
-                            .addResults(
-                                    WfSpecId.newBuilder().setName("greetings").build())
-                            .build();
-
+                    WfSpecId wfSpecId =
+                            WfSpecId.newBuilder().setName("greetings").build();
+                    WfSpecIdList expectedResult =
+                            WfSpecIdList.newBuilder().addResults(wfSpecId).build();
                     assertThat(results.getResultsCount()).isEqualTo(1);
                     assertThat(results).isEqualTo(expectedResult);
+
+                    WfSpec wfSpec = blockingStub.getWfSpec(wfSpecId);
+                    wfSpec.getThreadSpecsOrThrow("entrypoint")
+                            .getNodesMap()
+                            .values()
+                            .forEach(node -> {
+                                if (node.hasTask()) {
+                                    TaskNode task = node.getTask();
+                                    assertThat(task.getExponentialBackoff())
+                                            .isEqualTo(ExponentialBackoffRetryPolicy.newBuilder()
+                                                    .setMultiplier(2.2f)
+                                                    .setMaxDelayMs(5000)
+                                                    .setBaseIntervalMs(4000)
+                                                    .build());
+                                }
+                            });
                 });
     }
 

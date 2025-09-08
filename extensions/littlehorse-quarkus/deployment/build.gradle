@@ -3,6 +3,9 @@ dependencies {
     implementation project(":littlehorse-quarkus-runtime")
     implementation "io.quarkus:quarkus-grpc-common-deployment"
     implementation "io.quarkus:quarkus-smallrye-health-spi"
+
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
 }
 
 publishing {

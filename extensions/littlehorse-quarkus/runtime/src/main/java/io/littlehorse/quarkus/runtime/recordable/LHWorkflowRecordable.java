@@ -3,6 +3,7 @@ package io.littlehorse.quarkus.runtime.recordable;
 import io.littlehorse.quarkus.config.ConfigExpression;
 import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
+import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
 import io.littlehorse.sdk.common.proto.ThreadRetentionPolicy;
 import io.littlehorse.sdk.common.proto.WorkflowRetentionPolicy;
 import io.littlehorse.sdk.wfsdk.Workflow;
@@ -18,6 +19,7 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     private final String updateType;
     private final String retention;
     private final String defaultThreadRetention;
+    private final LHExponentialBackoffRetryRecordable retryRecordable;
 
     public LHWorkflowRecordable(
             Class<?> beanClass,
@@ -27,7 +29,8 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
             String defaultTaskRetries,
             String updateType,
             String retention,
-            String defaultThreadRetention) {
+            String defaultThreadRetention,
+            LHExponentialBackoffRetryRecordable retryRecordable) {
         super(beanClass, name);
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
@@ -35,6 +38,7 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
         this.updateType = updateType;
         this.retention = retention;
         this.defaultThreadRetention = defaultThreadRetention;
+        this.retryRecordable = retryRecordable;
     }
 
     public String getDefaultTaskRetries() {
@@ -59,6 +63,10 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
 
     public String getDefaultThreadRetention() {
         return defaultThreadRetention;
+    }
+
+    public LHExponentialBackoffRetryRecordable getRetryRecordable() {
+        return retryRecordable;
     }
 
     public abstract void buildWorkflowThread(WorkflowThread workflowThread);
@@ -105,7 +113,28 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
                     .build());
         }
 
-        //                        workflow.setDefaultTaskExponentialBackoffPolicy();
+        if (retryRecordable != null) {
+            ExponentialBackoffRetryPolicy.Builder backoffRetryBuilder =
+                    ExponentialBackoffRetryPolicy.newBuilder();
+
+            if (retryRecordable.getBaseIntervalMs() != null) {
+                backoffRetryBuilder.setBaseIntervalMs(
+                        ConfigExpression.expand(retryRecordable.getBaseIntervalMs())
+                                .asInt());
+            }
+
+            if (retryRecordable.getMultiplier() != null) {
+                backoffRetryBuilder.setMultiplier(
+                        ConfigExpression.expand(retryRecordable.getMultiplier()).asFloat());
+            }
+
+            if (retryRecordable.getMaxDelayMs() != null) {
+                backoffRetryBuilder.setMaxDelayMs(
+                        ConfigExpression.expand(retryRecordable.getMaxDelayMs()).asLong());
+            }
+
+            workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
+        }
 
         register.registerWorkflow(workflow);
     }

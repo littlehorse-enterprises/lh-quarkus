@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LHWorkflow {
+
     /**
      * Workflow name (WfSpec).
      */
@@ -49,4 +50,12 @@ public @interface LHWorkflow {
      * Delete associated ThreadRun's X seconds (as int) after they terminate, regardless of status.
      */
     String defaultThreadRetention() default "";
+
+    /**
+     * Tells the Workflow to configure (by default) the specified ExponentialBackoffRetryPolicy as the retry policy.
+     * Can be overridden by setting the retry policy on the WorkflowThread or TaskNodeOutput level.
+     * The Exponential Backoff Retry Policy to configure by default for all Task Nodes.
+     */
+    LHExponentialBackoffRetry defaultTaskExponentialBackoffRetry() default
+            @LHExponentialBackoffRetry;
 }

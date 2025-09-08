@@ -2,6 +2,7 @@ package io.littlehorse.workflows;
 
 import static io.littlehorse.tasks.GreetingsTask.GREETINGS_TASK;
 
+import io.littlehorse.quarkus.workflow.LHExponentialBackoffRetry;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
 import io.littlehorse.sdk.wfsdk.TaskNodeOutput;
@@ -10,7 +11,13 @@ import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-@LHWorkflow(GreetingsWorkflow.GREETINGS_WORKFLOW)
+@LHWorkflow(
+        value = GreetingsWorkflow.GREETINGS_WORKFLOW,
+        defaultTaskExponentialBackoffRetry =
+                @LHExponentialBackoffRetry(
+                        baseIntervalMs = "${retry.base.interval.ms}",
+                        maxDelayMs = "${retry.max.delay.ms}",
+                        multiplier = "${retry.multiplier}"))
 public class GreetingsWorkflow implements LHWorkflowDefinition {
 
     public static final String NAME_VARIABLE = "name";

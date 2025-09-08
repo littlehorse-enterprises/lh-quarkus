@@ -20,7 +20,8 @@ public class LHWorkflowFromMethodRecordable extends LHWorkflowRecordable {
             String defaultTaskRetries,
             String updateType,
             String retention,
-            String defaultThreadRetention) {
+            String defaultThreadRetention,
+            LHExponentialBackoffRetryRecordable retryRecordable) {
         super(
                 beanClass,
                 name,
@@ -29,7 +30,8 @@ public class LHWorkflowFromMethodRecordable extends LHWorkflowRecordable {
                 defaultTaskRetries,
                 updateType,
                 retention,
-                defaultThreadRetention);
+                defaultThreadRetention,
+                retryRecordable);
         this.beanMethodName = beanMethodName;
     }
 

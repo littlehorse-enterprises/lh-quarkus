@@ -4,7 +4,8 @@ import io.littlehorse.quarkus.deployment.items.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHWorkflowDefinitionBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHWorkflowFromMethodBuildItem;
-import io.littlehorse.quarkus.deployment.reflection.LHWorkflowAnnotationDescriptor;
+import io.littlehorse.quarkus.deployment.reflection.LHWorkflowDescriptor;
+import io.littlehorse.quarkus.deployment.reflection.OptionalAnnotation;
 import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
@@ -73,7 +74,7 @@ class LHServiceProcessor {
                     Class<?> beanClass = loadClass(beanClassName);
 
                     return new LHWorkflowDefinitionBuildItem(
-                            beanClass, LHWorkflowAnnotationDescriptor.describe(annotated));
+                            beanClass, new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
                 })
                 .forEach(producer::produce);
     }
@@ -89,11 +90,10 @@ class LHServiceProcessor {
                     String beanClassName = methodInfo.declaringClass().toString();
                     Class<?> beanClass = loadClass(beanClassName);
                     String beanMethodName = methodInfo.name();
-
                     return new LHWorkflowFromMethodBuildItem(
                             beanClass,
                             beanMethodName,
-                            LHWorkflowAnnotationDescriptor.describe(annotated));
+                            new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
                 })
                 .forEach(producer::produce);
     }
