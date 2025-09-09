@@ -16,7 +16,7 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
     @Override
     public Map<String, String> start() {
         cluster = LittleHorseCluster.newBuilder()
-                .withKafkaImage("apache/kafka:4.0.0")
+                .withKafkaImage("apache/kafka:" + System.getProperty("kafkaVersion", "latest"))
                 .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:"
                         + System.getProperty("lhVersion", "latest"))
                 .build();

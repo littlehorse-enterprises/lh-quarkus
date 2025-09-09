@@ -85,6 +85,7 @@ configure(lhExamples.split(',').collect { project(":example-$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
     testNative {
@@ -93,6 +94,7 @@ configure(lhExamples.split(',').collect { project(":example-$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
     test {
@@ -101,5 +103,6 @@ configure(lhExamples.split(',').collect { project(":example-$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 }
