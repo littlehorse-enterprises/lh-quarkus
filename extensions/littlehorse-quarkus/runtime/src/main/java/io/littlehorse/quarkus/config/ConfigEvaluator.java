@@ -10,18 +10,49 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public final class ConfigExpression {
+public final class ConfigEvaluator {
 
-    private final String result;
-    private final Map<String, String> members;
+    private final SmallRyeConfig config;
 
-    private ConfigExpression(String result, Map<String, String> members) {
-        this.result = result;
-        this.members = members;
+    public ConfigEvaluator() {
+        this.config = ConfigProvider.getConfig().unwrap(SmallRyeConfig.class);
     }
 
-    public static ConfigExpression expand(String expression) {
-        SmallRyeConfig config = ConfigProvider.getConfig().unwrap(SmallRyeConfig.class);
+    public static class ConfigExpression {
+        private final String result;
+        private final Map<String, String> members;
+
+        private ConfigExpression(String result, Map<String, String> members) {
+            this.result = result;
+            this.members = members;
+        }
+
+        public boolean isExpression() {
+            return members != null && !members.isEmpty();
+        }
+
+        public String asString() {
+            return result;
+        }
+
+        public int asInt() {
+            return Integer.parseInt(result);
+        }
+
+        public float asFloat() {
+            return Float.parseFloat(result);
+        }
+
+        public Map<String, String> getMembers() {
+            return members;
+        }
+
+        public long asLong() {
+            return Long.parseLong(result);
+        }
+    }
+
+    public ConfigExpression expand(String expression) {
         Expression compiledExpression = Expression.compile(
                 expression, Expression.Flag.LENIENT_SYNTAX, Expression.Flag.NO_TRIM);
 
@@ -46,29 +77,5 @@ public final class ConfigExpression {
         }
 
         return new ConfigExpression(expression, Map.of());
-    }
-
-    public boolean isExpression() {
-        return members != null && !members.isEmpty();
-    }
-
-    public String asString() {
-        return result;
-    }
-
-    public int asInt() {
-        return Integer.parseInt(result);
-    }
-
-    public float asFloat() {
-        return Float.parseFloat(result);
-    }
-
-    public Map<String, String> getMembers() {
-        return members;
-    }
-
-    public long asLong() {
-        return Long.parseLong(result);
     }
 }

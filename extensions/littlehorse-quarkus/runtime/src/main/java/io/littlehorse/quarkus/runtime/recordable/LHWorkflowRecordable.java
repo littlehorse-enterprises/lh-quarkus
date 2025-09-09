@@ -1,6 +1,6 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
-import io.littlehorse.quarkus.config.ConfigExpression;
+import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
 import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
@@ -74,42 +74,43 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     public void registerWorkflow() {
         if (!exists()) return;
 
+        ConfigEvaluator configEvaluator = new ConfigEvaluator();
         LHWorkflowRegister register =
                 CDI.current().select(LHWorkflowRegister.class).get();
 
         Workflow workflow = Workflow.newWorkflow(
-                ConfigExpression.expand(getName()).asString(), this::buildWorkflowThread);
+                configEvaluator.expand(getName()).asString(), this::buildWorkflowThread);
 
         if (parent != null) {
-            workflow.setParent(ConfigExpression.expand(parent).asString());
+            workflow.setParent(configEvaluator.expand(parent).asString());
         }
 
         if (defaultTaskTimeout != null) {
             workflow.setDefaultTaskTimeout(
-                    ConfigExpression.expand(defaultTaskTimeout).asInt());
+                    configEvaluator.expand(defaultTaskTimeout).asInt());
         }
 
         if (defaultTaskRetries != null) {
             workflow.setDefaultTaskRetries(
-                    ConfigExpression.expand(defaultTaskRetries).asInt());
+                    configEvaluator.expand(defaultTaskRetries).asInt());
         }
 
         if (updateType != null) {
             workflow.withUpdateType(AllowedUpdateType.valueOf(
-                    ConfigExpression.expand(defaultTaskRetries).asString().toUpperCase()));
+                    configEvaluator.expand(defaultTaskRetries).asString().toUpperCase()));
         }
 
         if (retention != null) {
             workflow.withRetentionPolicy(WorkflowRetentionPolicy.newBuilder()
                     .setSecondsAfterWfTermination(
-                            ConfigExpression.expand(retention).asLong())
+                            configEvaluator.expand(retention).asLong())
                     .build());
         }
 
         if (defaultThreadRetention != null) {
             workflow.withDefaultThreadRetentionPolicy(ThreadRetentionPolicy.newBuilder()
                     .setSecondsAfterThreadTermination(
-                            ConfigExpression.expand(defaultThreadRetention).asLong())
+                            configEvaluator.expand(defaultThreadRetention).asLong())
                     .build());
         }
 
@@ -118,19 +119,19 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
                     ExponentialBackoffRetryPolicy.newBuilder();
 
             if (retryRecordable.getBaseIntervalMs() != null) {
-                backoffRetryBuilder.setBaseIntervalMs(
-                        ConfigExpression.expand(retryRecordable.getBaseIntervalMs())
-                                .asInt());
+                backoffRetryBuilder.setBaseIntervalMs(configEvaluator
+                        .expand(retryRecordable.getBaseIntervalMs())
+                        .asInt());
             }
 
             if (retryRecordable.getMultiplier() != null) {
                 backoffRetryBuilder.setMultiplier(
-                        ConfigExpression.expand(retryRecordable.getMultiplier()).asFloat());
+                        configEvaluator.expand(retryRecordable.getMultiplier()).asFloat());
             }
 
             if (retryRecordable.getMaxDelayMs() != null) {
                 backoffRetryBuilder.setMaxDelayMs(
-                        ConfigExpression.expand(retryRecordable.getMaxDelayMs()).asLong());
+                        configEvaluator.expand(retryRecordable.getMaxDelayMs()).asLong());
             }
 
             workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
