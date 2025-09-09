@@ -22,6 +22,7 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
   * [Missing LHTaskMethod Annotation](#missing-lhtaskmethod-annotation)
 * [Configurations](#configurations)
   * [Passing Configurations](#passing-configurations)
+  * [Expressions Expansion](#expressions-expansion)
   * [LittleHorse Client Configurations](#littlehorse-client-configurations)
     * [Client](#client)
     * [Task Worker](#task-worker)
@@ -187,7 +188,7 @@ public class WorkflowProducer {
 
 As you can see in the example above, you can add methods as workflows, this could be useful in some cases.
 
-A final example with both task and workflow:
+A class example with both task and workflow:
 
 ```java
 @LHTask
@@ -207,6 +208,33 @@ public class HelloWorldWorker {
 
 More about workflows at: [Your First WfSpec](https://littlehorse.io/docs/getting-started/your-first-wfspec)
 and [Workflows](https://littlehorse.io/docs/server/concepts/workflows).
+
+It is also possible to configure the workflow. In the next example we add a **parent wf**:
+
+```java
+@LHTask
+public class ChildWorkflow {
+    public static final String GREETINGS_TASK = "greetings";
+    public static final String NAME_VARIABLE = "name";
+    public static final String PARENT_WF = "parent-wf";
+    public static final String CHILD_WF = "child-wf";
+
+    @LHWorkflow(PARENT_WF)
+    public void parent(WorkflowThread wf) {
+        wf.execute(GREETINGS_TASK, PARENT_WF, wf.declareStr(NAME_VARIABLE).asPublic());
+    }
+
+    @LHWorkflow(value = CHILD_WF, parent = PARENT_WF)
+    public void child(WorkflowThread wf) {
+        wf.execute(GREETINGS_TASK, CHILD_WF, wf.declareStr(NAME_VARIABLE).asInherited());
+    }
+
+    @LHTaskMethod(GREETINGS_TASK)
+    public void greetings(String wfName, String name) {
+        System.out.printf("Hello %s from %s %n", name, wfName);
+    }
+}
+```
 
 ## Registering User Tasks
 
@@ -477,6 +505,49 @@ Some examples could be:
 * **System Properties:** Adding a `-D` property (ex: `-Dlhc.api.port=2023`) to the command line when running the
   artifact.
 * **Property File:** Adding a property entry (ex: `lhc.api.port=2023`) into the `application.properties` file.
+
+## Expressions Expansion
+
+This extension supports [Expressions Expansion](https://smallrye.io/smallrye-config/Main/config/expressions/)
+for configurations.
+
+An expression string is a mix of plain strings and expression segments, which are wrapped by the sequence: `${ … }`.
+Additionally, the Expression Expansion engine supports the following segments:
+
+`${expression:value}` - Provides a default value after the `:` if the expansion doesn’t find a value.
+`${my.prop${compose}}` - Composed expressions. Inner expressions are resolved first.
+`${my.prop}${my.prop}` - Multiple expressions.
+
+Examples:
+
+```java
+@LHWorkflow(
+        value = "${my.wf.name}",
+        defaultTaskExponentialBackoffRetry =
+                @LHExponentialBackoffRetry(
+                        baseIntervalMs = "${retry.base.interval.ms}",
+                        maxDelayMs = "${retry.max.delay.ms}",
+                        multiplier = "${retry.multiplier}"))
+public class GreetingsWorkflow implements LHWorkflowDefinition {
+
+    @ConfigProperty(name = "my.task.name")
+    String taskPrintName;
+
+    @Override
+    public void define(WorkflowThread wf) {
+        wf.execute(taskPrintName, wf.declareStr("name"));
+    }
+}
+
+@LHTask
+public class PrintTask {
+
+    @LHTaskMethod("${my.task.name}")
+    public void print(String name) {
+        System.out.println("Hello " + name);
+    }
+}
+```
 
 ## LittleHorse Client Configurations
 

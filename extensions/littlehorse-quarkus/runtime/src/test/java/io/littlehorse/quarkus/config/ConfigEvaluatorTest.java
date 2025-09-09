@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-class ConfigExpressionTest {
+class ConfigEvaluatorTest {
     @Test
     void shouldReadConfig() {
         String expression = "my-value";
