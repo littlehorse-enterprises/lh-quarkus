@@ -19,7 +19,7 @@ allprojects {
     apply plugin: "idea"
 
     group = "io.littlehorse"
-    version = "${lhVersion}"
+    version = "${extensionVersion}"
 
     test {
         testLogging {
