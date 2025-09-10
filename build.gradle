@@ -55,7 +55,7 @@ allprojects {
     }
 }
 
-configure(lhExtensions.split(',').collectMany { ["littlehorse-$it-runtime", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
+configure(lhExtensions.split(',').collectMany { ["littlehorse-$it", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
     apply plugin: "signing"
     apply plugin: "maven-publish"
     apply plugin: "java-library"

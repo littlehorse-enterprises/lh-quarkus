@@ -14,8 +14,8 @@ pluginManagement {
 rootProject.name = "littlehorse-quarkus-extensions"
 
 lhExtensions.split(',').each {
-    include("littlehorse-$it-runtime")
-    project(":littlehorse-$it-runtime").projectDir = file("extensions/littlehorse-$it/runtime")
+    include("littlehorse-$it")
+    project(":littlehorse-$it").projectDir = file("extensions/littlehorse-$it/runtime")
 
     include("littlehorse-$it-deployment")
     project(":littlehorse-$it-deployment").projectDir = file("extensions/littlehorse-$it/deployment")

@@ -4,7 +4,7 @@ dependencies {
     implementation "io.quarkus:quarkus-arc"
 
     // quarkus extension
-    implementation project(":littlehorse-quarkus-runtime")
+    implementation project(":littlehorse-quarkus")
 
     // logs
     implementation "org.jboss.logging:commons-logging-jboss-logging"
