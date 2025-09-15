@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.deployment.processors;
+package io.littlehorse.quarkus.deployment.processor;
 
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.IndexDependencyBuildItem;

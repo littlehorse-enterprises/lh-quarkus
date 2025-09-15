@@ -1,5 +1,6 @@
-package io.littlehorse.quarkus.deployment.processors;
+package io.littlehorse.quarkus.deployment.processor;
 
+import io.littlehorse.quarkus.deployment.collection.LHWorkflowRecordableGraph;
 import io.littlehorse.quarkus.deployment.items.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHWorkflowDefinitionBuildItem;
@@ -130,12 +131,14 @@ class LHServiceProcessor {
                 .map(LHUserTaskFormBuildItem::toRecordable)
                 .forEach(recorder::registerLHUserTaskForm);
 
-        workflowDefinitionBuildItems.stream()
-                .map(LHWorkflowDefinitionBuildItem::toRecordable)
+        LHWorkflowRecordableGraph.sort(workflowDefinitionBuildItems.stream()
+                        .map(LHWorkflowDefinitionBuildItem::toRecordable)
+                        .toList())
                 .forEach(recorder::registerLHWorkflow);
 
-        workflowFromMethodBuildItems.stream()
-                .map(LHWorkflowFromMethodBuildItem::toRecordable)
+        LHWorkflowRecordableGraph.sort(workflowFromMethodBuildItems.stream()
+                        .map(LHWorkflowFromMethodBuildItem::toRecordable)
+                        .toList())
                 .forEach(recorder::registerLHWorkflow);
 
         return new ServiceStartBuildItem("LittleHorse");

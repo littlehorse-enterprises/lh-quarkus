@@ -47,6 +47,7 @@ jobs:
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
 
   create-release:
+    if: ${{ !contains(github.ref_name, '-SNAPSHOT') }}
     needs:
       - publish
     runs-on: ubuntu-latest
