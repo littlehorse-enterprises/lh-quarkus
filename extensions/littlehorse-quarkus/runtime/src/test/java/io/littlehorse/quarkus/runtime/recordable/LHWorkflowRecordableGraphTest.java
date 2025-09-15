@@ -1,8 +1,7 @@
-package io.littlehorse.quarkus.deployment.collection;
+package io.littlehorse.quarkus.runtime.recordable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
 import org.junit.jupiter.api.Test;
@@ -23,8 +22,8 @@ class LHWorkflowRecordableGraphTest {
         LHWorkflowRecordable child = newRecordable("my-child", "my-parent");
         LHWorkflowRecordable parent = newRecordable("my-parent", null);
 
-        assertThat(LHWorkflowRecordableGraph.sort(List.of(child, parent)))
-                .containsExactly(parent, child);
+        LHWorkflowRecordableGraph graph = new LHWorkflowRecordableGraph(List.of(child, parent));
+        assertThat(graph.toList()).containsExactly(parent, child);
     }
 
     @Test
@@ -33,8 +32,9 @@ class LHWorkflowRecordableGraphTest {
         LHWorkflowRecordable parent1 = newRecordable("my-parent1", "my-parent2");
         LHWorkflowRecordable parent2 = newRecordable("my-parent2", null);
 
-        assertThat(LHWorkflowRecordableGraph.sort(List.of(child, parent1, parent2)))
-                .containsExactly(parent2, parent1, child);
+        LHWorkflowRecordableGraph graph =
+                new LHWorkflowRecordableGraph(List.of(child, parent1, parent2));
+        assertThat(graph.toList()).containsExactly(parent2, parent1, child);
     }
 
     @Test
@@ -44,8 +44,9 @@ class LHWorkflowRecordableGraphTest {
         LHWorkflowRecordable parent1 = newRecordable("my-parent1", "my-parent2");
         LHWorkflowRecordable parent2 = newRecordable("my-parent2", null);
 
-        assertThat(LHWorkflowRecordableGraph.sort(List.of(child, parent1, parent2, other)))
-                .containsExactly(parent2, other, parent1, child);
+        LHWorkflowRecordableGraph graph =
+                new LHWorkflowRecordableGraph(List.of(child, parent1, parent2, other));
+        assertThat(graph.toList()).containsExactly(parent2, other, parent1, child);
     }
 
     @Test
@@ -56,8 +57,9 @@ class LHWorkflowRecordableGraphTest {
         LHWorkflowRecordable wf4 = newRecordable("wf4", null);
         LHWorkflowRecordable wf5 = newRecordable("wf5", "wf3");
 
-        assertThat(LHWorkflowRecordableGraph.sort(List.of(wf4, wf5, wf3, wf1, wf2)))
-                .containsExactly(wf4, wf3, wf5, wf2, wf1);
+        LHWorkflowRecordableGraph graph =
+                new LHWorkflowRecordableGraph(List.of(wf4, wf5, wf3, wf1, wf2));
+        assertThat(graph.toList()).containsExactly(wf4, wf3, wf5, wf2, wf1);
     }
 
     @Test
@@ -67,7 +69,8 @@ class LHWorkflowRecordableGraphTest {
         LHWorkflowRecordable wf4 = newRecordable("wf4", null);
         LHWorkflowRecordable wf5 = newRecordable("wf5", "wf3");
 
-        assertThat(LHWorkflowRecordableGraph.sort(List.of(wf4, wf5, wf1, wf2)))
-                .containsExactly(wf4, wf5, wf2, wf1);
+        LHWorkflowRecordableGraph graph =
+                new LHWorkflowRecordableGraph(List.of(wf4, wf5, wf1, wf2));
+        assertThat(graph.toList()).containsExactly(wf4, wf5, wf2, wf1);
     }
 }

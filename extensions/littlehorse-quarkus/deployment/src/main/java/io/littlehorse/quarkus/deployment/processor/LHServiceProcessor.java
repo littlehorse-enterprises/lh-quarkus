@@ -1,6 +1,5 @@
 package io.littlehorse.quarkus.deployment.processor;
 
-import io.littlehorse.quarkus.deployment.collection.LHWorkflowRecordableGraph;
 import io.littlehorse.quarkus.deployment.items.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHWorkflowDefinitionBuildItem;
@@ -8,6 +7,8 @@ import io.littlehorse.quarkus.deployment.items.LHWorkflowFromMethodBuildItem;
 import io.littlehorse.quarkus.deployment.reflection.LHWorkflowDescriptor;
 import io.littlehorse.quarkus.deployment.reflection.OptionalAnnotation;
 import io.littlehorse.quarkus.runtime.LHRecorder;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordableGraph;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
@@ -29,6 +30,7 @@ import org.jboss.jandex.MethodInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 class LHServiceProcessor {
 
@@ -131,15 +133,16 @@ class LHServiceProcessor {
                 .map(LHUserTaskFormBuildItem::toRecordable)
                 .forEach(recorder::registerLHUserTaskForm);
 
-        LHWorkflowRecordableGraph.sort(workflowDefinitionBuildItems.stream()
-                        .map(LHWorkflowDefinitionBuildItem::toRecordable)
-                        .toList())
-                .forEach(recorder::registerLHWorkflow);
+        List<LHWorkflowRecordable> workflowRecordables = Stream.concat(
+                        workflowDefinitionBuildItems.stream()
+                                .map(LHWorkflowDefinitionBuildItem::toRecordable),
+                        workflowFromMethodBuildItems.stream()
+                                .map(LHWorkflowFromMethodBuildItem::toRecordable))
+                .toList();
 
-        LHWorkflowRecordableGraph.sort(workflowFromMethodBuildItems.stream()
-                        .map(LHWorkflowFromMethodBuildItem::toRecordable)
-                        .toList())
-                .forEach(recorder::registerLHWorkflow);
+        LHWorkflowRecordableGraph workflowRecordableGraph =
+                new LHWorkflowRecordableGraph(workflowRecordables);
+        workflowRecordableGraph.toList().forEach(recorder::registerLHWorkflow);
 
         return new ServiceStartBuildItem("LittleHorse");
     }

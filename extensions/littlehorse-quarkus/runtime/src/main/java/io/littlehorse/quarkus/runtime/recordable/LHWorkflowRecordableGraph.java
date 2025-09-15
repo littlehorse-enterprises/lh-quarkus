@@ -1,6 +1,4 @@
-package io.littlehorse.quarkus.deployment.collection;
-
-import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
+package io.littlehorse.quarkus.runtime.recordable;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -14,7 +12,13 @@ import java.util.Optional;
 
 public class LHWorkflowRecordableGraph {
 
-    public static List<LHWorkflowRecordable> sort(List<? extends LHWorkflowRecordable> inputList) {
+    private final List<? extends LHWorkflowRecordable> inputList;
+
+    public LHWorkflowRecordableGraph(List<? extends LHWorkflowRecordable> inputList) {
+        this.inputList = inputList;
+    }
+
+    public List<LHWorkflowRecordable> toList() {
         if (inputList == null || inputList.isEmpty()) {
             return List.of();
         }

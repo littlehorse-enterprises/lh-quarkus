@@ -9,6 +9,7 @@ quarkusExtension {
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
     implementation "io.quarkus:quarkus-grpc-common"
+    implementation "io.quarkiverse.jgrapht:quarkus-jgrapht:${jgraphtVersion}"
     compileOnly "io.quarkus:quarkus-smallrye-health"
     api("io.littlehorse:littlehorse-client:${lhVersion}") {
         exclude group: "io.grpc", module: "grpc-netty-shaded"

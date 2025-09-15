@@ -3,7 +3,7 @@ dependencies {
     implementation project(":littlehorse-quarkus")
     implementation "io.quarkus:quarkus-grpc-common-deployment"
     implementation "io.quarkus:quarkus-smallrye-health-spi"
-    implementation "org.jgrapht:jgrapht-core:${jgraphtVersion}"
+    implementation "io.quarkiverse.jgrapht:quarkus-jgrapht-deployment:${jgraphtVersion}"
 
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
