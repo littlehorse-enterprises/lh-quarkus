@@ -1,5 +1,10 @@
 package io.littlehorse.quarkus.deployment.processor;
 
+import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
+import static org.jboss.jandex.Type.Kind.ARRAY;
+import static org.jboss.jandex.Type.Kind.CLASS;
+import static org.jboss.jandex.Type.Kind.PARAMETERIZED_TYPE;
+
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
@@ -25,7 +30,8 @@ public class LHReflectionProcessor {
 
     private static final Function<String, ReflectiveClassBuildItem> newBuildItem = className ->
             ReflectiveClassBuildItem.builder(className).methods().fields().build();
-    public static final DotName JAVA_LANG = DotName.createSimple("java.lang");
+    private static final DotName JAVA_LANG = DotName.createSimple("java.lang");
+    private static final DotName JAVA_UTIL_LIST = DotName.createSimple(List.class);
 
     @BuildStep
     void registerLHWorkflow(
@@ -33,7 +39,7 @@ public class LHReflectionProcessor {
             CombinedIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHWorkflow.class).stream()
                 .map(AnnotationInstance::target)
-                .filter(target -> target.kind().equals(AnnotationTarget.Kind.METHOD))
+                .filter(target -> target.kind().equals(METHOD))
                 .map(AnnotationTarget::asMethod)
                 .map(MethodInfo::declaringClass)
                 .map(ClassInfo::toString)
@@ -101,7 +107,7 @@ public class LHReflectionProcessor {
                         .anyMatch(methodInfo -> methodInfo.hasAnnotation(LHTaskMethod.class)))
                 .flatMap(classInfo -> classInfo.methods().stream())
                 .map(MethodInfo::returnType)
-                .filter(type -> type.kind().equals(Type.Kind.CLASS))
+                .filter(type -> type.kind().equals(CLASS))
                 .map(Type::asClassType)
                 .map(Type::name)
                 .filter(dotName -> !dotName.prefix().equals(JAVA_LANG))
@@ -120,7 +126,7 @@ public class LHReflectionProcessor {
                         .anyMatch(methodInfo -> methodInfo.hasAnnotation(LHTaskMethod.class)))
                 .flatMap(classInfo -> classInfo.methods().stream())
                 .map(MethodInfo::returnType)
-                .filter(type -> type.kind().equals(Type.Kind.ARRAY))
+                .filter(type -> type.kind().equals(ARRAY))
                 .map(Type::asArrayType)
                 .map(ArrayType::elementType)
                 .map(Type::name)
@@ -140,10 +146,9 @@ public class LHReflectionProcessor {
                         .anyMatch(methodInfo -> methodInfo.hasAnnotation(LHTaskMethod.class)))
                 .flatMap(classInfo -> classInfo.methods().stream())
                 .map(MethodInfo::returnType)
-                .filter(type -> type.kind().equals(Type.Kind.PARAMETERIZED_TYPE))
+                .filter(type -> type.kind().equals(PARAMETERIZED_TYPE))
                 .map(Type::asParameterizedType)
-                .filter(parameterizedType ->
-                        parameterizedType.name().equals(DotName.createSimple(List.class)))
+                .filter(parameterizedType -> parameterizedType.name().equals(JAVA_UTIL_LIST))
                 .flatMap(parameterizedType -> parameterizedType.arguments().stream())
                 .map(Type::name)
                 .filter(dotName -> !dotName.prefix().equals(JAVA_LANG))
