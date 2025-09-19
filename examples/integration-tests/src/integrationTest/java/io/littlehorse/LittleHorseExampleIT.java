@@ -47,14 +47,17 @@ class LittleHorseExampleIT {
                 .untilAsserted(() -> {
                     WfSpecIdList results = blockingStub.searchWfSpec(
                             SearchWfSpecRequest.newBuilder().build());
-                    WfSpecId wfSpecId =
+                    WfSpecId greetings =
                             WfSpecId.newBuilder().setName("greetings").build();
-                    WfSpecIdList expectedResult =
-                            WfSpecIdList.newBuilder().addResults(wfSpecId).build();
-                    assertThat(results.getResultsCount()).isEqualTo(1);
+                    WfSpecId json = WfSpecId.newBuilder().setName("json").build();
+                    WfSpecIdList expectedResult = WfSpecIdList.newBuilder()
+                            .addResults(greetings)
+                            .addResults(json)
+                            .build();
+                    assertThat(results.getResultsCount()).isEqualTo(2);
                     assertThat(results).isEqualTo(expectedResult);
 
-                    WfSpec wfSpec = blockingStub.getWfSpec(wfSpecId);
+                    WfSpec wfSpec = blockingStub.getWfSpec(greetings);
                     wfSpec.getThreadSpecsOrThrow("entrypoint")
                             .getNodesMap()
                             .values()
@@ -85,9 +88,18 @@ class LittleHorseExampleIT {
                             .addResults(
                                     TaskDefId.newBuilder().setName("greetings").build())
                             .addResults(TaskDefId.newBuilder().setName("print").build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("return-json-array")
+                                    .build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("return-json-list")
+                                    .build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("return-json-object")
+                                    .build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(2);
+                    assertThat(results.getResultsCount()).isEqualTo(5);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

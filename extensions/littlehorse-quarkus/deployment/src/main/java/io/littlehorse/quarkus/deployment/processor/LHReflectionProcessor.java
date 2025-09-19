@@ -12,15 +12,20 @@ import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
+import org.jboss.jandex.ArrayType;
 import org.jboss.jandex.ClassInfo;
+import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.Type;
 
+import java.util.List;
 import java.util.function.Function;
 
 public class LHReflectionProcessor {
 
     private static final Function<String, ReflectiveClassBuildItem> newBuildItem = className ->
             ReflectiveClassBuildItem.builder(className).methods().fields().build();
+    public static final DotName JAVA_LANG = DotName.createSimple("java.lang");
 
     @BuildStep
     void registerLHWorkflow(
@@ -83,6 +88,67 @@ public class LHReflectionProcessor {
                 .map(AnnotationInstance::target)
                 .map(AnnotationTarget::asClass)
                 .map(ClassInfo::toString)
+                .map(newBuildItem)
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void registerReturnedClassForLHTaskMethod(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getKnownClasses().stream()
+                .filter(classInfo -> classInfo.methods().stream()
+                        .anyMatch(methodInfo -> methodInfo.hasAnnotation(LHTaskMethod.class)))
+                .flatMap(classInfo -> classInfo.methods().stream())
+                .map(MethodInfo::returnType)
+                .filter(type -> type.kind().equals(Type.Kind.CLASS))
+                .map(Type::asClassType)
+                .map(Type::name)
+                .filter(dotName -> !dotName.prefix().equals(JAVA_LANG))
+                .map(DotName::toString)
+                .distinct()
+                .map(newBuildItem)
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void registerReturnedArrayForLHTaskMethod(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getKnownClasses().stream()
+                .filter(classInfo -> classInfo.methods().stream()
+                        .anyMatch(methodInfo -> methodInfo.hasAnnotation(LHTaskMethod.class)))
+                .flatMap(classInfo -> classInfo.methods().stream())
+                .map(MethodInfo::returnType)
+                .filter(type -> type.kind().equals(Type.Kind.ARRAY))
+                .map(Type::asArrayType)
+                .map(ArrayType::elementType)
+                .map(Type::name)
+                .filter(dotName -> !dotName.prefix().equals(JAVA_LANG))
+                .map(DotName::toString)
+                .distinct()
+                .map(newBuildItem)
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void registerReturnedListForLHTaskMethod(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getKnownClasses().stream()
+                .filter(classInfo -> classInfo.methods().stream()
+                        .anyMatch(methodInfo -> methodInfo.hasAnnotation(LHTaskMethod.class)))
+                .flatMap(classInfo -> classInfo.methods().stream())
+                .map(MethodInfo::returnType)
+                .filter(type -> type.kind().equals(Type.Kind.PARAMETERIZED_TYPE))
+                .map(Type::asParameterizedType)
+                .filter(parameterizedType ->
+                        parameterizedType.name().equals(DotName.createSimple(List.class)))
+                .flatMap(parameterizedType -> parameterizedType.arguments().stream())
+                .map(Type::name)
+                .filter(dotName -> !dotName.prefix().equals(JAVA_LANG))
+                .map(DotName::toString)
+                .distinct()
                 .map(newBuildItem)
                 .forEach(producer::produce);
     }
