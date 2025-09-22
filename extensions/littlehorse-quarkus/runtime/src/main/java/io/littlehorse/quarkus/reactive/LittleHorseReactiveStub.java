@@ -58,6 +58,11 @@ public class LittleHorseReactiveStub {
         return new LittleHorseReactiveStub(futureStub.withWaitForReady());
     }
 
+    public Uni<com.google.protobuf.Empty> deletePrincipal(
+            io.littlehorse.sdk.common.proto.DeletePrincipalRequest request) {
+        return Uni.createFrom().future(futureStub.deletePrincipal(request));
+    }
+
     public <T> LittleHorseReactiveStub withWaitForReady(CallOptions.Key<T> key, T value) {
         return new LittleHorseReactiveStub(futureStub.withOption(key, value));
     }
@@ -125,11 +130,6 @@ public class LittleHorseReactiveStub {
     public Uni<com.google.protobuf.Empty> deleteExternalEventDef(
             io.littlehorse.sdk.common.proto.DeleteExternalEventDefRequest request) {
         return Uni.createFrom().future(futureStub.deleteExternalEventDef(request));
-    }
-
-    public Uni<com.google.protobuf.Empty> deletePrincipal(
-            io.littlehorse.sdk.common.proto.DeletePrincipalRequest request) {
-        return Uni.createFrom().future(futureStub.deletePrincipal(request));
     }
 
     public Uni<com.google.protobuf.Empty> deleteScheduledWfRun(

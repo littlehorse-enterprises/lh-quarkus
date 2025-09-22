@@ -1,26 +1,37 @@
 package io.littlehorse.quarkus.deployment.items;
 
+import io.littlehorse.quarkus.deployment.reflection.LHExponentialBackoffRetryDescriptor;
+import io.littlehorse.quarkus.deployment.reflection.LHWorkflowDescriptor;
+import io.littlehorse.quarkus.runtime.recordable.LHExponentialBackoffRetryRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowDefinitionRecordable;
 import io.quarkus.builder.item.MultiBuildItem;
 
 public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
-    private final String wfSpecName;
+    private final LHWorkflowDescriptor descriptor;
 
-    public LHWorkflowDefinitionBuildItem(Class<?> beanClass, String wfSpecName) {
-        this.wfSpecName = wfSpecName;
+    public LHWorkflowDefinitionBuildItem(Class<?> beanClass, LHWorkflowDescriptor descriptor) {
         this.beanClass = beanClass;
-    }
-
-    public String getWfSpecName() {
-        return wfSpecName;
-    }
-
-    public Class<?> getBeanClass() {
-        return beanClass;
+        this.descriptor = descriptor;
     }
 
     public LHWorkflowDefinitionRecordable toRecordable() {
-        return new LHWorkflowDefinitionRecordable(beanClass, wfSpecName);
+        LHExponentialBackoffRetryDescriptor backoffRetryDescriptor =
+                descriptor.getDefaultTaskExponentialBackoffRetry();
+        return new LHWorkflowDefinitionRecordable(
+                beanClass,
+                descriptor.getWfSpecName(),
+                descriptor.getParent(),
+                descriptor.getDefaultTaskTimeout(),
+                descriptor.getDefaultTaskRetries(),
+                descriptor.getUpdateType(),
+                descriptor.getRetention(),
+                descriptor.getDefaultThreadRetention(),
+                backoffRetryDescriptor != null
+                        ? new LHExponentialBackoffRetryRecordable(
+                                backoffRetryDescriptor.getBaseIntervalMs(),
+                                backoffRetryDescriptor.getMultiplier(),
+                                backoffRetryDescriptor.getMaxDelayMs())
+                        : null);
     }
 }

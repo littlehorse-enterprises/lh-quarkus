@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.deployment.processors;
+package io.littlehorse.quarkus.deployment.processor;
 
 import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.quarkus.runtime.LHExternalBeans;

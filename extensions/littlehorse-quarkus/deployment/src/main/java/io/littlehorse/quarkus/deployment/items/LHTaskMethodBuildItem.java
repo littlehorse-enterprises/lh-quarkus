@@ -12,14 +12,6 @@ public final class LHTaskMethodBuildItem extends MultiBuildItem {
         this.beanClass = beanClass;
     }
 
-    public String getTaskDefName() {
-        return taskDefName;
-    }
-
-    public Class<?> getBeanClass() {
-        return beanClass;
-    }
-
     public LHTaskMethodRecordable toRecordable() {
         return new LHTaskMethodRecordable(beanClass, taskDefName);
     }

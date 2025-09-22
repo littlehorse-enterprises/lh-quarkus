@@ -11,8 +11,27 @@ public class LHWorkflowFromMethodRecordable extends LHWorkflowRecordable {
     private final String beanMethodName;
 
     @RecordableConstructor
-    public LHWorkflowFromMethodRecordable(Class<?> beanClass, String name, String beanMethodName) {
-        super(beanClass, name);
+    public LHWorkflowFromMethodRecordable(
+            Class<?> beanClass,
+            String name,
+            String beanMethodName,
+            String parent,
+            String defaultTaskTimeout,
+            String defaultTaskRetries,
+            String updateType,
+            String retention,
+            String defaultThreadRetention,
+            LHExponentialBackoffRetryRecordable retryRecordable) {
+        super(
+                beanClass,
+                name,
+                parent,
+                defaultTaskTimeout,
+                defaultTaskRetries,
+                updateType,
+                retention,
+                defaultThreadRetention,
+                retryRecordable);
         this.beanMethodName = beanMethodName;
     }
 

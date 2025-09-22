@@ -19,7 +19,7 @@ allprojects {
     apply plugin: "idea"
 
     group = "io.littlehorse"
-    version = "${lhVersion}"
+    version = "${extensionVersion}"
 
     test {
         testLogging {
@@ -55,7 +55,7 @@ allprojects {
     }
 }
 
-configure(lhExtensions.split(',').collectMany { ["littlehorse-$it-runtime", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
+configure(lhExtensions.split(',').collectMany { ["littlehorse-$it", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
     apply plugin: "signing"
     apply plugin: "maven-publish"
     apply plugin: "java-library"
@@ -85,6 +85,7 @@ configure(lhExamples.split(',').collect { project(":example-$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
     testNative {
@@ -93,6 +94,7 @@ configure(lhExamples.split(',').collect { project(":example-$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
     test {
@@ -101,5 +103,6 @@ configure(lhExamples.split(',').collect { project(":example-$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 }

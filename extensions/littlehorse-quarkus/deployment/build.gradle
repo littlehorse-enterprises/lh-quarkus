@@ -1,8 +1,12 @@
 dependencies {
     implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
-    implementation project(":littlehorse-quarkus-runtime")
+    implementation project(":littlehorse-quarkus")
     implementation "io.quarkus:quarkus-grpc-common-deployment"
     implementation "io.quarkus:quarkus-smallrye-health-spi"
+    implementation "io.quarkiverse.jgrapht:quarkus-jgrapht-deployment:${jgraphtVersion}"
+
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
 }
 
 publishing {

@@ -1,10 +1,14 @@
-package io.littlehorse.quarkus.deployment.processors;
+package io.littlehorse.quarkus.deployment.processor;
 
 import io.littlehorse.quarkus.deployment.items.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHWorkflowDefinitionBuildItem;
 import io.littlehorse.quarkus.deployment.items.LHWorkflowFromMethodBuildItem;
+import io.littlehorse.quarkus.deployment.reflection.LHWorkflowDescriptor;
+import io.littlehorse.quarkus.deployment.reflection.OptionalAnnotation;
 import io.littlehorse.quarkus.runtime.LHRecorder;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordableGraph;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
@@ -26,6 +30,7 @@ import org.jboss.jandex.MethodInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 class LHServiceProcessor {
 
@@ -69,9 +74,10 @@ class LHServiceProcessor {
                         .contains(DotName.createSimple(LHWorkflowDefinition.class)))
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
-                    String wfSpecName = annotated.value().asString();
                     Class<?> beanClass = loadClass(beanClassName);
-                    return new LHWorkflowDefinitionBuildItem(beanClass, wfSpecName);
+
+                    return new LHWorkflowDefinitionBuildItem(
+                            beanClass, new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
                 })
                 .forEach(producer::produce);
     }
@@ -85,10 +91,12 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     MethodInfo methodInfo = annotated.target().asMethod();
                     String beanClassName = methodInfo.declaringClass().toString();
-                    String beanMethodName = methodInfo.name();
-                    String wfSpecName = annotated.value().asString();
                     Class<?> beanClass = loadClass(beanClassName);
-                    return new LHWorkflowFromMethodBuildItem(beanClass, beanMethodName, wfSpecName);
+                    String beanMethodName = methodInfo.name();
+                    return new LHWorkflowFromMethodBuildItem(
+                            beanClass,
+                            beanMethodName,
+                            new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
                 })
                 .forEach(producer::produce);
     }
@@ -125,13 +133,16 @@ class LHServiceProcessor {
                 .map(LHUserTaskFormBuildItem::toRecordable)
                 .forEach(recorder::registerLHUserTaskForm);
 
-        workflowDefinitionBuildItems.stream()
-                .map(LHWorkflowDefinitionBuildItem::toRecordable)
-                .forEach(recorder::registerLHWorkflow);
+        List<LHWorkflowRecordable> workflowRecordables = Stream.concat(
+                        workflowDefinitionBuildItems.stream()
+                                .map(LHWorkflowDefinitionBuildItem::toRecordable),
+                        workflowFromMethodBuildItems.stream()
+                                .map(LHWorkflowFromMethodBuildItem::toRecordable))
+                .toList();
 
-        workflowFromMethodBuildItems.stream()
-                .map(LHWorkflowFromMethodBuildItem::toRecordable)
-                .forEach(recorder::registerLHWorkflow);
+        LHWorkflowRecordableGraph workflowRecordableGraph =
+                new LHWorkflowRecordableGraph(workflowRecordables);
+        workflowRecordableGraph.toList().forEach(recorder::registerLHWorkflow);
 
         return new ServiceStartBuildItem("LittleHorse");
     }
