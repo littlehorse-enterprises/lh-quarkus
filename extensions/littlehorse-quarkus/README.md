@@ -43,6 +43,8 @@ Gradle:
 implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
 ```
 
+> Use `platform` instead of `enforcedPlatform` in the `dependencies` code block.
+
 Maven:
 
 ```xml
@@ -358,7 +360,7 @@ class, and start LittleHorse:
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
     private final LittleHorseCluster cluster = LittleHorseCluster.newBuilder()
-            .withKafkaImage("apache/kafka:4.0.0")
+            .withKafkaImage("apache/kafka:4.1.0")
             .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:latest")
             .build();
 

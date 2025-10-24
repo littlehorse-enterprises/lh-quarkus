@@ -5,6 +5,9 @@ import static org.jboss.jandex.Type.Kind.ARRAY;
 import static org.jboss.jandex.Type.Kind.CLASS;
 import static org.jboss.jandex.Type.Kind.PARAMETERIZED_TYPE;
 
+import com.google.protobuf.GeneratedMessage;
+import com.google.protobuf.ProtocolMessageEnum;
+
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
@@ -32,6 +35,41 @@ public class LHReflectionProcessor {
             ReflectiveClassBuildItem.builder(className).methods().fields().build();
     private static final DotName JAVA_LANG = DotName.createSimple("java.lang");
     private static final DotName JAVA_UTIL_LIST = DotName.createSimple(List.class);
+    private static final DotName GRPC_MESSAGE = DotName.createSimple(GeneratedMessage.class);
+    private static final DotName GRPC_MESSAGE_BUILDER =
+            DotName.createSimple(GeneratedMessage.Builder.class);
+    private static final DotName GRPC_MESSAGE_ENUM =
+            DotName.createSimple(ProtocolMessageEnum.class);
+
+    @BuildStep
+    void registerGeneratedMessage(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAllKnownSubclasses(GRPC_MESSAGE).stream()
+                .map(ClassInfo::toString)
+                .map(newBuildItem)
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void registerGeneratedMessageBuilder(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAllKnownSubclasses(GRPC_MESSAGE_BUILDER).stream()
+                .map(ClassInfo::toString)
+                .map(newBuildItem)
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void registerProtocolMessageEnum(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAllKnownImplementations(GRPC_MESSAGE_ENUM).stream()
+                .map(ClassInfo::toString)
+                .map(newBuildItem)
+                .forEach(producer::produce);
+    }
 
     @BuildStep
     void registerLHWorkflow(

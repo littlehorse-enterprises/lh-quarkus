@@ -18,17 +18,17 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
 
     private static final Logger log = LoggerFactory.getLogger(ContainersTestResource.class);
 
-    private LittleHorseCluster cluster;
+    private final LittleHorseCluster cluster = LittleHorseCluster.newBuilder()
+            .withKafkaImage("apache/kafka:" + KAFKA_VERSION)
+            .withLittlehorseImage(
+                    // TODO: use LH_VERSION instead of master
+                    "ghcr.io/littlehorse-enterprises/littlehorse/lh-server:master")
+            .build();
     private LittleHorseBlockingStub blockingStub;
 
     @Override
     public Map<String, String> start() {
         log.info("Starting testcontainers");
-        cluster = LittleHorseCluster.newBuilder()
-                .withKafkaImage("apache/kafka:" + KAFKA_VERSION)
-                .withLittlehorseImage(
-                        "ghcr.io/littlehorse-enterprises/littlehorse/lh-server:" + LH_VERSION)
-                .build();
         cluster.start();
         blockingStub = LHConfig.newBuilder()
                 .loadFromMap(cluster.getClientConfig())

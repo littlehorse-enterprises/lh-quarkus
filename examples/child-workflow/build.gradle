@@ -1,6 +1,6 @@
 dependencies {
     // quarkus
-    implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
+    implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
     implementation "io.quarkus:quarkus-arc"
 
     // quarkus extension
