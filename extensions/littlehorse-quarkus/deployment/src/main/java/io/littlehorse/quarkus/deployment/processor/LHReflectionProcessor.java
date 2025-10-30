@@ -35,17 +35,17 @@ public class LHReflectionProcessor {
             ReflectiveClassBuildItem.builder(className).methods().fields().build();
     private static final DotName JAVA_LANG = DotName.createSimple("java.lang");
     private static final DotName JAVA_UTIL_LIST = DotName.createSimple(List.class);
-    private static final DotName GRPC_MESSAGE = DotName.createSimple(GeneratedMessage.class);
-    private static final DotName GRPC_MESSAGE_BUILDER =
+    private static final DotName PROTOBUF_MESSAGE = DotName.createSimple(GeneratedMessage.class);
+    private static final DotName PROTOBUF_MESSAGE_BUILDER =
             DotName.createSimple(GeneratedMessage.Builder.class);
-    private static final DotName GRPC_MESSAGE_ENUM =
+    private static final DotName PROTOBUF_MESSAGE_ENUM =
             DotName.createSimple(ProtocolMessageEnum.class);
 
     @BuildStep
     void registerGeneratedMessage(
             BuildProducer<ReflectiveClassBuildItem> producer,
             CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAllKnownSubclasses(GRPC_MESSAGE).stream()
+        indexContainer.getIndex().getAllKnownSubclasses(PROTOBUF_MESSAGE).stream()
                 .map(ClassInfo::toString)
                 .map(newBuildItem)
                 .forEach(producer::produce);
@@ -55,7 +55,7 @@ public class LHReflectionProcessor {
     void registerGeneratedMessageBuilder(
             BuildProducer<ReflectiveClassBuildItem> producer,
             CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAllKnownSubclasses(GRPC_MESSAGE_BUILDER).stream()
+        indexContainer.getIndex().getAllKnownSubclasses(PROTOBUF_MESSAGE_BUILDER).stream()
                 .map(ClassInfo::toString)
                 .map(newBuildItem)
                 .forEach(producer::produce);
@@ -65,7 +65,7 @@ public class LHReflectionProcessor {
     void registerProtocolMessageEnum(
             BuildProducer<ReflectiveClassBuildItem> producer,
             CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAllKnownImplementations(GRPC_MESSAGE_ENUM).stream()
+        indexContainer.getIndex().getAllKnownImplementations(PROTOBUF_MESSAGE_ENUM).stream()
                 .map(ClassInfo::toString)
                 .map(newBuildItem)
                 .forEach(producer::produce);
