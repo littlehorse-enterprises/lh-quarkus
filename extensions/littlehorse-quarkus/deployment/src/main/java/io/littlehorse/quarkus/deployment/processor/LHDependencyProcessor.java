@@ -11,7 +11,22 @@ public class LHDependencyProcessor {
     }
 
     @BuildStep
-    IndexDependencyBuildItem produceProtobufDependency() {
+    IndexDependencyBuildItem produceProtobufJavaDependency() {
         return new IndexDependencyBuildItem("com.google.protobuf", "protobuf-java");
+    }
+
+    @BuildStep
+    IndexDependencyBuildItem produceProtobufJavaUtilDependency() {
+        return new IndexDependencyBuildItem("com.google.protobuf", "protobuf-java-util");
+    }
+
+    @BuildStep
+    IndexDependencyBuildItem produceGrpcProtobufDependency() {
+        return new IndexDependencyBuildItem("io.grpc", "grpc-protobuf");
+    }
+
+    @BuildStep
+    IndexDependencyBuildItem produceGrpcStubDependency() {
+        return new IndexDependencyBuildItem("io.grpc", "grpc-stub");
     }
 }

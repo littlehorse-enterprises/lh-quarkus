@@ -49,7 +49,7 @@ services:
       LHS_STATE_DIR: /var/lib/lh/data
       LHS_LISTENERS_PROTOCOL_MAP: INTERNAL:PLAIN,EXTERNAL:PLAIN
     healthcheck:
-      test: curl -f localhost:1822/liveness
+      test: wget --no-verbose --spider 0.0.0.0:1822/liveness
       interval: 10s
       timeout: 10s
       retries: 5

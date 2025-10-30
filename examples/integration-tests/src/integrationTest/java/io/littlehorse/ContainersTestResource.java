@@ -27,7 +27,8 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
         cluster = LittleHorseCluster.newBuilder()
                 .withKafkaImage("apache/kafka:" + KAFKA_VERSION)
                 .withLittlehorseImage(
-                        "ghcr.io/littlehorse-enterprises/littlehorse/lh-server:" + LH_VERSION)
+                        // TODO: use LH_VERSION instead of master
+                        "ghcr.io/littlehorse-enterprises/littlehorse/lh-server:master")
                 .build();
         cluster.start();
         blockingStub = LHConfig.newBuilder()
