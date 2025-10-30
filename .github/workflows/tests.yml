@@ -22,7 +22,7 @@ jobs:
       - format
     strategy:
       matrix:
-        java-version: [ "17", "21" ]
+        java-version: [ "17", "21", "25" ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,14 +39,17 @@ jobs:
     needs:
       - format
       - tests
+    strategy:
+      matrix:
+        java-version: [ "17", "21", "25" ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Java
+      - name: Setup Java ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
           distribution: "corretto"
-          java-version: "17"
+          java-version: ${{ matrix.java-version }}
       - name: Jar Tests
         run: ./gradlew example-integration-tests:quarkusIntTest
       - name: Native Tests
