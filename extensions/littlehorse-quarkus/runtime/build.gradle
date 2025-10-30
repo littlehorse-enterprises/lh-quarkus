@@ -7,7 +7,7 @@ quarkusExtension {
 }
 
 dependencies {
-    implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
+    implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
     implementation "io.quarkus:quarkus-grpc-common"
     implementation "io.quarkiverse.jgrapht:quarkus-jgrapht:${jgraphtVersion}"
     compileOnly "io.quarkus:quarkus-smallrye-health"
