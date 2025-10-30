@@ -1,5 +1,5 @@
 dependencies {
-    implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
+    implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
     implementation project(":littlehorse-quarkus")
     implementation "io.quarkus:quarkus-grpc-common-deployment"
     implementation "io.quarkus:quarkus-smallrye-health-spi"
