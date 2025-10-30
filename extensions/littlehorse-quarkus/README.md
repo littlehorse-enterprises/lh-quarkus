@@ -43,8 +43,6 @@ Gradle:
 implementation "io.littlehorse:littlehorse-quarkus:${lhVersion}"
 ```
 
-> Use `platform` instead of `enforcedPlatform` in the `dependencies` code block.
-
 Maven:
 
 ```xml
