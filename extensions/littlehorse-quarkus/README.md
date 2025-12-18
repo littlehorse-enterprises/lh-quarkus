@@ -358,7 +358,7 @@ class, and start LittleHorse:
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
     private final LittleHorseCluster cluster = LittleHorseCluster.newBuilder()
-            .withKafkaImage("apache/kafka:4.1.0")
+            .withKafkaImage("apache/kafka:latest")
             .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:latest")
             .build();
 

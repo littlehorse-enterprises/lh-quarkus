@@ -44,8 +44,7 @@ public class LittleHorseReactiveStub {
                     String parameterType =
                             method.getParameters()[0].getParameterizedType().getTypeName();
                     String name = method.getName();
-                    String format =
-                            """
+                    String format = """
                             public Uni<%s> %s(%s request) {
                                 return Uni.createFrom().future(futureStub.%s(request));
                             }%n
