@@ -1,25 +1,9 @@
-plugins {
-    id "io.quarkus.extension"
-}
-
-quarkusExtension {
-    deploymentModule = "littlehorse-quarkus-deployment"
-}
-
 dependencies {
     implementation platform("io.quarkus:quarkus-bom:${quarkusVersion}")
-    implementation "io.quarkus:quarkus-grpc-common"
-    implementation "io.quarkus:quarkus-core"
-    implementation "io.quarkus:quarkus-arc"
-    implementation "io.quarkiverse.jgrapht:quarkus-jgrapht:${jgraphtVersion}"
-    compileOnly "io.quarkus:quarkus-smallrye-health"
-    api("io.littlehorse:littlehorse-client:${lhVersion}") {
-        exclude group: "io.grpc", module: "grpc-netty-shaded"
-        exclude group: "io.grpc", module: "grpc-services"
-    }
-    testImplementation "io.quarkus:quarkus-junit5"
-    testImplementation "io.quarkus:quarkus-junit5-mockito"
-    testImplementation "io.rest-assured:rest-assured"
+    implementation "io.quarkus:quarkus-core-deployment"
+    implementation "io.quarkus:quarkus-arc-deployment"
+    implementation project(":littlehorse-quarkus-proxy")
+    implementation project(":littlehorse-quarkus-deployment")
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
 }
@@ -28,14 +12,14 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = group
-            artifactId = "littlehorse-quarkus"
+            artifactId = "littlehorse-quarkus-proxy-deployment"
             version = version
             from components.java
             artifact sourcesJar
             artifact javadocJar
             pom {
-                name = "LittleHorse Quarkus Extension"
-                description = "LittleHorse Quarkus Extension"
+                name = "LittleHorse Quarkus Proxy Extension"
+                description = "LittleHorse Quarkus Proxy Extension"
                 url = "https://github.com/littlehorse-enterprises/littlehorse"
                 licenses {
                     license {

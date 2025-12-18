@@ -1,0 +1,11 @@
+name: LittleHorse Quarkus Proxy
+description: This is a REST proxy for LittleHorse API
+metadata:
+  keywords:
+    - littlehorse
+  categories:
+    - "workflow"
+    - "workflow engine"
+    - "microservices"
+    - "proxy"
+  status: "preview"

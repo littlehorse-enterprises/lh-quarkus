@@ -3,20 +3,14 @@ plugins {
 }
 
 quarkusExtension {
-    deploymentModule = "littlehorse-quarkus-deployment"
+    deploymentModule = "littlehorse-quarkus-proxy-deployment"
 }
 
 dependencies {
     implementation platform("io.quarkus:quarkus-bom:${quarkusVersion}")
-    implementation "io.quarkus:quarkus-grpc-common"
     implementation "io.quarkus:quarkus-core"
     implementation "io.quarkus:quarkus-arc"
-    implementation "io.quarkiverse.jgrapht:quarkus-jgrapht:${jgraphtVersion}"
-    compileOnly "io.quarkus:quarkus-smallrye-health"
-    api("io.littlehorse:littlehorse-client:${lhVersion}") {
-        exclude group: "io.grpc", module: "grpc-netty-shaded"
-        exclude group: "io.grpc", module: "grpc-services"
-    }
+    implementation project(":littlehorse-quarkus")
     testImplementation "io.quarkus:quarkus-junit5"
     testImplementation "io.quarkus:quarkus-junit5-mockito"
     testImplementation "io.rest-assured:rest-assured"
@@ -28,14 +22,14 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = group
-            artifactId = "littlehorse-quarkus"
+            artifactId = "littlehorse-quarkus-proxy"
             version = version
             from components.java
             artifact sourcesJar
             artifact javadocJar
             pom {
-                name = "LittleHorse Quarkus Extension"
-                description = "LittleHorse Quarkus Extension"
+                name = "LittleHorse Quarkus Proxy Extension"
+                description = "LittleHorse Quarkus Proxy Extension"
                 url = "https://github.com/littlehorse-enterprises/littlehorse"
                 licenses {
                     license {
