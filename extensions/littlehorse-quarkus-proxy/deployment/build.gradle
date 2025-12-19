@@ -2,6 +2,8 @@ dependencies {
     implementation platform("io.quarkus:quarkus-bom:${quarkusVersion}")
     implementation "io.quarkus:quarkus-core-deployment"
     implementation "io.quarkus:quarkus-arc-deployment"
+    implementation "io.quarkus:quarkus-rest-deployment"
+    implementation "io.quarkus:quarkus-rest-jackson-deployment"
     implementation project(":littlehorse-quarkus-proxy")
     implementation project(":littlehorse-quarkus-deployment")
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
