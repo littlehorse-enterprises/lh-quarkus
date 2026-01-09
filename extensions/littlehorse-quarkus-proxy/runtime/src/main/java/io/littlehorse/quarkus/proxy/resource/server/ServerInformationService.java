@@ -1,8 +1,7 @@
-package io.littlehorse.quarkus.proxy.service;
+package io.littlehorse.quarkus.proxy.resource.server;
 
 import com.google.protobuf.Empty;
 
-import io.littlehorse.quarkus.proxy.presentation.ServerInformationResponse;
 import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.smallrye.mutiny.Uni;
 

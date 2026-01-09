@@ -19,5 +19,15 @@ Execute it:
 Get server version:
 
 ```shell
-http :8080/proxy/server
+http :8080/proxy/version
 ```
+
+> Equivalent to `lhctl version`
+
+Get wfSpec:
+
+```shell
+http :8080/proxy/tenants/default/wf-specs/greetings
+```
+
+> Equivalent to `lhctl get wfSpec greetings`

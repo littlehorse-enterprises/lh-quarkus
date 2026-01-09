@@ -1,13 +1,11 @@
-package io.littlehorse.quarkus.proxy.resource;
+package io.littlehorse.quarkus.proxy.resource.server;
 
-import io.littlehorse.quarkus.proxy.presentation.ServerInformationResponse;
-import io.littlehorse.quarkus.proxy.service.ServerInformationService;
 import io.smallrye.mutiny.Uni;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
-@Path("/proxy/server")
+@Path("/proxy/version")
 public class ServerInformationResource {
 
     private final ServerInformationService service;

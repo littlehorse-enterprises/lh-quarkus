@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.proxy.presentation;
+package io.littlehorse.quarkus.proxy.resource.server;
 
 import io.littlehorse.sdk.common.proto.LittleHorseVersion;
 
