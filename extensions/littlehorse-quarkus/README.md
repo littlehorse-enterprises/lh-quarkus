@@ -275,7 +275,9 @@ public class GreetingsResource {
         RunWfRequest request = RunWfRequest.newBuilder()
                 .setWfSpecName("greetings")
                 .putVariables("name", LHLibUtil.objToVarVal(name)).build();
-        return blockingStub.runWf(request).getId().getId();
+
+        return blockingStub.runWf(request)
+                .getId().getId();
     }
 }
 ```

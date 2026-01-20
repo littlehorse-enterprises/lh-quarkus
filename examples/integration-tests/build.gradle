@@ -9,6 +9,7 @@ dependencies {
 
     // quarkus extension
     implementation project(":littlehorse-quarkus")
+    implementation project(":littlehorse-quarkus-proxy")
 
     // logs
     implementation "org.jboss.logging:commons-logging-jboss-logging"
