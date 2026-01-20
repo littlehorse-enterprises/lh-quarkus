@@ -13,6 +13,7 @@ dependencies {
     implementation "io.quarkus:quarkus-rest"
     implementation "io.quarkus:quarkus-rest-jackson"
     implementation "org.apache.commons:commons-lang3"
+    compileOnly "io.quarkus:quarkus-smallrye-openapi"
     implementation project(":littlehorse-quarkus")
     testImplementation "io.quarkus:quarkus-junit5"
     testImplementation "io.quarkus:quarkus-junit5-mockito"

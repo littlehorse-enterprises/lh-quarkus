@@ -5,6 +5,7 @@ dependencies {
     implementation "io.quarkus:quarkus-rest"
     implementation "io.quarkus:quarkus-rest-jackson"
     implementation "org.apache.commons:commons-lang3"
+    implementation "io.quarkus:quarkus-smallrye-openapi"
 
     // quarkus extension
     implementation project(":littlehorse-quarkus")
