@@ -31,3 +31,11 @@ http :8080/proxy/tenants/default/wf-specs/greetings
 ```
 
 > Equivalent to `lhctl get wfSpec greetings`
+
+## OAuth 2
+
+Pass the token in the http request ([Bearer auth](https://httpie.io/docs/cli/bearer-auth)). Example:
+
+```shell
+http -A bearer -a $TOKEN :8080/proxy/tenants/default/wf-specs/greetings
+```

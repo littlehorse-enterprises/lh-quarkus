@@ -29,6 +29,7 @@
 - [Rest](examples/rest): How to run a wf run request from a rest endpoint.
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
 - [Child Workflow](examples/child-workflow): How to build parent and child workflows.
+- [Proxy](examples/proxy): How to configure LH Quarkus Proxy Extension.
 
 ## Versioning
 

@@ -10,7 +10,7 @@ public record ServerInformationResponse(String version) {
                         littleHorseVersion.getMinorVersion(),
                         littleHorseVersion.getPatchVersion(),
                         littleHorseVersion.hasPreReleaseIdentifier()
-                                ? littleHorseVersion.getPreReleaseIdentifier()
+                                ? "-" + littleHorseVersion.getPreReleaseIdentifier()
                                 : ""));
     }
 }
