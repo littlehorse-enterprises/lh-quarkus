@@ -4,6 +4,7 @@ dependencies {
     implementation "io.quarkus:quarkus-arc-deployment"
     implementation "io.quarkus:quarkus-rest-deployment"
     implementation "io.quarkus:quarkus-rest-jackson-deployment"
+    implementation "io.quarkus:quarkus-hibernate-validator-deployment"
     implementation "io.quarkus:quarkus-smallrye-openapi-spi"
     implementation project(":littlehorse-quarkus-proxy")
     implementation project(":littlehorse-quarkus-deployment")
