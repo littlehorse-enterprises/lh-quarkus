@@ -15,12 +15,14 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.enums.ParameterIn;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @Path("/proxy/tenants/{tenant}/wf-specs")
 public class WfSpecResource {
@@ -113,8 +115,14 @@ public class WfSpecResource {
                                                                         "https://littlehorse.io/docs/server/api#wfspec"))))
     })
     @Parameters(
-            value = {@Parameter(name = "tenant", in = ParameterIn.PATH, description = "Tenant name")
+            value = {
+                @Parameter(
+                        name = "tenant",
+                        in = ParameterIn.PATH,
+                        description = "Tenant name",
+                        schema = @Schema(type = SchemaType.STRING))
             })
+    @Tag(ref = "WfSpec")
     public Uni<WfSpec> get(@PathParam("wfSpecId") String wfSpecId) {
         return service.get(wfSpecId);
     }
@@ -145,8 +153,14 @@ public class WfSpecResource {
                                                                         "https://littlehorse.io/docs/server/api#wfspecidlist"))))
     })
     @Parameters(
-            value = {@Parameter(name = "tenant", in = ParameterIn.PATH, description = "Tenant name")
+            value = {
+                @Parameter(
+                        name = "tenant",
+                        in = ParameterIn.PATH,
+                        description = "Tenant name",
+                        schema = @Schema(type = SchemaType.STRING))
             })
+    @Tag(ref = "WfSpec")
     public Uni<WfSpecIdList> search(
             @Parameter(description = "Maximum number of workflow specs to return")
                     @QueryParam("limit")

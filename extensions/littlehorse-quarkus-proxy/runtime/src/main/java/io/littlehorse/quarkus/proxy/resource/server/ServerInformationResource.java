@@ -5,6 +5,8 @@ import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+
 @Path("/proxy/version")
 public class ServerInformationResource {
 
@@ -15,6 +17,7 @@ public class ServerInformationResource {
     }
 
     @GET
+    @Tag(ref = "Version")
     public Uni<ServerInformationResponse> get() {
         return service.get();
     }
