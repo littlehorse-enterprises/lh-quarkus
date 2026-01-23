@@ -21,8 +21,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: "corretto"
-          java-version: "21"
+          distribution: "graalvm"
+          java-version: "25"
 
       - name: Build Jar
         run: ./gradlew restful-gateway:build
@@ -34,8 +34,7 @@ jobs:
           -Dquarkus.package.runner-suffix=-run
           -Dquarkus.package.output-name=quarkus
           -Dquarkus.package.jar.enabled=false
-          -Dquarkus.native.container-build=true
-          -Dquarkus.native.builder-image=quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21
+          -Dquarkus.native.container-build=false
 
       - name: Build and Publish
         uses: littlehorse-enterprises/publish-image@v1

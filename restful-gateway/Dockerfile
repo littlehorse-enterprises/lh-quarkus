@@ -1,4 +1,4 @@
-FROM amazoncorretto:21
+FROM amazoncorretto:25
 
 RUN yum install findutils -y && \
     yum clean all && \
