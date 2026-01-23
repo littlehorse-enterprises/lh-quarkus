@@ -35,6 +35,7 @@ jobs:
           -Dquarkus.package.output-name=quarkus
           -Dquarkus.package.jar.enabled=false
           -Dquarkus.native.container-build=true
+          -Dquarkus.native.builder-image=quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21
 
       - name: Build and Publish
         uses: littlehorse-enterprises/publish-image@v1
