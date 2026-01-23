@@ -36,6 +36,20 @@ docker compose up -d
 ./gradlew test
 ```
 
+## Integration Tests
+
+Execute tests:
+
+```shell
+./gradlew integration-tests:quarkusIntTest
+```
+
+Execute native tests:
+
+```shell
+./gradlew integration-tests:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
+```
+
 ## Publish Locally
 
 ```shell
@@ -48,6 +62,36 @@ docker compose up -d
 
 ```shell
 ./gradlew spotlessApply
+```
+
+## Proxy
+
+Execute it:
+
+```shell
+./gradlew proxy:quarkusDev
+```
+
+Get server version:
+
+```shell
+http :8080/proxy/version
+```
+
+> Equivalent to `lhctl version`
+
+Get wfSpec:
+
+```shell
+http :8080/proxy/tenants/default/wf-specs/greetings
+```
+
+> Equivalent to `lhctl get wfSpec greetings`
+
+Pass the token in the http request ([Bearer auth](https://httpie.io/docs/cli/bearer-auth)):
+
+```shell
+http -A bearer -a $TOKEN :8080/proxy/tenants/default/wf-specs/greetings
 ```
 
 ## Links

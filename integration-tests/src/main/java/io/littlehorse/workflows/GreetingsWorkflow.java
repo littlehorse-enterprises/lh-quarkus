@@ -1,24 +1,35 @@
 package io.littlehorse.workflows;
 
 import static io.littlehorse.proxy.dev.GreetingsTask.GREETINGS_TASK;
-import static io.littlehorse.proxy.dev.PrintTask.PRINT_TASK;
 
+import io.littlehorse.quarkus.workflow.LHExponentialBackoffRetry;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
 import io.littlehorse.sdk.wfsdk.TaskNodeOutput;
 import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 
-@LHWorkflow(GreetingsWorkflow.GREETINGS_WORKFLOW)
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+@LHWorkflow(
+        value = GreetingsWorkflow.GREETINGS_WORKFLOW,
+        defaultTaskExponentialBackoffRetry =
+                @LHExponentialBackoffRetry(
+                        baseIntervalMs = "${retry.base.interval.ms}",
+                        maxDelayMs = "${retry.max.delay.ms}",
+                        multiplier = "${retry.multiplier}"))
 public class GreetingsWorkflow implements LHWorkflowDefinition {
 
     public static final String NAME_VARIABLE = "name";
     public static final String GREETINGS_WORKFLOW = "greetings";
 
+    @ConfigProperty(name = "task.print.name")
+    String taskPrintName;
+
     @Override
     public void define(WorkflowThread wf) {
         WfRunVariable name = wf.declareStr(NAME_VARIABLE);
         TaskNodeOutput message = wf.execute(GREETINGS_TASK, name);
-        wf.execute(PRINT_TASK, message);
+        wf.execute(taskPrintName, message);
     }
 }

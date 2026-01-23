@@ -1,35 +1,46 @@
 # LittleHorse Extensions for Quarkus
 
-<a href="https://github.com/littlehorse-enterprises/lh-quarkus"><img alt="github" src="https://img.shields.io/badge/GitHub-blue?logo=github&logoColor=white"></a>
+<a href="https://github.com/littlehorse-enterprises/lh-quarkus"><img alt="github" src="https://img.shields.io/badge/GitHub-blueviolet?logo=github&logoColor=white"></a>
 <a href="https://quarkus.io/"><img alt="quarkus" src="https://img.shields.io/badge/Quarkus-ff004a?logo=quarkus&logoColor=white"/></a>
-<a href="https://littlehorse.io/"><img alt="littlehorse" src="https://raw.githubusercontent.com/littlehorse-enterprises/littlehorse/refs/heads/master/img/badges/gray.svg"/></a>
+<a href="https://littlehorse.io/"><img alt="littlehorse" src="https://raw.githubusercontent.com/littlehorse-enterprises/littlehorse/refs/heads/master/img/badges/blue.svg"/></a>
 
 ## Table of Content
 
 <!-- TOC -->
 * [LittleHorse Extensions for Quarkus](#littlehorse-extensions-for-quarkus)
   * [Table of Content](#table-of-content)
-  * [Extensions](#extensions)
   * [Examples](#examples)
+  * [Extensions](#extensions)
+  * [Proxy](#proxy)
   * [Versioning](#versioning)
   * [Development](#development)
   * [License](#license)
 <!-- TOC -->
 
+## Examples
+
+- [Basic Example](examples/basic): How to run a task and register a workflow.
+- [Child Workflow](examples/child-workflow): How to build parent and child workflows.
+- [Reactive](examples/reactive): How to use `LittleHorseReactiveStub` object.
+- [Rest](examples/rest): How to run a wf run request from a rest endpoint.
+- [User Tasks](examples/user-tasks): How to use and register user tasks.
+
 ## Extensions
+
+<a href="https://central.sonatype.com/search?q=littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/badge/central-orange?logo=sonatype&logoColor=white"></a>
 
 - [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on Quarkus and LittleHorse.
 - [LittleHorse Quarkus Proxy](extensions/littlehorse-quarkus-proxy): RESTful reverse proxy for LittleHorse.
 
-## Examples
+## Proxy
 
-- [Basic Example](examples/basic): How to run a task and register a workflow.
-- [Integration Tests](examples/integration-tests): How to perform integration tests with LH Testcontainers.
-- [Reactive](examples/reactive): How to use `LittleHorseReactiveStub` object.
-- [Rest](examples/rest): How to run a wf run request from a rest endpoint.
-- [User Tasks](examples/user-tasks): How to use and register user tasks.
-- [Child Workflow](examples/child-workflow): How to build parent and child workflows.
-- [Proxy](examples/proxy): How to configure LH Quarkus Proxy Extension.
+<a href="https://github.com/orgs/littlehorse-enterprises/packages?repo_name=lh-quarkus"><img alt="GitHub" src="https://img.shields.io/badge/ghcr-orange?logo=docker&logoColor=white"></a>
+
+[LittleHorse Server Proxy](extensions/littlehorse-quarkus-proxy) is RESTful reverse proxy for [LittleHorse](https://littlehorse.io/).
+
+```shell
+docker pull ghcr.io/littlehorse-enterprises/lh-server-proxy:latest
+```
 
 ## Versioning
 
@@ -47,6 +58,6 @@ For development instructions go to [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## License
 
-<a href="https://github.com/littlehorse-enterprises/lh-quarkus/blob/main/LICENSE.md"><img alt="Apache-2.0" src="https://img.shields.io/github/license/littlehorse-enterprises/lh-quarkus?label=covered%20by"></a>
+<a href="https://github.com/littlehorse-enterprises/lh-quarkus/blob/main/LICENSE.md"><img alt="Apache-2.0" src="https://img.shields.io/github/license/littlehorse-enterprises/lh-quarkus?label=&logo=apache"></a>
 
 All code in this repository is licensed by the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) and is copyright of LittleHorse Enterprises LLC.

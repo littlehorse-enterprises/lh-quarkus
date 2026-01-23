@@ -55,7 +55,7 @@ allprojects {
     }
 }
 
-configure(lhExtensions.split(',').collectMany { ["littlehorse-$it", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
+configure(extensionProjects.split(',').collectMany { ["littlehorse-$it", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
     apply plugin: "signing"
     apply plugin: "maven-publish"
     apply plugin: "java-library"
@@ -76,7 +76,11 @@ configure(lhExtensions.split(',').collectMany { ["littlehorse-$it", "littlehorse
     }
 }
 
-configure(lhExamples.split(',').collect { project(":example-$it") }) {
+configure(exampleProjects.split(',').collect { project(":example-$it") }) {
+    apply plugin: "io.quarkus"
+}
+
+configure(otherProjects.split(',').collect { project(":$it") }) {
     apply plugin: "io.quarkus"
 
     quarkusIntTest {

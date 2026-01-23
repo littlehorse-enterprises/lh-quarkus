@@ -51,9 +51,9 @@ jobs:
           distribution: "corretto"
           java-version: ${{ matrix.java-version }}
       - name: Jar Tests
-        run: ./gradlew example-integration-tests:quarkusIntTest
+        run: ./gradlew integration-tests:quarkusIntTest
       - name: Native Tests
         run: >-
-          ./gradlew example-integration-tests:quarkusIntTest
+          ./gradlew integration-tests:quarkusIntTest
           -Dquarkus.native.enabled=true
           -Dquarkus.package.jar.enabled=false
