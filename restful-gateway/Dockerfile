@@ -1,4 +1,4 @@
-FROM amazoncorretto:17
+FROM amazoncorretto:21
 
 RUN yum install findutils -y && \
     yum clean all && \
@@ -17,4 +17,4 @@ COPY build/quarkus-app/quarkus/ /gateway/quarkus/
 COPY --chmod=0755 build/quarkus-run /gateway/
 
 ENTRYPOINT ["/gateway/docker-entrypoint.sh"]
-CMD ["jvm"]
+CMD ["native"]
