@@ -12,7 +12,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: "corretto"
+          distribution: "graalvm"
           java-version: "17"
       - name: Format
         run: ./gradlew spotlessJavaCheck
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Java ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
-          distribution: "corretto"
+          distribution: "graalvm"
           java-version: ${{ matrix.java-version }}
       - name: Tests
         run: ./gradlew -x spotlessJavaCheck test
@@ -49,7 +49,7 @@ jobs:
       - name: Setup Java ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
-          distribution: "corretto"
+          distribution: "graalvm"
           java-version: ${{ matrix.java-version }}
       - name: Jar Tests
         run: ./gradlew integration-tests:quarkusIntTest

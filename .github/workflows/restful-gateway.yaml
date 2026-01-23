@@ -21,20 +21,19 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: "corretto"
+          distribution: "graalvm"
           java-version: "17"
 
       - name: Build Jar
-        run: ./gradlew -x restful-gateway:build
+        run: ./gradlew restful-gateway:build
 
       - name: Build Native
         run: >
-          ./gradlew -x restful-gateway:build
+          ./gradlew restful-gateway:build
           -Dquarkus.native.enabled=true
           -Dquarkus.package.runner-suffix=-run
           -Dquarkus.package.output-name=quarkus
           -Dquarkus.package.jar.enabled=false
-          -Dquarkus.native.container-build=true
 
       - name: Build and Publish
         uses: littlehorse-enterprises/publish-image@v1
