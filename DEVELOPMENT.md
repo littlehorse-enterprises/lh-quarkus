@@ -72,6 +72,14 @@ Execute it:
 ./gradlew restful-gateway:quarkusDev
 ```
 
+> Swagger UI at http://localhost:8080/q/swagger-ui/
+
+Run Workflow:
+
+```shell
+lhctl run restful-gateway-demo-workflow
+```
+
 Get server version:
 
 ```shell
@@ -84,9 +92,19 @@ Get wfSpec:
 
 ```shell
 http :8080/gateway/tenants/default/wf-specs/greetings
+http :8080/gateway/tenants/default/wf-specs/greetings/versions/0.0
 ```
 
-> Equivalent to `lhctl get wfSpec greetings`
+> Equivalent to `lhctl get wfSpec greetings` and `lhctl get wfSpec greetings --majorVersion 0 --revision 0`
+
+Search wfSpec:
+
+```shell
+http :8080/gateway/tenants/default/wf-specs
+http :8080/gateway/tenants/default/wf-specs limit==1 prefix==greeting
+```
+
+> Equivalent to `lhctl search wfSpec` and `lhctl search wfSpec --limit 1 --prefix greetings`
 
 Pass the token in the http request ([Bearer auth](https://httpie.io/docs/cli/bearer-auth)):
 

@@ -1,6 +1,6 @@
 # LittleHorse Quarkus RESTful Gateway Extension
 
-This is RESTful Gateway for [LittleHorse](https://littlehorse.io/).
+A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
 
 # Table of Content
 
@@ -8,6 +8,7 @@ This is RESTful Gateway for [LittleHorse](https://littlehorse.io/).
 * [LittleHorse Quarkus RESTful Gateway Extension](#littlehorse-quarkus-restful-gateway-extension)
 * [Table of Content](#table-of-content)
 * [Installation](#installation)
+* [OpenAPI](#openapi)
 * [Configurations](#configurations)
   * [Passing Configurations](#passing-configurations)
   * [LittleHorse Client Configurations](#littlehorse-client-configurations)
@@ -33,6 +34,33 @@ Maven:
     <artifactId>littlehorse-quarkus-restful-gateway</artifactId>
     <version>${lhVersion}</version>
 </dependency>
+```
+
+# OpenAPI
+
+Enable [OpenAPI](https://quarkus.io/guides/openapi-swaggerui)
+adding `io.quarkus:quarkus-smallrye-openapi` to your project's dependencies.
+Check [SmallRye OpenAPI Extension](https://quarkus.io/extensions/io.quarkus/quarkus-smallrye-openapi/).
+
+Gradle:
+
+```groovy
+implementation "io.quarkus:quarkus-smallrye-openapi"
+```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-smallrye-openapi</artifactId>
+</dependency>
+```
+
+Once your application is started, you can make a request to the default `/q/openapi` endpoint:
+
+```shell
+curl http://localhost:8080/q/openapi
 ```
 
 # Configurations

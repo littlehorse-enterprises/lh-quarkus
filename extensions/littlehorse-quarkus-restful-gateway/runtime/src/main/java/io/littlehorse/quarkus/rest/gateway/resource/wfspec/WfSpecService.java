@@ -5,6 +5,7 @@ import io.littlehorse.quarkus.rest.gateway.protobuf.ByteStringUtils;
 import io.littlehorse.sdk.common.proto.GetLatestWfSpecRequest;
 import io.littlehorse.sdk.common.proto.SearchWfSpecRequest;
 import io.littlehorse.sdk.common.proto.WfSpec;
+import io.littlehorse.sdk.common.proto.WfSpecId;
 import io.littlehorse.sdk.common.proto.WfSpecIdList;
 import io.smallrye.mutiny.Uni;
 
@@ -23,9 +24,19 @@ public class WfSpecService {
     }
 
     public Uni<WfSpec> get(String wfSpecId) {
-        return context.getLittleHorseReactiveStub()
-                .getLatestWfSpec(
-                        GetLatestWfSpecRequest.newBuilder().setName(wfSpecId).build());
+        GetLatestWfSpecRequest request =
+                GetLatestWfSpecRequest.newBuilder().setName(wfSpecId).build();
+        return context.getLittleHorseReactiveStub().getLatestWfSpec(request);
+    }
+
+    public Uni<WfSpec> get(String wfSpecId, String version) {
+        WorkflowVersion workflowVersion = WorkflowVersion.of(version);
+        WfSpecId request = WfSpecId.newBuilder()
+                .setName(wfSpecId)
+                .setMajorVersion(workflowVersion.getMajorVersion())
+                .setRevision(workflowVersion.getRevision())
+                .build();
+        return context.getLittleHorseReactiveStub().getWfSpec(request);
     }
 
     public Uni<WfSpecIdList> search(String prefix, String bookmark, Integer limit) {

@@ -47,6 +47,35 @@ class RESTfulGatewayIT {
     }
 
     @Test
+    void shouldNotFoundWfSpec() {
+        given().pathParam("tenant", "default")
+                .pathParam("wfSpecId", "not-a-workflow")
+                .when()
+                .get("/gateway/tenants/{tenant}/wf-specs/{wfSpecId}")
+                .then()
+                .statusCode(404)
+                .log()
+                .all();
+    }
+
+    @Test
+    void shouldGetWfSpecFromWfSpecNameAndVersion() {
+        String wfSpecName = "greetings";
+        String version = "0.0";
+        given().pathParam("tenant", "default")
+                .pathParam("wfSpecId", wfSpecName)
+                .pathParam("version", version)
+                .when()
+                .get("/gateway/tenants/{tenant}/wf-specs/{wfSpecId}/versions/{version}")
+                .then()
+                .statusCode(200)
+                .body("id.name", is(wfSpecName))
+                .body("status", is("ACTIVE"))
+                .log()
+                .all();
+    }
+
+    @Test
     void shouldSearchAllWfSpec() {
         given().pathParam("tenant", "default")
                 .when()
