@@ -1,6 +1,21 @@
 # User Tasks Example
 
 This example shows you how to use LH and User tasks on quarkus.
+Annotating a class as `@LHUserTaskForm` is enough to make LH Quarkus extension
+to register it at runtime.
+
+```java
+@LHUserTaskForm(ApproveForm.APPROVE_USER_TASK)
+public class ApproveForm {
+
+    public static final String APPROVE_USER_TASK = "approve-user-task";
+
+    @UserTaskField(
+            displayName = "Approved?",
+            description = "Reply 'true' if this is an acceptable request.")
+    public boolean isApproved;
+}
+```
 
 ## Running the Example
 
