@@ -511,4 +511,34 @@ public class LittleHorseReactiveStub {
             io.littlehorse.sdk.common.proto.SearchCorrelatedEventRequest request) {
         return Uni.createFrom().future(futureStub.searchCorrelatedEvent(request));
     }
+
+    public Uni<io.littlehorse.sdk.common.proto.UserTaskRun> deleteUserTaskRunComment(
+            io.littlehorse.sdk.common.proto.DeleteUserTaskRunCommentRequest request) {
+        return Uni.createFrom().future(futureStub.deleteUserTaskRunComment(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.UserTaskRun> editUserTaskRunComment(
+            io.littlehorse.sdk.common.proto.EditUserTaskRunCommentRequest request) {
+        return Uni.createFrom().future(futureStub.editUserTaskRunComment(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.Checkpoint> getCheckpoint(
+            io.littlehorse.sdk.common.proto.CheckpointId request) {
+        return Uni.createFrom().future(futureStub.getCheckpoint(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.PutCheckpointResponse> putCheckpoint(
+            io.littlehorse.sdk.common.proto.PutCheckpointRequest request) {
+        return Uni.createFrom().future(futureStub.putCheckpoint(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.UserTaskRun> putUserTaskRunComment(
+            io.littlehorse.sdk.common.proto.PutUserTaskRunCommentRequest request) {
+        return Uni.createFrom().future(futureStub.putUserTaskRunComment(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.StructDefIdList> searchStructDef(
+            io.littlehorse.sdk.common.proto.SearchStructDefRequest request) {
+        return Uni.createFrom().future(futureStub.searchStructDef(request));
+    }
 }
