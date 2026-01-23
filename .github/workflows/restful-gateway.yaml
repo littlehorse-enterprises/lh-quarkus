@@ -21,7 +21,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: "graalvm"
+          distribution: "corretto"
           java-version: "17"
 
       - name: Build Jar
@@ -34,6 +34,7 @@ jobs:
           -Dquarkus.package.runner-suffix=-run
           -Dquarkus.package.output-name=quarkus
           -Dquarkus.package.jar.enabled=false
+          -Dquarkus.native.container-build=true
 
       - name: Build and Publish
         uses: littlehorse-enterprises/publish-image@v1

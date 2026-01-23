@@ -37,7 +37,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: "graalvm"
+          distribution: "corretto"
           java-version: "17"
       - name: Publish
         env:
