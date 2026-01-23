@@ -64,18 +64,18 @@ Execute native tests:
 ./gradlew spotlessApply
 ```
 
-## Proxy
+## RESTful Gateway
 
 Execute it:
 
 ```shell
-./gradlew proxy:quarkusDev
+./gradlew restful-gateway:quarkusDev
 ```
 
 Get server version:
 
 ```shell
-http :8080/proxy/version
+http :8080/gateway/version
 ```
 
 > Equivalent to `lhctl version`
@@ -83,7 +83,7 @@ http :8080/proxy/version
 Get wfSpec:
 
 ```shell
-http :8080/proxy/tenants/default/wf-specs/greetings
+http :8080/gateway/tenants/default/wf-specs/greetings
 ```
 
 > Equivalent to `lhctl get wfSpec greetings`
@@ -91,7 +91,7 @@ http :8080/proxy/tenants/default/wf-specs/greetings
 Pass the token in the http request ([Bearer auth](https://httpie.io/docs/cli/bearer-auth)):
 
 ```shell
-http -A bearer -a $TOKEN :8080/proxy/tenants/default/wf-specs/greetings
+http -A bearer -a $TOKEN :8080/gateway/tenants/default/wf-specs/greetings
 ```
 
 ## Links

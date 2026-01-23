@@ -1,6 +1,6 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.proxy.dev.GreetingsTask.GREETINGS_TASK;
+import static io.littlehorse.tasks.GreetingsTask.GREETINGS_TASK;
 
 import io.littlehorse.quarkus.workflow.LHExponentialBackoffRetry;
 import io.littlehorse.quarkus.workflow.LHWorkflow;

@@ -1,8 +1,8 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.proxy.dev.JsonTask.RETURN_JSON_ARRAY;
-import static io.littlehorse.proxy.dev.JsonTask.RETURN_JSON_LIST;
-import static io.littlehorse.proxy.dev.JsonTask.RETURN_JSON_OBJECT;
+import static io.littlehorse.tasks.JsonTask.RETURN_JSON_ARRAY;
+import static io.littlehorse.tasks.JsonTask.RETURN_JSON_LIST;
+import static io.littlehorse.tasks.JsonTask.RETURN_JSON_OBJECT;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;

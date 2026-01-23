@@ -11,7 +11,7 @@
   * [Table of Content](#table-of-content)
   * [Examples](#examples)
   * [Extensions](#extensions)
-  * [Proxy](#proxy)
+  * [RESTful Gateway](#restful-gateway)
   * [Versioning](#versioning)
   * [Development](#development)
   * [License](#license)
@@ -30,16 +30,16 @@
 <a href="https://central.sonatype.com/search?q=littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/badge/central-orange?logo=sonatype&logoColor=white"></a>
 
 - [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on Quarkus and LittleHorse.
-- [LittleHorse Quarkus Proxy](extensions/littlehorse-quarkus-proxy): RESTful reverse proxy for LittleHorse.
+- [LittleHorse Quarkus RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway): RESTful gateway for LittleHorse.
 
-## Proxy
+## RESTful Gateway
 
 <a href="https://github.com/orgs/littlehorse-enterprises/packages?repo_name=lh-quarkus"><img alt="GitHub" src="https://img.shields.io/badge/ghcr-orange?logo=docker&logoColor=white"></a>
 
-[LittleHorse Server Proxy](extensions/littlehorse-quarkus-proxy) is RESTful reverse proxy for [LittleHorse](https://littlehorse.io/).
+[LittleHorse RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway) is RESTful gateway for [LittleHorse](https://littlehorse.io/).
 
 ```shell
-docker pull ghcr.io/littlehorse-enterprises/lh-server-proxy:latest
+docker pull ghcr.io/littlehorse-enterprises/lh-restful-gateway:latest
 ```
 
 ## Versioning

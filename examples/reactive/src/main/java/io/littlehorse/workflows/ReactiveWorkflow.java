@@ -1,6 +1,6 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.proxy.dev.PrintTask.PRINT_TASK;
+import static io.littlehorse.tasks.PrintTask.PRINT_TASK;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
