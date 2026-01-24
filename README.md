@@ -36,11 +36,13 @@
 
 <a href="https://github.com/orgs/littlehorse-enterprises/packages?repo_name=lh-quarkus"><img alt="GitHub" src="https://img.shields.io/badge/ghcr-orange?logo=docker&logoColor=white"></a>
 
-[LittleHorse RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway) is RESTful gateway for [LittleHorse](https://littlehorse.io/).
+This gateway allows you to interact with [LittleHorse](https://littlehorse.io/) in a RESTful style.
+Check the configurations at [LittleHorse RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway).
 
 ```shell
 docker pull ghcr.io/littlehorse-enterprises/lh-restful-gateway:latest
 ```
+
 
 ## Versioning
 
