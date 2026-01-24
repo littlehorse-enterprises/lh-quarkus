@@ -30,11 +30,11 @@ public class WfSpecRepository {
     }
 
     public Uni<WfSpec> get(String name, String version) {
-        WorkflowVersion workflowVersion = WorkflowVersion.of(version);
+        WorkflowVersion workflowVersion = new WorkflowVersion(version);
         WfSpecId request = WfSpecId.newBuilder()
                 .setName(name)
-                .setMajorVersion(workflowVersion.getMajorVersion())
-                .setRevision(workflowVersion.getRevision())
+                .setMajorVersion(workflowVersion.majorVersion())
+                .setRevision(workflowVersion.revision())
                 .build();
         return context.getLittleHorseReactiveStub().getWfSpec(request);
     }

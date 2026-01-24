@@ -110,7 +110,9 @@ public class WfSpecResource {
 
     @GET
     @Path("/{name}")
+    @APIResponse(responseCode = "400", description = "Bad request")
     @APIResponse(responseCode = "404", description = "Record not found")
+    @APIResponse(responseCode = "500", description = "Internal error")
     @APIResponse(
             responseCode = "200",
             description = "Record retrieved successfully",
@@ -136,7 +138,9 @@ public class WfSpecResource {
 
     @GET
     @Path("/{name}/versions/{version}")
+    @APIResponse(responseCode = "400", description = "Bad request")
     @APIResponse(responseCode = "404", description = "Record not found")
+    @APIResponse(responseCode = "500", description = "Internal error")
     @APIResponse(
             responseCode = "200",
             description = "Record retrieved successfully",
@@ -168,6 +172,8 @@ public class WfSpecResource {
     }
 
     @GET
+    @APIResponse(responseCode = "400", description = "Bad request")
+    @APIResponse(responseCode = "500", description = "Internal error")
     @APIResponse(
             responseCode = "200",
             description = "List retrieved successfully",

@@ -14,7 +14,7 @@ class WorkflowVersionTest {
     @Test
     void shouldThrowExceptionIfVersionIsInvalid() {
         BadRequestException result = assertThrows(BadRequestException.class, () -> {
-            WorkflowVersion.of("invalidVersion");
+            new WorkflowVersion("invalidVersion");
         });
 
         assertThat(result.getMessage()).isEqualTo(ERROR_MESSAGE);
@@ -23,7 +23,7 @@ class WorkflowVersionTest {
     @Test
     void shouldThrowExceptionIfVersionIsEmpty() {
         BadRequestException result = assertThrows(BadRequestException.class, () -> {
-            WorkflowVersion.of("");
+            new WorkflowVersion("");
         });
 
         assertThat(result.getMessage()).isEqualTo(ERROR_MESSAGE);
@@ -32,9 +32,25 @@ class WorkflowVersionTest {
     @Test
     void shouldThrowExceptionIfVersionIsNull() {
         BadRequestException result = assertThrows(BadRequestException.class, () -> {
-            WorkflowVersion.of(null);
+            new WorkflowVersion(null);
         });
 
         assertThat(result.getMessage()).isEqualTo(ERROR_MESSAGE);
+    }
+
+    @Test
+    void shouldParseVersionToInt() {
+        WorkflowVersion workflowVersion = new WorkflowVersion("1.4");
+
+        assertThat(workflowVersion.majorVersion()).isEqualTo(1);
+        assertThat(workflowVersion.revision()).isEqualTo(4);
+    }
+
+    @Test
+    void shouldToString() {
+        String expected = "5.3";
+        WorkflowVersion workflowVersion = new WorkflowVersion(expected);
+
+        assertThat(workflowVersion.toString()).isEqualTo(expected);
     }
 }

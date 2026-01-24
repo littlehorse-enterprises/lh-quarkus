@@ -74,54 +74,85 @@ Execute it:
 
 > Swagger UI at http://localhost:8080/q/swagger-ui/
 
-Run Workflow:
-
-```shell
-lhctl run restful-gateway-demo-workflow
-```
-
-Get server version:
+### Get server version:
 
 ```shell
 http :8080/gateway/version
 ```
 
-> Equivalent to `lhctl version`
+Equivalent to:
 
-Get wfSpec:
+```shell
+lhctl version
+```
+
+### Get wfSpec:
 
 ```shell
 http :8080/gateway/tenants/default/wf-specs/greetings
 http :8080/gateway/tenants/default/wf-specs/greetings/versions/0.0
 ```
 
-> Equivalent to `lhctl get wfSpec greetings` and `lhctl get wfSpec greetings --majorVersion 0 --revision 0`
+Equivalent to:
 
-Search wfSpec:
+```shell
+lhctl get wfSpec greetings
+lhctl get wfSpec greetings --majorVersion 0 --revision 0
+```
+
+### Search wfSpec:
 
 ```shell
 http :8080/gateway/tenants/default/wf-specs
 http :8080/gateway/tenants/default/wf-specs limit==1 prefix==greetings
 ```
 
-> Equivalent to `lhctl search wfSpec` and `lhctl search wfSpec --limit 1 --prefix greetings`
+Equivalent to:
 
-Get taskDef:
+```shell
+lhctl search wfSpec
+lhctl search wfSpec --limit 1 --prefix greetings
+```
+
+### Get taskDef:
 
 ```shell
 http :8080/gateway/tenants/default/task-defs/greetings
 ```
 
-> Equivalent to `lhctl get taskDef greetings`
+Equivalent to:
 
-Search taskDef:
+```shell
+lhctl get taskDef greetings
+```
+
+### Search taskDef:
 
 ```shell
 http :8080/gateway/tenants/default/task-defs
 http :8080/gateway/tenants/default/task-defs limit==1 prefix==greetings
 ```
 
-> Equivalent to `lhctl search taskDef` and `lhctl search taskDef --limit 1 greetings`
+Equivalent to:
+
+```shell
+lhctl search taskDef
+lhctl search taskDef --limit 1 greetings
+```
+
+### Run wf:
+
+```shell
+http POST :8080/gateway/tenants/default/wf-runs wfSpecName=restful-gateway-demo-workflow
+```
+
+Equivalent to:
+
+```shell
+lhctl run restful-gateway-demo-workflow
+```
+
+### OAuth
 
 Pass the token in the http request ([Bearer auth](https://httpie.io/docs/cli/bearer-auth)):
 

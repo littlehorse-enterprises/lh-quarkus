@@ -2,42 +2,32 @@ package io.littlehorse.quarkus.rest.gateway.resource.wfspec;
 
 import jakarta.ws.rs.BadRequestException;
 
-public class WorkflowVersion {
-    private final int majorVersion;
-    private final int revision;
+public record WorkflowVersion(String version) {
 
-    private WorkflowVersion(int majorVersion, int revision) {
-        this.majorVersion = majorVersion;
-        this.revision = revision;
+    public WorkflowVersion(int majorVersion, int revision) {
+        this("%d.%d".formatted(majorVersion, revision));
     }
 
-    public static WorkflowVersion of(String version) {
+    public WorkflowVersion {
         if (version == null || !version.matches("\\d+\\.\\d+")) {
             throw new BadRequestException("Version should be in the format major.revision");
         }
-
-        String[] versionParts = version.split("\\.");
-        return new WorkflowVersion(
-                Integer.parseInt(versionParts[0]), Integer.parseInt(versionParts[1]));
     }
 
-    public static WorkflowVersion of(int majorVersion, int revision) {
-        return new WorkflowVersion(majorVersion, revision);
-    }
-
+    @Override
     public String toString() {
-        return majorVersion + "." + revision;
+        return version;
     }
 
-    public int getMajorVersion() {
-        return majorVersion;
+    public int majorVersion() {
+        return getVersionPart(WorkflowVersionPart.MAJOR);
     }
 
-    public int getRevision() {
-        return revision;
+    public int revision() {
+        return getVersionPart(WorkflowVersionPart.REVISION);
     }
 
-    public String get() {
-        return toString();
+    private int getVersionPart(WorkflowVersionPart part) {
+        return Integer.parseInt(version.split("\\.")[part.ordinal()]);
     }
 }

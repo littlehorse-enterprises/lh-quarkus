@@ -7,6 +7,8 @@ import io.littlehorse.quarkus.rest.gateway.resource.server.ServerInformationRepo
 import io.littlehorse.quarkus.rest.gateway.resource.server.ServerInformationResource;
 import io.littlehorse.quarkus.rest.gateway.resource.task.TaskDefRepository;
 import io.littlehorse.quarkus.rest.gateway.resource.task.TaskDefResource;
+import io.littlehorse.quarkus.rest.gateway.resource.wfrun.WfRunRepository;
+import io.littlehorse.quarkus.rest.gateway.resource.wfrun.WfRunResource;
 import io.littlehorse.quarkus.rest.gateway.resource.wfspec.WfSpecRepository;
 import io.littlehorse.quarkus.rest.gateway.resource.wfspec.WfSpecResource;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
@@ -27,6 +29,7 @@ public class LHRESTfulGatewayExtensionProcessor {
                 ServerInformationResource.class.getName(),
                 TaskDefResource.class.getName(),
                 WfSpecResource.class.getName(),
+                WfRunResource.class.getName(),
                 GrpcExceptionMapper.class.getName());
     }
 
@@ -41,6 +44,8 @@ public class LHRESTfulGatewayExtensionProcessor {
                 WfSpecResource.class,
                 WfSpecRepository.class,
                 TaskDefResource.class,
-                TaskDefRepository.class);
+                TaskDefRepository.class,
+                WfRunRepository.class,
+                WfRunResource.class);
     }
 }
