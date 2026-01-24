@@ -143,7 +143,7 @@ lhctl search taskDef --limit 1 restful-gateway-demo-task
 ### Run wf:
 
 ```shell
-http POST :8080/gateway/tenants/default/wf-runs wfSpecName=restful-gateway-demo-workflow 'variables[name]'=Anakin id=my-id
+http POST :8080/gateway/tenants/default/wf-runs wfSpecName=restful-gateway-demo-workflow 'variables[name]'=Anakin id=my-workflow-id
 ```
 
 Equivalent to:
@@ -155,25 +155,53 @@ lhctl run restful-gateway-demo-workflow
 ### Get wfRun:
 
 ```shell
-http :8080/gateway/tenants/default/wf-runs/my-id
+http :8080/gateway/tenants/default/wf-runs/my-workflow-id
 ```
 
 Equivalent to:
 
 ```shell
-lhctl get wfRun my-id
+lhctl get wfRun my-workflow-id
 ```
 
 ### Get variables:
 
 ```shell
-http :8080/gateway/tenants/default/wf-runs/my-id/variables
+http :8080/gateway/tenants/default/wf-runs/my-workflow-id/variables
 ```
 
 Equivalent to:
 
 ```shell
-lhctl list variable my-id
+lhctl list variable my-workflow-id
+```
+
+### External events:
+
+Run wf:
+
+```shell
+http POST :8080/gateway/tenants/default/wf-runs wfSpecName=restful-gateway-external-event-demo-workflow id=my-external-event-id
+```
+
+Gent wf (should be running):
+
+```shell
+http :8080/gateway/tenants/default/wf-runs/my-external-event-id
+```
+
+Post event:
+
+```shell
+http POST :8080/gateway/tenants/default/external-events externalEventDefName=restful-gateway-external-event-demo wfRunId=my-external-event-id
+```
+
+> Then the wf run should be completed.
+
+Equivalent to:
+
+```shell
+lhctl postEvent my-external-event-id restful-gateway-external-event-demo
 ```
 
 ### OAuth

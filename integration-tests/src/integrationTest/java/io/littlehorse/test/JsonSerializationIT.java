@@ -1,13 +1,18 @@
 package io.littlehorse.test;
 
+import static io.littlehorse.workflows.JsonWorkflow.JSON_WORKFLOW;
+import static io.littlehorse.workflows.JsonWorkflow.UNBLOCK_JSON_WORKFLOW;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.with;
 
 import io.littlehorse.common.ContainersTestResource;
 import io.littlehorse.common.InjectLittleHorseBlockingStub;
+import io.littlehorse.sdk.common.proto.ExternalEventDefId;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.ListVariablesRequest;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+import io.littlehorse.sdk.common.proto.PutExternalEventRequest;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
 import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.WfRun;
@@ -29,7 +34,12 @@ public class JsonSerializationIT {
     @Test
     void shouldSerializeJsonObjects() {
         WfRun wfRun = blockingStub.runWf(
-                RunWfRequest.newBuilder().setWfSpecName("json").build());
+                RunWfRequest.newBuilder().setWfSpecName(JSON_WORKFLOW).build());
+        blockingStub.putExternalEvent(PutExternalEventRequest.newBuilder()
+                .setWfRunId(wfRun.getId())
+                .setExternalEventDefId(
+                        ExternalEventDefId.newBuilder().setName(UNBLOCK_JSON_WORKFLOW))
+                .build());
 
         with().pollInterval(Duration.ofSeconds(1))
                 .ignoreExceptions()

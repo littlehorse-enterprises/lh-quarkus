@@ -15,12 +15,15 @@ public class JsonWorkflow implements LHWorkflowDefinition {
     public static final String CHILDREN_VARIABLE = "children";
     public static final String FAMILY_VARIABLE = "family";
     public static final String CHARACTER_VARIABLE = "character";
+    public static final String UNBLOCK_JSON_WORKFLOW = "unblock-json-workflow";
 
     @Override
     public void define(WorkflowThread wf) {
         WfRunVariable character = wf.declareJsonObj(CHARACTER_VARIABLE);
         WfRunVariable children = wf.declareJsonArr(CHILDREN_VARIABLE);
         WfRunVariable family = wf.declareJsonArr(FAMILY_VARIABLE);
+
+        wf.waitForEvent(UNBLOCK_JSON_WORKFLOW).registeredAs(null);
 
         character.assign(wf.execute(RETURN_JSON_OBJECT));
         children.assign(wf.execute(RETURN_JSON_ARRAY));

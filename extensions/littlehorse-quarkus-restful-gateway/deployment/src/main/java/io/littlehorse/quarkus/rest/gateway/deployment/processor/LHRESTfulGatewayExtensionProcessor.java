@@ -3,6 +3,8 @@ package io.littlehorse.quarkus.rest.gateway.deployment.processor;
 import io.littlehorse.quarkus.rest.gateway.context.TenantContext;
 import io.littlehorse.quarkus.rest.gateway.infrastructure.GrpcExceptionMapper;
 import io.littlehorse.quarkus.rest.gateway.infrastructure.ProtobufObjectMapperCustomizer;
+import io.littlehorse.quarkus.rest.gateway.resource.externalevent.ExternalEventRepository;
+import io.littlehorse.quarkus.rest.gateway.resource.externalevent.ExternalEventResource;
 import io.littlehorse.quarkus.rest.gateway.resource.server.ServerInformationRepository;
 import io.littlehorse.quarkus.rest.gateway.resource.server.ServerInformationResource;
 import io.littlehorse.quarkus.rest.gateway.resource.task.TaskDefRepository;
@@ -30,6 +32,7 @@ public class LHRESTfulGatewayExtensionProcessor {
                 TaskDefResource.class.getName(),
                 WfSpecResource.class.getName(),
                 WfRunResource.class.getName(),
+                ExternalEventResource.class.getName(),
                 GrpcExceptionMapper.class.getName());
     }
 
@@ -46,6 +49,8 @@ public class LHRESTfulGatewayExtensionProcessor {
                 TaskDefResource.class,
                 TaskDefRepository.class,
                 WfRunRepository.class,
-                WfRunResource.class);
+                WfRunResource.class,
+                ExternalEventResource.class,
+                ExternalEventRepository.class);
     }
 }
