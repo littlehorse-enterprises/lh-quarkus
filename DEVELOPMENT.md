@@ -101,10 +101,27 @@ Search wfSpec:
 
 ```shell
 http :8080/gateway/tenants/default/wf-specs
-http :8080/gateway/tenants/default/wf-specs limit==1 prefix==greeting
+http :8080/gateway/tenants/default/wf-specs limit==1 prefix==greetings
 ```
 
 > Equivalent to `lhctl search wfSpec` and `lhctl search wfSpec --limit 1 --prefix greetings`
+
+Get taskDef:
+
+```shell
+http :8080/gateway/tenants/default/task-defs/greetings
+```
+
+> Equivalent to `lhctl get taskDef greetings`
+
+Search taskDef:
+
+```shell
+http :8080/gateway/tenants/default/task-defs
+http :8080/gateway/tenants/default/task-defs limit==1 prefix==greetings
+```
+
+> Equivalent to `lhctl search taskDef` and `lhctl search taskDef --limit 1 greetings`
 
 Pass the token in the http request ([Bearer auth](https://httpie.io/docs/cli/bearer-auth)):
 

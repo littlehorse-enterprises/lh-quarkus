@@ -16,31 +16,18 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-class RESTfulGatewayIT {
-
-    private static final String LH_VERSION = System.getProperty("lhVersion", "latest");
-
-    @Test
-    void shouldGetServerVersion() {
-        given().when()
-                .get("/gateway/version")
-                .then()
-                .statusCode(200)
-                .body("version", is(LH_VERSION))
-                .log()
-                .all();
-    }
+class RESTfulWfSpecGatewayIT {
 
     @Test
     void shouldGetWfSpecFromWfSpecName() {
-        String wfSpecName = "greetings";
+        String name = "greetings";
         given().pathParam("tenant", "default")
-                .pathParam("wfSpecId", wfSpecName)
+                .pathParam("name", name)
                 .when()
-                .get("/gateway/tenants/{tenant}/wf-specs/{wfSpecId}")
+                .get("/gateway/tenants/{tenant}/wf-specs/{name}")
                 .then()
                 .statusCode(200)
-                .body("id.name", is(wfSpecName))
+                .body("id.name", is(name))
                 .body("status", is("ACTIVE"))
                 .log()
                 .all();
@@ -49,9 +36,9 @@ class RESTfulGatewayIT {
     @Test
     void shouldNotFoundWfSpec() {
         given().pathParam("tenant", "default")
-                .pathParam("wfSpecId", "not-a-workflow")
+                .pathParam("name", "not-a-workflow")
                 .when()
-                .get("/gateway/tenants/{tenant}/wf-specs/{wfSpecId}")
+                .get("/gateway/tenants/{tenant}/wf-specs/{name}")
                 .then()
                 .statusCode(404)
                 .log()
@@ -60,16 +47,16 @@ class RESTfulGatewayIT {
 
     @Test
     void shouldGetWfSpecFromWfSpecNameAndVersion() {
-        String wfSpecName = "greetings";
+        String name = "greetings";
         String version = "0.0";
         given().pathParam("tenant", "default")
-                .pathParam("wfSpecId", wfSpecName)
+                .pathParam("name", name)
                 .pathParam("version", version)
                 .when()
-                .get("/gateway/tenants/{tenant}/wf-specs/{wfSpecId}/versions/{version}")
+                .get("/gateway/tenants/{tenant}/wf-specs/{name}/versions/{version}")
                 .then()
                 .statusCode(200)
-                .body("id.name", is(wfSpecName))
+                .body("id.name", is(name))
                 .body("status", is("ACTIVE"))
                 .log()
                 .all();

@@ -8,10 +8,10 @@ import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class ServerInformationService {
+public class ServerInformationRepository {
     private final LittleHorseReactiveStub stub;
 
-    public ServerInformationService(LittleHorseReactiveStub stub) {
+    public ServerInformationRepository(LittleHorseReactiveStub stub) {
         this.stub = stub;
     }
 

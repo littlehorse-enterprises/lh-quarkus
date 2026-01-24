@@ -10,15 +10,15 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Path("/gateway/version")
 public class ServerInformationResource {
 
-    private final ServerInformationService service;
+    private final ServerInformationRepository repository;
 
-    public ServerInformationResource(ServerInformationService service) {
-        this.service = service;
+    public ServerInformationResource(ServerInformationRepository repository) {
+        this.repository = repository;
     }
 
     @GET
     @Tag(ref = "Version")
     public Uni<ServerInformationResponse> get() {
-        return service.get();
+        return repository.get();
     }
 }

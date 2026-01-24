@@ -28,14 +28,14 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 public class WfSpecResource {
 
     public static final String SEARCH_WFSPEC_EXAMPLE_RESPONSE = """
-                    {
-                      "results": [{
-                        "name": "greetings",
-                        "majorVersion": 0,
-                        "revision": 0
-                      }],
-                      "bookmark": "ChgIABIUEhIyL3dmLTAvMDAwMDAvMDAwMDA="
-                    }
+            {
+              "results": [{
+                "name": "greetings",
+                "majorVersion": 0,
+                "revision": 0
+              }],
+              "bookmark": "ChgIABIUEhIyL3dmLTAvMDAwMDAvMDAwMDA="
+            }
             """;
     public static final String GET_WFSPEC_EXAMPLE_RESPONSE = """
             {
@@ -102,14 +102,14 @@ public class WfSpecResource {
               "entrypointThreadName": "entrypoint"
             }
             """;
-    private final WfSpecService service;
+    private final WfSpecRepository repository;
 
-    public WfSpecResource(WfSpecService service) {
-        this.service = service;
+    public WfSpecResource(WfSpecRepository repository) {
+        this.repository = repository;
     }
 
     @GET
-    @Path("/{wfSpecId}")
+    @Path("/{name}")
     @APIResponse(responseCode = "404", description = "Record not found")
     @APIResponse(
             responseCode = "200",
@@ -130,12 +130,12 @@ public class WfSpecResource {
             description = "Tenant name",
             schema = @Schema(type = SchemaType.STRING))
     @Tag(ref = "WfSpec")
-    public Uni<WfSpec> get(@PathParam("wfSpecId") String wfSpecId) {
-        return service.get(wfSpecId);
+    public Uni<WfSpec> get(@PathParam("name") String name) {
+        return repository.get(name);
     }
 
     @GET
-    @Path("/{wfSpecId}/versions/{version}")
+    @Path("/{name}/versions/{version}")
     @APIResponse(responseCode = "404", description = "Record not found")
     @APIResponse(
             responseCode = "200",
@@ -157,14 +157,14 @@ public class WfSpecResource {
             schema = @Schema(type = SchemaType.STRING))
     @Tag(ref = "WfSpec")
     public Uni<WfSpec> get(
-            @PathParam("wfSpecId") @NotBlank String wfSpecId,
+            @PathParam("name") @NotBlank String name,
             @PathParam("version")
                     @NotBlank
                     @Pattern(
                             regexp = "\\d+\\.\\d+",
                             message = "Version should be in the format major.revision")
                     String version) {
-        return service.get(wfSpecId, version);
+        return repository.get(name, version);
     }
 
     @GET
@@ -188,17 +188,16 @@ public class WfSpecResource {
             schema = @Schema(type = SchemaType.STRING))
     @Tag(ref = "WfSpec")
     public Uni<WfSpecIdList> search(
-            @Parameter(description = "Maximum number of workflow specs to return")
+            @Parameter(description = "Maximum number of records to return")
                     @QueryParam("limit")
                     @Positive
                     @Max(100)
                     @DefaultValue("10")
                     Integer limit,
-            @Parameter(description = "Search prefix for workflow names") @QueryParam("prefix")
-                    String prefix,
+            @Parameter(description = "Search by prefix") @QueryParam("prefix") String prefix,
             @Parameter(description = "Bookmark for pagination, it is a base64 string")
                     @QueryParam("bookmark")
                     String bookmark) {
-        return service.search(prefix, bookmark, limit);
+        return repository.search(prefix, bookmark, limit);
     }
 }

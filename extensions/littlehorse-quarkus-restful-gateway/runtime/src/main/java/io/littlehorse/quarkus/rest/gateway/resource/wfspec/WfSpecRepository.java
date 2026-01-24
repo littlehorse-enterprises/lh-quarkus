@@ -15,24 +15,24 @@ import jakarta.ws.rs.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 
 @ApplicationScoped
-public class WfSpecService {
+public class WfSpecRepository {
 
     private final TenantContext context;
 
-    public WfSpecService(TenantContext context) {
+    public WfSpecRepository(TenantContext context) {
         this.context = context;
     }
 
-    public Uni<WfSpec> get(String wfSpecId) {
+    public Uni<WfSpec> get(String name) {
         GetLatestWfSpecRequest request =
-                GetLatestWfSpecRequest.newBuilder().setName(wfSpecId).build();
+                GetLatestWfSpecRequest.newBuilder().setName(name).build();
         return context.getLittleHorseReactiveStub().getLatestWfSpec(request);
     }
 
-    public Uni<WfSpec> get(String wfSpecId, String version) {
+    public Uni<WfSpec> get(String name, String version) {
         WorkflowVersion workflowVersion = WorkflowVersion.of(version);
         WfSpecId request = WfSpecId.newBuilder()
-                .setName(wfSpecId)
+                .setName(name)
                 .setMajorVersion(workflowVersion.getMajorVersion())
                 .setRevision(workflowVersion.getRevision())
                 .build();
