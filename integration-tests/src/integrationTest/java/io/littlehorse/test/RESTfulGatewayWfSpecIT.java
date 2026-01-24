@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-class RESTfulWfSpecGatewayIT {
+class RESTfulGatewayWfSpecIT {
 
     @Test
     void shouldGetWfSpecFromWfSpecName() {
