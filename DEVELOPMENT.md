@@ -89,67 +89,91 @@ lhctl version
 ### Get wfSpec:
 
 ```shell
-http :8080/gateway/tenants/default/wf-specs/greetings
-http :8080/gateway/tenants/default/wf-specs/greetings/versions/0.0
+http :8080/gateway/tenants/default/wf-specs/restful-gateway-demo-workflow
+http :8080/gateway/tenants/default/wf-specs/restful-gateway-demo-workflow/versions/0.0
 ```
 
 Equivalent to:
 
 ```shell
-lhctl get wfSpec greetings
-lhctl get wfSpec greetings --majorVersion 0 --revision 0
+lhctl get wfSpec restful-gateway-demo-workflow
+lhctl get wfSpec restful-gateway-demo-workflow --majorVersion 0 --revision 0
 ```
 
 ### Search wfSpec:
 
 ```shell
 http :8080/gateway/tenants/default/wf-specs
-http :8080/gateway/tenants/default/wf-specs limit==1 prefix==greetings
+http :8080/gateway/tenants/default/wf-specs limit==1 prefix==restful-gateway
 ```
 
 Equivalent to:
 
 ```shell
 lhctl search wfSpec
-lhctl search wfSpec --limit 1 --prefix greetings
+lhctl search wfSpec --limit 1 --prefix restful-gateway-demo-workflow
 ```
 
 ### Get taskDef:
 
 ```shell
-http :8080/gateway/tenants/default/task-defs/greetings
+http :8080/gateway/tenants/default/task-defs/restful-gateway-demo-task
 ```
 
 Equivalent to:
 
 ```shell
-lhctl get taskDef greetings
+lhctl get taskDef restful-gateway-demo-task
 ```
 
 ### Search taskDef:
 
 ```shell
 http :8080/gateway/tenants/default/task-defs
-http :8080/gateway/tenants/default/task-defs limit==1 prefix==greetings
+http :8080/gateway/tenants/default/task-defs limit==1 prefix==restful-gateway
 ```
 
 Equivalent to:
 
 ```shell
 lhctl search taskDef
-lhctl search taskDef --limit 1 greetings
+lhctl search taskDef --limit 1 restful-gateway-demo-task
 ```
 
 ### Run wf:
 
 ```shell
-http POST :8080/gateway/tenants/default/wf-runs wfSpecName=restful-gateway-demo-workflow
+http POST :8080/gateway/tenants/default/wf-runs wfSpecName=restful-gateway-demo-workflow 'variables[name]'=Anakin id=my-id
 ```
 
 Equivalent to:
 
 ```shell
 lhctl run restful-gateway-demo-workflow
+```
+
+### Get wfRun:
+
+```shell
+http :8080/gateway/tenants/default/wf-runs/my-id
+```
+
+Equivalent to:
+
+```shell
+lhctl get wfRun my-id
+```
+
+### Get variables:
+
+```shell
+http :8080/gateway/tenants/default/wf-runs/my-id/variables
+```
+
+Equivalent to:
+
+```shell
+lhctl list variable my-id
 ```
 
 ### OAuth

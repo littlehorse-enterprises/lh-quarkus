@@ -1,11 +1,14 @@
 package io.littlehorse.quarkus.rest.gateway.resource.wfrun;
 
+import io.littlehorse.sdk.common.proto.VariableList;
 import io.littlehorse.sdk.common.proto.WfRun;
 import io.smallrye.mutiny.Uni;
 
 import jakarta.validation.Valid;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
@@ -26,7 +29,7 @@ public class WfRunResource {
                  "id": "597bfc2a10c346f6a01a04a84c3b6ee6"
                },
                "wfSpecId": {
-                 "name": "restful-gateway-demo-workflow",
+                 "name": "greetings",
                  "majorVersion": 0,
                  "revision": 0
                },
@@ -36,7 +39,7 @@ public class WfRunResource {
                "startTime": "2026-01-24T15:38:35.421Z",
                "threadRuns": [{
                  "wfSpecId": {
-                   "name": "restful-gateway-demo-workflow",
+                   "name": "greetings",
                    "majorVersion": 0,
                    "revision": 0
                  },
@@ -52,6 +55,29 @@ public class WfRunResource {
                }],
                "pendingInterrupts": [],
                "pendingFailures": []
+            }
+            """;
+    private static final String GET_VARIABLES_EXAMPLE_RESPONSE = """
+            {
+              "results": [{
+                "id": {
+                  "wfRunId": {
+                    "id": "my-id"
+                  },
+                  "threadRunNumber": 0,
+                  "name": "name"
+                },
+                "value": {
+                  "str": "Anakin"
+                },
+                "createdAt": "2026-01-24T16:17:43.337Z",
+                "wfSpecId": {
+                  "name": "greetings",
+                  "majorVersion": 0,
+                  "revision": 0
+                },
+                "masked": false
+              }]
             }
             """;
 
@@ -87,5 +113,61 @@ public class WfRunResource {
     @Tag(ref = "WfRun")
     public Uni<WfRun> run(@Valid WfRunRequest request) {
         return repository.run(request);
+    }
+
+    @GET
+    @Path("/{id}/variables")
+    @APIResponse(responseCode = "400", description = "Bad request")
+    @APIResponse(responseCode = "404", description = "Record not found")
+    @APIResponse(responseCode = "500", description = "Internal error")
+    @APIResponse(
+            responseCode = "200",
+            description = "List retrieved successfully",
+            content =
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema =
+                                    @Schema(
+                                            examples = {GET_VARIABLES_EXAMPLE_RESPONSE},
+                                            externalDocs =
+                                                    @ExternalDocumentation(
+                                                            url =
+                                                                    "https://littlehorse.io/docs/server/api#variablelist"))))
+    @Parameter(
+            name = "tenant",
+            in = ParameterIn.PATH,
+            description = "Tenant name",
+            schema = @Schema(type = SchemaType.STRING))
+    @Tag(ref = "WfRun")
+    public Uni<VariableList> variables(@PathParam("id") String id) {
+        return repository.variables(id);
+    }
+
+    @GET
+    @Path("/{id}")
+    @APIResponse(responseCode = "400", description = "Bad request")
+    @APIResponse(responseCode = "404", description = "Record not found")
+    @APIResponse(responseCode = "500", description = "Internal error")
+    @APIResponse(
+            responseCode = "200",
+            description = "Record retrieved successfully",
+            content =
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema =
+                                    @Schema(
+                                            examples = {POST_WFRUN_EXAMPLE_RESPONSE},
+                                            externalDocs =
+                                                    @ExternalDocumentation(
+                                                            url =
+                                                                    "https://littlehorse.io/docs/server/api#wfrun"))))
+    @Parameter(
+            name = "tenant",
+            in = ParameterIn.PATH,
+            description = "Tenant name",
+            schema = @Schema(type = SchemaType.STRING))
+    @Tag(ref = "WfRun")
+    public Uni<WfRun> get(@PathParam("id") String id) {
+        return repository.get(id);
     }
 }

@@ -19,11 +19,11 @@ public class DemoTask {
 
     @LHWorkflow(RESTFUL_GATEWAY_DEMO_WORKFLOW)
     public void demoWorkflow(WorkflowThread wf) {
-        wf.execute(RESTFUL_GATEWAY_DEMO_TASK);
+        wf.execute(RESTFUL_GATEWAY_DEMO_TASK, wf.declareStr("name"));
     }
 
     @LHTaskMethod(RESTFUL_GATEWAY_DEMO_TASK)
-    public void demoTask() {
-        log.info("Hello World!");
+    public void demoTask(String name) {
+        log.info("Hello {}!", name);
     }
 }
