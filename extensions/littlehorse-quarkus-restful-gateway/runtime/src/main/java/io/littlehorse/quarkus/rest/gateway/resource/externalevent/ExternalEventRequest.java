@@ -10,16 +10,16 @@ import jakarta.validation.constraints.PositiveOrZero;
 import org.apache.commons.lang3.StringUtils;
 
 public record ExternalEventRequest(
-        @NotBlank(message = "ExternalEventDefName may not be blank")
+        @NotBlank(message = "ExternalEventDefName must not be blank")
         String externalEventDefName,
 
-        @NotBlank(message = "WfRunId may not be blank") String wfRunId,
+        @NotBlank(message = "WfRunId must not be blank") String wfRunId,
         String guid,
 
-        @PositiveOrZero(message = "ThreadRunNumber has to be greater than 0")
+        @PositiveOrZero(message = "ThreadRunNumber has to be greater or equal to 0")
         Integer threadRunNumber,
 
-        @PositiveOrZero(message = "NodeRunPosition has to be greater than 0")
+        @PositiveOrZero(message = "NodeRunPosition has to be greater or equal to 0")
         Integer nodeRunPosition,
 
         Object content) {

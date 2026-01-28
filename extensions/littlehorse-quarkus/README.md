@@ -309,7 +309,7 @@ public class GreetingsResource {
 
 ## Dependency Injection
 
-Annotated object with `@LHTask`, `@LHUserTaskForm` o `@LHWorkflow` are marked as beans and are managed by the Quarkus
+Objects annotated with `@LHTask`, `@LHUserTaskForm` o `@LHWorkflow` are marked as beans and are managed by the Quarkus
 [CDI](https://quarkus.io/guides/cdi), so it is possible to inject other beans into them.
 
 ```java

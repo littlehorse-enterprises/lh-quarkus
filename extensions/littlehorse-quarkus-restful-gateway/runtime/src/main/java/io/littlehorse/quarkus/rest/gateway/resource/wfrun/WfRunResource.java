@@ -139,7 +139,7 @@ public class WfRunResource {
             description = "Tenant name",
             schema = @Schema(type = SchemaType.STRING))
     @Tag(ref = "WfRun")
-    public Uni<VariableList> variables(@PathParam("id") String id) {
+    public Uni<VariableList> getVariables(@PathParam("id") String id) {
         return repository.variables(id);
     }
 

@@ -118,7 +118,7 @@ Maven:
 </dependency>
 ```
 
-Once your application is started, you can make a request to the default `/q/openapi` endpoint:
+Once your application has started, you can make a request to the default `/q/openapi` endpoint:
 
 ```shell
 curl http://localhost:8080/q/openapi
@@ -534,7 +534,7 @@ GET /gateway/tenants/{tenant}/wf-runs/{id}
 | 404    | [Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)             | Record not found              | None                                                  |
 | 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | Internal error                | None                                                  |
 
-### Variables
+### Get Variables
 
 ```
 GET /gateway/tenants/{tenant}/wf-runs/{id}/variables
@@ -880,14 +880,14 @@ External documentation: [ExternalEvent](https://littlehorse.io/docs/server/api#e
 
 ### Properties
 
-| Name                 | Type           | Required | Restrictions | Description |
-|----------------------|----------------|----------|--------------|-------------|
-| externalEventDefName | string         | true     | none         | none        |
-| wfRunId              | string         | true     | none         | none        |
-| guid                 | string         | false    | none         | none        |
-| threadRunNumber      | integer(int32) | false    | none         | none        |
-| nodeRunPosition      | integer(int32) | false    | none         | none        |
-| content              | any            | false    | none         | none        |
+| Name                 | Type           | Required | Restrictions                                    | Description                                                                                                                                             |
+|----------------------|----------------|----------|-------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| externalEventDefName | string         | true     | ExternalEventDefName must not be blank          | The ID of the ExternalEventDef that this event implements                                                                                               |
+| wfRunId              | string         | true     | WfRunId must not be blank                       | The ID of the WfRun that this Event is sent to                                                                                                          |
+| guid                 | string         | false    | none                                            | The Globally Unique IDentifier can be optionally provided to the PutExternalEventRequest in order to make it idempotent. It is a best practice to do so |
+| threadRunNumber      | integer(int32) | false    | ThreadRunNumber has to be greater or equal to 0 | Optionally specify that this ExternalEvent may only be claimed by a specific ThreadRun                                                                  |
+| nodeRunPosition      | integer(int32) | false    | NodeRunPosition has to be greater or equal to 0 | Optionally specify that this ExternalEvent may only be claimed by a specific NodeRun. In order for this to be set, you must also set thread_run_number  |
+| content              | any            | false    | none                                            | The content of this event                                                                                                                               |
 
 ## ServerInformationResponse
 
@@ -939,15 +939,15 @@ External documentation: [WfRun](https://littlehorse.io/docs/server/api#wfrun).
 
 ### Properties
 
-| Name                       | Type           | Required | Restrictions | Description |
-|----------------------------|----------------|----------|--------------|-------------|
-| wfSpecName                 | string         | true     | none         | none        |
-| id                         | string         | false    | none         | none        |
-| majorVersion               | integer(int32) | false    | none         | none        |
-| revision                   | integer(int32) | false    | none         | none        |
-| parentWfRunId              | string         | false    | none         | none        |
-| variables                  | object         | false    | none         | none        |
-| » **additionalProperties** | any            | false    | none         | none        |
+| Name                       | Type           | Required | Restrictions                                  | Description                                                                                                                                                                                              |
+|----------------------------|----------------|----------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| wfSpecName                 | string         | true     | WfSpec name must not be blank                 | The name of the WfSpec to run                                                                                                                                                                            |
+| id                         | string         | false    | none                                          | You can optionally specify the ID of this WfRun. This is a recommended best practice as it also makes your request idempotent and allows you to easily find the WfRun at a later time                    |
+| majorVersion               | integer(int32) | false    | Major version has to be greater or equal to 0 | Optionally specify the major version of the WfSpec to run. This guarantees that the "signature" of the WfSpec (i.e. the required input variables, and searchable variables) will not change for this app |
+| revision                   | integer(int32) | false    | Revision has to be greater or equal to 0      | Optionally specify the specific revision of the WfSpec to run. It is not recommended to use this in practice, as the WfSpec logic should be de-coupled from the applications that run WfRun's            |
+| parentWfRunId              | string         | false    | none                                          | none                                                                                                                                                                                                     |
+| variables                  | object         | false    | none                                          | A map from Variable Name to Values for those variables. The provided variables are passed as input to the Entrypoint ThreadRun                                                                           |
+| » **additionalProperties** | any            | false    | none                                          | none                                                                                                                                                                                                     |
 
 ## WfSpec
 

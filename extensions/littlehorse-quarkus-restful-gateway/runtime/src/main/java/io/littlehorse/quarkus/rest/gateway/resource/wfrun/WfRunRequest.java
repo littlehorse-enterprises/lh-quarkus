@@ -11,14 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 public record WfRunRequest(
-        @NotBlank(message = "WfSpec name may not be blank") String wfSpecName,
+        @NotBlank(message = "WfSpec name must not be blank") String wfSpecName,
 
         String id,
 
-        @PositiveOrZero(message = "Major version has to be greater than 0")
+        @PositiveOrZero(message = "Major version has to be greater or equal to 0")
         Integer majorVersion,
 
-        @PositiveOrZero(message = "Revision has to be greater than 0")
+        @PositiveOrZero(message = "Revision has to be greater or equal to 0")
         Integer revision,
 
         String parentWfRunId,
