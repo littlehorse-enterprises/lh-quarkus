@@ -72,3 +72,9 @@ Check workflows:
 ```shell
 lhctl search wfRun reactive-workflow
 ```
+
+Check external events:
+
+```shell
+lhctl search externalEvent reactive-external-event
+```

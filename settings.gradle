@@ -13,7 +13,7 @@ pluginManagement {
 }
 rootProject.name = "littlehorse-quarkus-extensions"
 
-lhExtensions.split(',').each {
+extensionProjects.split(',').each {
     include("littlehorse-$it")
     project(":littlehorse-$it").projectDir = file("extensions/littlehorse-$it/runtime")
 
@@ -21,7 +21,12 @@ lhExtensions.split(',').each {
     project(":littlehorse-$it-deployment").projectDir = file("extensions/littlehorse-$it/deployment")
 }
 
-lhExamples.split(',').each {
+exampleProjects.split(',').each {
     include "example-$it"
     project(":example-$it").projectDir = file("examples/$it")
+}
+
+otherProjects.split(',').each {
+    include "$it"
+    project(":$it").projectDir = file("$it")
 }

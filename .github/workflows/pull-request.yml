@@ -1,5 +1,5 @@
 name: pull-request
-run-name: Test branch "${{ github.head_ref }}"
+run-name: Check PR on branch "${{ github.head_ref }}"
 on:
   workflow_dispatch:
   pull_request:

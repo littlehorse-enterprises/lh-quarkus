@@ -1,0 +1,28 @@
+dependencies {
+    // quarkus
+    implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
+    implementation "io.quarkus:quarkus-arc"
+    implementation "io.quarkus:quarkus-rest"
+    implementation "io.quarkus:quarkus-rest-jackson"
+    implementation "io.quarkus:quarkus-smallrye-health"
+    implementation "org.apache.commons:commons-lang3"
+
+    // quarkus extension
+    implementation project(":littlehorse-quarkus")
+    implementation project(":littlehorse-quarkus-restful-gateway")
+
+    // logs
+    implementation "org.jboss.logging:commons-logging-jboss-logging"
+    implementation "org.jboss.logmanager:log4j-jboss-logmanager"
+    implementation "org.jboss.slf4j:slf4j-jboss-logmanager"
+    implementation "org.jboss.logmanager:log4j2-jboss-logmanager"
+
+    // tests
+    testImplementation "io.quarkus:quarkus-junit5"
+    testImplementation "io.rest-assured:rest-assured"
+    testImplementation "io.quarkus:quarkus-junit5-mockito"
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
+    testImplementation "io.littlehorse:littlehorse-test-utils-container:${lhVersion}"
+    testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
+}

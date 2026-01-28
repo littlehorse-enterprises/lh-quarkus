@@ -14,6 +14,7 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
   * [Registering a Workflow](#registering-a-workflow)
   * [Registering User Tasks](#registering-user-tasks)
   * [LittleHorse Clients](#littlehorse-clients)
+  * [Dependency Injection](#dependency-injection)
   * [Enabling Task Health Checks](#enabling-task-health-checks)
   * [Native Build](#native-build)
   * [Tests](#tests)
@@ -275,7 +276,9 @@ public class GreetingsResource {
         RunWfRequest request = RunWfRequest.newBuilder()
                 .setWfSpecName("greetings")
                 .putVariables("name", LHLibUtil.objToVarVal(name)).build();
-        return blockingStub.runWf(request).getId().getId();
+
+        return blockingStub.runWf(request)
+                .getId().getId();
     }
 }
 ```
@@ -300,6 +303,25 @@ public class GreetingsResource {
 
         return reactiveStub.runWf(request)
                 .map(wfRun -> wfRun.getId().getId());
+    }
+}
+```
+
+## Dependency Injection
+
+Objects annotated with `@LHTask`, `@LHUserTaskForm` o `@LHWorkflow` are marked as beans and are managed by the Quarkus
+[CDI](https://quarkus.io/guides/cdi), so it is possible to inject other beans into them.
+
+```java
+@LHTask
+public class GreetingsTask {
+
+    @Inject
+    private GreetingsService service;
+
+    @LHTaskMethod("greetings")
+    public String greetings(String name) {
+        return service.sayHello(name);
     }
 }
 ```
@@ -358,7 +380,7 @@ class, and start LittleHorse:
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
     private final LittleHorseCluster cluster = LittleHorseCluster.newBuilder()
-            .withKafkaImage("apache/kafka:4.1.0")
+            .withKafkaImage("apache/kafka:latest")
             .withLittlehorseImage("ghcr.io/littlehorse-enterprises/littlehorse/lh-server:latest")
             .build();
 

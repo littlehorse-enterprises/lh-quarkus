@@ -1,0 +1,46 @@
+name: restful-gateway
+run-name: Publishing RESTful Gateway for "${{ github.head_ref }}"
+on:
+  workflow_call:
+  pull_request:
+    paths:
+      - restful-gateway/**
+      - extensions/littlehorse-quarkus-restful-gateway/**
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "graalvm"
+          java-version: "25"
+
+      - name: Build Jar
+        run: ./gradlew restful-gateway:build
+
+      - name: Build Native
+        run: >
+          ./gradlew restful-gateway:build
+          -Dquarkus.native.enabled=true
+          -Dquarkus.package.runner-suffix=-run
+          -Dquarkus.package.output-name=quarkus
+          -Dquarkus.package.jar.enabled=false
+          -Dquarkus.native.container-build=false
+
+      - name: Build and Publish
+        uses: littlehorse-enterprises/publish-image@v1
+        with:
+          image-name: lh-restful-gateway
+          dockerfile: ./restful-gateway/Dockerfile
+          context: ./restful-gateway
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          ghcr-root: true

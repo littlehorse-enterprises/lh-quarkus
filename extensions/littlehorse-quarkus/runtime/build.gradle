@@ -7,8 +7,10 @@ quarkusExtension {
 }
 
 dependencies {
-    implementation platform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
+    implementation platform("io.quarkus:quarkus-bom:${quarkusVersion}")
     implementation "io.quarkus:quarkus-grpc-common"
+    implementation "io.quarkus:quarkus-core"
+    implementation "io.quarkus:quarkus-arc"
     implementation "io.quarkiverse.jgrapht:quarkus-jgrapht:${jgraphtVersion}"
     compileOnly "io.quarkus:quarkus-smallrye-health"
     api("io.littlehorse:littlehorse-client:${lhVersion}") {
