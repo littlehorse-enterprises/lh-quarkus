@@ -38,7 +38,7 @@ A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
       * [Parameters](#parameters-4)
       * [Example responses](#example-responses-4)
       * [Responses](#responses-4)
-    * [Variables](#variables)
+    * [Get Variables](#get-variables)
       * [Parameters](#parameters-5)
       * [Example responses](#example-responses-5)
       * [Responses](#responses-5)
