@@ -56,7 +56,7 @@ Execute native tests:
 ./gradlew publishToMavenLocal
 ```
 
-> Optionally you can pass `-Pversion=<version>`
+> Optionally you can pass `-PextensionVersion=<version>`
 
 ## Apply Code Style
 
