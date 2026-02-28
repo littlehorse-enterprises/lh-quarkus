@@ -19,6 +19,6 @@ public class LHUserTaskRecordable extends LHRecordable {
         ConfigEvaluator configEvaluator = new ConfigEvaluator();
         LHUserTaskRegister register =
                 CDI.current().select(LHUserTaskRegister.class).get();
-        register.registerUserTask(getBean(), configEvaluator.expand(getName()).asString());
+        register.registerUserTask(bean(), configEvaluator.expand(getName()).asString());
     }
 }

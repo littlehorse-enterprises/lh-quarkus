@@ -2,6 +2,8 @@ package io.littlehorse.quarkus.runtime.recordable;
 
 import jakarta.enterprise.inject.spi.CDI;
 
+import java.util.List;
+
 public abstract class LHRecordable {
 
     private final Class<?> beanClass;
@@ -24,7 +26,11 @@ public abstract class LHRecordable {
         return CDI.current().select(getBeanClass()).isResolvable();
     }
 
-    public Object getBean() {
+    public Object bean() {
         return CDI.current().select(getBeanClass()).get();
+    }
+
+    public List<String> dependencies() {
+        return List.of();
     }
 }

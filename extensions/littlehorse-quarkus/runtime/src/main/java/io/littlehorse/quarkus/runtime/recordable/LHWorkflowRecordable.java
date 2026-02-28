@@ -15,6 +15,7 @@ import jakarta.enterprise.inject.spi.CDI;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class LHWorkflowRecordable extends LHRecordable {
 
@@ -80,6 +81,14 @@ public class LHWorkflowRecordable extends LHRecordable {
 
     public LHExponentialBackoffRetryRecordable getRetryRecordable() {
         return retryRecordable;
+    }
+
+    @Override
+    public List<String> dependencies() {
+        if (getParent() == null) {
+            return List.of();
+        }
+        return List.of(getParent());
     }
 
     public void registerWorkflow() {
@@ -159,7 +168,7 @@ public class LHWorkflowRecordable extends LHRecordable {
         } else {
             try {
                 Method method = getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
-                method.invoke(getBean(), workflowThread);
+                method.invoke(bean(), workflowThread);
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }

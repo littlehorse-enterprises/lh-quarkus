@@ -26,7 +26,8 @@ public class LHStructDefRecordable extends LHRecordable {
         return description;
     }
 
-    public List<String> calculateDependencies() {
+    @Override
+    public List<String> dependencies() {
         LHStructDefType structDefType = new LHStructDefType(getBeanClass());
         return structDefType.getDependencyClasses().stream()
                 .map(LHStructDefType::getStructDefId)

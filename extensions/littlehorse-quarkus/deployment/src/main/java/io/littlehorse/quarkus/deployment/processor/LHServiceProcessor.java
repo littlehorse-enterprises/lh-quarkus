@@ -8,10 +8,9 @@ import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
 import io.littlehorse.quarkus.runtime.LHRecorder;
+import io.littlehorse.quarkus.runtime.recordable.LHRecordableDependenciesGraph;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
-import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordableGraph;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
-import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordableGraph;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
@@ -145,8 +144,8 @@ class LHServiceProcessor {
         List<LHStructDefRecordable> structDefRecordables = structDefBuildItems.stream()
                 .map(LHStructDefBuildItem::toRecordable)
                 .toList();
-        LHStructDefRecordableGraph structDefRecordableGraph =
-                new LHStructDefRecordableGraph(structDefRecordables);
+        LHRecordableDependenciesGraph<LHStructDefRecordable> structDefRecordableGraph =
+                new LHRecordableDependenciesGraph<>(structDefRecordables);
         structDefRecordableGraph.toList().forEach(recorder::registerLHStructDef);
 
         taskMethodBuildItems.stream()
@@ -160,8 +159,8 @@ class LHServiceProcessor {
         List<LHWorkflowRecordable> workflowRecordables = workflowBuildItems.stream()
                 .map(LHWorkflowBuildItem::toRecordable)
                 .toList();
-        LHWorkflowRecordableGraph workflowRecordableGraph =
-                new LHWorkflowRecordableGraph(workflowRecordables);
+        LHRecordableDependenciesGraph<LHWorkflowRecordable> workflowRecordableGraph =
+                new LHRecordableDependenciesGraph<>(workflowRecordables);
         workflowRecordableGraph.toList().forEach(recorder::registerLHWorkflow);
 
         return new ServiceStartBuildItem("LittleHorse");

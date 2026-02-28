@@ -10,15 +10,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class LHStructDefRecordableGraph {
+public class LHRecordableDependenciesGraph<G extends LHRecordable> {
 
-    private final List<LHStructDefRecordable> inputList;
+    private final List<G> inputList;
 
-    public LHStructDefRecordableGraph(List<LHStructDefRecordable> inputList) {
+    public LHRecordableDependenciesGraph(List<G> inputList) {
         this.inputList = inputList;
     }
 
-    public List<LHStructDefRecordable> toList() {
+    public List<G> toList() {
         if (inputList == null || inputList.isEmpty()) {
             return List.of();
         }
@@ -27,17 +27,17 @@ public class LHStructDefRecordableGraph {
 
         inputList.forEach(recordable -> directedGraph.addVertex(recordable.getName()));
         inputList.stream()
-                .flatMap(recordable -> recordable.calculateDependencies().stream())
+                .flatMap(recordable -> recordable.dependencies().stream())
                 .forEach(directedGraph::addVertex);
 
         inputList.forEach(recordable -> recordable
-                .calculateDependencies()
+                .dependencies()
                 .forEach(dependency -> directedGraph.addEdge(dependency, recordable.getName())));
 
         Iterator<String> iterator = new TopologicalOrderIterator<>(directedGraph);
-        List<LHStructDefRecordable> result = new ArrayList<>();
+        List<G> result = new ArrayList<>();
         iterator.forEachRemaining(name -> {
-            Optional<LHStructDefRecordable> first = inputList.stream()
+            Optional<G> first = inputList.stream()
                     .filter(recordable -> name.equals(recordable.getName()))
                     .findFirst();
             first.ifPresent(result::add);
