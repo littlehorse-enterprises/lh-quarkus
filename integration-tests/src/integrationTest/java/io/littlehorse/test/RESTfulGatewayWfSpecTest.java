@@ -69,18 +69,20 @@ class RESTfulGatewayWfSpecTest {
                 .get("/gateway/tenants/{tenant}/wf-specs")
                 .then()
                 .statusCode(200)
-                .body("results", hasSize(2))
+                .body("results", hasSize(3))
                 .body("bookmark", is(nullValue()))
                 .body("results[0].name", is("greetings"))
                 .body("results[1].name", is("json"))
+                .body("results[2].name", is("workflow-in-a-bean"))
                 .log()
                 .all();
     }
 
     @Test
     void shouldSearchWfSpecWithBookmark() {
+        int limit = 2;
         Response getFirstObject = given().pathParam("tenant", "default")
-                .queryParam("limit", 1)
+                .queryParam("limit", limit)
                 .when()
                 .get("/gateway/tenants/{tenant}/wf-specs");
         String bookmark = getFirstObject.jsonPath().getString("bookmark");
@@ -88,14 +90,14 @@ class RESTfulGatewayWfSpecTest {
         getFirstObject
                 .then()
                 .statusCode(200)
-                .body("results", hasSize(1))
+                .body("results", hasSize(limit))
                 .body("results[0].name", is("greetings"))
                 .body("bookmark", is(notNullValue()))
                 .log()
                 .all();
 
         given().pathParam("tenant", "default")
-                .queryParam("limit", 1)
+                .queryParam("limit", limit)
                 .queryParam("bookmark", bookmark)
                 .when()
                 .get("/gateway/tenants/{tenant}/wf-specs")
@@ -103,7 +105,7 @@ class RESTfulGatewayWfSpecTest {
                 .statusCode(200)
                 .body("results", hasSize(1))
                 .body("bookmark", is(nullValue()))
-                .body("results[0].name", is("json"))
+                .body("results[0].name", is("workflow-in-a-bean"))
                 .log()
                 .all();
     }
