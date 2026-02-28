@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.rest.gateway.resource.task;
+package io.littlehorse.quarkus.rest.gateway.resource.taskdef;
 
 import io.littlehorse.quarkus.rest.gateway.context.TenantContext;
 import io.littlehorse.quarkus.rest.gateway.protobuf.ByteStringUtils;
@@ -6,6 +6,7 @@ import io.littlehorse.sdk.common.proto.SearchTaskDefRequest;
 import io.littlehorse.sdk.common.proto.TaskDef;
 import io.littlehorse.sdk.common.proto.TaskDefId;
 import io.littlehorse.sdk.common.proto.TaskDefIdList;
+import io.littlehorse.sdk.common.proto.TaskWorkerGroup;
 import io.smallrye.mutiny.Uni;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,6 +21,11 @@ public class TaskDefRepository {
 
     public TaskDefRepository(TenantContext context) {
         this.context = context;
+    }
+
+    public Uni<TaskWorkerGroup> getWorkers(String taskName) {
+        TaskDefId request = TaskDefId.newBuilder().setName(taskName).build();
+        return context.getLittleHorseReactiveStub().getTaskWorkerGroup(request);
     }
 
     public Uni<TaskDef> get(String name) {

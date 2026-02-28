@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-class RESTfulGatewayServerInformationIT {
+class RESTfulGatewayServerInformationTest {
 
     private static final String LH_VERSION = System.getProperty("lhVersion", "latest");
 

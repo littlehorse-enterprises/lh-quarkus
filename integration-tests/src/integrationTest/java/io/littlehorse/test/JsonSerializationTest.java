@@ -26,7 +26,7 @@ import java.util.List;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-public class JsonSerializationIT {
+public class JsonSerializationTest {
 
     @InjectLittleHorseBlockingStub
     LittleHorseBlockingStub blockingStub;

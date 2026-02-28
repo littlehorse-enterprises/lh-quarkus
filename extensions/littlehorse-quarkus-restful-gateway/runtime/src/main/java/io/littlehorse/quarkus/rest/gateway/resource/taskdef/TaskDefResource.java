@@ -1,7 +1,8 @@
-package io.littlehorse.quarkus.rest.gateway.resource.task;
+package io.littlehorse.quarkus.rest.gateway.resource.taskdef;
 
 import io.littlehorse.sdk.common.proto.TaskDef;
 import io.littlehorse.sdk.common.proto.TaskDefIdList;
+import io.littlehorse.sdk.common.proto.TaskWorkerGroup;
 import io.smallrye.mutiny.Uni;
 
 import jakarta.validation.constraints.Max;
@@ -54,6 +55,28 @@ public class TaskDefResource {
               }
             }
             """;
+    public static final String GET_WORKER_GROUP_EXAMPLE_RESPONSE = """
+            {
+               "id":  {
+                 "taskDefId":  {
+                   "name":  "greetings"
+                 }
+               },
+               "createdAt":  "2026-02-28T15:42:10.467Z",
+               "taskWorkers":  {
+                 "worker-0279f257b66a4cb885e854548ab6f131":  {
+                   "taskWorkerId":  "worker-0279f257b66a4cb885e854548ab6f131",
+                   "latestHeartbeat":  "2026-02-28T16:05:10.588Z",
+                   "hosts":  [
+                     {
+                       "host":  "littlehorse",
+                       "port":  2011
+                     }
+                   ]
+                 }
+               }
+             }
+            """;
     private final TaskDefRepository repository;
 
     public TaskDefResource(TaskDefRepository repository) {
@@ -86,6 +109,34 @@ public class TaskDefResource {
     @Tag(ref = "TaskDef")
     public Uni<TaskDef> get(@PathParam("name") String name) {
         return repository.get(name);
+    }
+
+    @GET
+    @Path("/{name}/workers")
+    @APIResponse(responseCode = "400", description = "Bad request")
+    @APIResponse(responseCode = "404", description = "Record not found")
+    @APIResponse(responseCode = "500", description = "Internal error")
+    @APIResponse(
+            responseCode = "200",
+            description = "Record retrieved successfully",
+            content =
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema =
+                                    @Schema(
+                                            examples = {GET_WORKER_GROUP_EXAMPLE_RESPONSE},
+                                            externalDocs =
+                                                    @ExternalDocumentation(
+                                                            url =
+                                                                    "https://littlehorse.io/docs/server/api#taskworkergroup"))))
+    @Parameter(
+            name = "tenant",
+            in = ParameterIn.PATH,
+            description = "Tenant name",
+            schema = @Schema(type = SchemaType.STRING))
+    @Tag(ref = "TaskDef")
+    public Uni<TaskWorkerGroup> getWorkers(@PathParam("name") String name) {
+        return repository.getWorkers(name);
     }
 
     @GET

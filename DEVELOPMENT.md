@@ -126,6 +126,18 @@ Equivalent to:
 lhctl get taskDef restful-gateway-demo-task
 ```
 
+### Get taskWorkers:
+
+```shell
+http :8080/gateway/tenants/default/task-defs/restful-gateway-demo-task/workers
+```
+
+Equivalent to:
+
+```shell
+lhctl get taskWorkerGroup restful-gateway-demo-task
+```
+
 ### Search taskDef:
 
 ```shell

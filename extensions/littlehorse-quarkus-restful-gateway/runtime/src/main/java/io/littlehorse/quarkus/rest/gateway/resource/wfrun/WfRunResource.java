@@ -111,8 +111,8 @@ public class WfRunResource {
             description = "Tenant name",
             schema = @Schema(type = SchemaType.STRING))
     @Tag(ref = "WfRun")
-    public Uni<WfRun> run(@Valid WfRunRequest request) {
-        return repository.run(request);
+    public Uni<WfRun> runWf(@Valid WfRunRequest request) {
+        return repository.runWf(request);
     }
 
     @GET
@@ -140,7 +140,7 @@ public class WfRunResource {
             schema = @Schema(type = SchemaType.STRING))
     @Tag(ref = "WfRun")
     public Uni<VariableList> getVariables(@PathParam("id") String id) {
-        return repository.variables(id);
+        return repository.geVariables(id);
     }
 
     @GET

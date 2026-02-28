@@ -16,28 +16,29 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-class RESTfulGatewayTaskDefIT {
+class RESTfulGatewayWfSpecTest {
 
     @Test
-    void shouldGetTaskDefFromTaskDefName() {
+    void shouldGetWfSpecFromWfSpecName() {
         String name = "greetings";
         given().pathParam("tenant", "default")
                 .pathParam("name", name)
                 .when()
-                .get("/gateway/tenants/{tenant}/task-defs/{name}")
+                .get("/gateway/tenants/{tenant}/wf-specs/{name}")
                 .then()
                 .statusCode(200)
                 .body("id.name", is(name))
+                .body("status", is("ACTIVE"))
                 .log()
                 .all();
     }
 
     @Test
-    void shouldNotFoundTaskDef() {
+    void shouldNotFoundWfSpec() {
         given().pathParam("tenant", "default")
-                .pathParam("name", "not-a-task")
+                .pathParam("name", "not-a-workflow")
                 .when()
-                .get("/gateway/tenants/{tenant}/task-defs/{name}")
+                .get("/gateway/tenants/{tenant}/wf-specs/{name}")
                 .then()
                 .statusCode(404)
                 .log()
@@ -45,29 +46,43 @@ class RESTfulGatewayTaskDefIT {
     }
 
     @Test
-    void shouldSearchAllTaskDef() {
+    void shouldGetWfSpecFromWfSpecNameAndVersion() {
+        String name = "greetings";
+        String version = "0.0";
         given().pathParam("tenant", "default")
+                .pathParam("name", name)
+                .pathParam("version", version)
                 .when()
-                .get("/gateway/tenants/{tenant}/task-defs")
+                .get("/gateway/tenants/{tenant}/wf-specs/{name}/versions/{version}")
                 .then()
                 .statusCode(200)
-                .body("results", hasSize(5))
-                .body("bookmark", is(nullValue()))
-                .body("results[0].name", is("greetings"))
-                .body("results[1].name", is("print"))
-                .body("results[2].name", is("return-json-array"))
-                .body("results[3].name", is("return-json-list"))
-                .body("results[4].name", is("return-json-object"))
+                .body("id.name", is(name))
+                .body("status", is("ACTIVE"))
                 .log()
                 .all();
     }
 
     @Test
-    void shouldSearchTaskDefWithBookmark() {
+    void shouldSearchAllWfSpec() {
+        given().pathParam("tenant", "default")
+                .when()
+                .get("/gateway/tenants/{tenant}/wf-specs")
+                .then()
+                .statusCode(200)
+                .body("results", hasSize(2))
+                .body("bookmark", is(nullValue()))
+                .body("results[0].name", is("greetings"))
+                .body("results[1].name", is("json"))
+                .log()
+                .all();
+    }
+
+    @Test
+    void shouldSearchWfSpecWithBookmark() {
         Response getFirstObject = given().pathParam("tenant", "default")
                 .queryParam("limit", 1)
                 .when()
-                .get("/gateway/tenants/{tenant}/task-defs");
+                .get("/gateway/tenants/{tenant}/wf-specs");
         String bookmark = getFirstObject.jsonPath().getString("bookmark");
 
         getFirstObject
@@ -83,12 +98,12 @@ class RESTfulGatewayTaskDefIT {
                 .queryParam("limit", 1)
                 .queryParam("bookmark", bookmark)
                 .when()
-                .get("/gateway/tenants/{tenant}/task-defs")
+                .get("/gateway/tenants/{tenant}/wf-specs")
                 .then()
                 .statusCode(200)
                 .body("results", hasSize(1))
-                .body("bookmark", is(notNullValue()))
-                .body("results[0].name", is("print"))
+                .body("bookmark", is(nullValue()))
+                .body("results[0].name", is("json"))
                 .log()
                 .all();
     }
