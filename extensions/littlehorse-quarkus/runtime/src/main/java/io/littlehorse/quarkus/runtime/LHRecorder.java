@@ -2,7 +2,7 @@ package io.littlehorse.quarkus.runtime;
 
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
-import io.littlehorse.quarkus.runtime.recordable.LHUserTaskRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHUserTaskFormRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.quarkus.runtime.ShutdownContext;
 import io.quarkus.runtime.annotations.Recorder;
@@ -19,7 +19,7 @@ public class LHRecorder {
         recordable.registerWorkflow();
     }
 
-    public void registerLHUserTaskForm(LHUserTaskRecordable recordable) {
+    public void registerLHUserTaskForm(LHUserTaskFormRecordable recordable) {
         recordable.registerUserTask();
     }
 

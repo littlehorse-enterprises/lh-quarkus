@@ -3,16 +3,11 @@ package io.littlehorse.quarkus.deployment.annotation;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
 
-import java.lang.annotation.Annotation;
 import java.util.Optional;
 
 public final class OptionalAnnotation {
 
     private final AnnotationInstance annotationInstance;
-
-    public OptionalAnnotation(Class<? extends Annotation> annotationType) {
-        this.annotationInstance = AnnotationInstance.builder(annotationType).build();
-    }
 
     public OptionalAnnotation(AnnotationInstance annotationInstance) {
         this.annotationInstance = annotationInstance;

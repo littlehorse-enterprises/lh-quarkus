@@ -1,18 +1,19 @@
 package io.littlehorse.quarkus.deployment.item;
 
-import io.littlehorse.quarkus.runtime.recordable.LHUserTaskRecordable;
+import io.littlehorse.quarkus.deployment.descriptor.LHUserTaskFormDescriptor;
+import io.littlehorse.quarkus.runtime.recordable.LHUserTaskFormRecordable;
 import io.quarkus.builder.item.MultiBuildItem;
 
 public final class LHUserTaskFormBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
-    private final String userTaskDefName;
+    private final LHUserTaskFormDescriptor descriptor;
 
-    public LHUserTaskFormBuildItem(Class<?> beanClass, String userTaskDefName) {
-        this.userTaskDefName = userTaskDefName;
+    public LHUserTaskFormBuildItem(Class<?> beanClass, LHUserTaskFormDescriptor descriptor) {
+        this.descriptor = descriptor;
         this.beanClass = beanClass;
     }
 
-    public LHUserTaskRecordable toRecordable() {
-        return new LHUserTaskRecordable(beanClass, userTaskDefName);
+    public LHUserTaskFormRecordable toRecordable() {
+        return new LHUserTaskFormRecordable(beanClass, descriptor.getUserTaskDefName());
     }
 }

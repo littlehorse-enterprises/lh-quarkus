@@ -6,10 +6,10 @@ import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
 
-public class LHUserTaskRecordable extends LHRecordable {
+public class LHUserTaskFormRecordable extends LHRecordable {
 
     @RecordableConstructor
-    public LHUserTaskRecordable(Class<?> beanClass, String name) {
+    public LHUserTaskFormRecordable(Class<?> beanClass, String name) {
         super(beanClass, name);
     }
 
