@@ -26,7 +26,7 @@ import java.util.UUID;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-class RESTfulGatewayWfRunIT {
+class RESTfulGatewayWfRunTest {
 
     @Test
     void shouldRunWf() {

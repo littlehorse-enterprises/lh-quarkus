@@ -7,8 +7,8 @@ import io.littlehorse.quarkus.rest.gateway.resource.externalevent.ExternalEventR
 import io.littlehorse.quarkus.rest.gateway.resource.externalevent.ExternalEventResource;
 import io.littlehorse.quarkus.rest.gateway.resource.server.ServerInformationRepository;
 import io.littlehorse.quarkus.rest.gateway.resource.server.ServerInformationResource;
-import io.littlehorse.quarkus.rest.gateway.resource.task.TaskDefRepository;
-import io.littlehorse.quarkus.rest.gateway.resource.task.TaskDefResource;
+import io.littlehorse.quarkus.rest.gateway.resource.taskdef.TaskDefRepository;
+import io.littlehorse.quarkus.rest.gateway.resource.taskdef.TaskDefResource;
 import io.littlehorse.quarkus.rest.gateway.resource.wfrun.WfRunRepository;
 import io.littlehorse.quarkus.rest.gateway.resource.wfrun.WfRunResource;
 import io.littlehorse.quarkus.rest.gateway.resource.wfspec.WfSpecRepository;

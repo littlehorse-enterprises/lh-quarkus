@@ -69,7 +69,7 @@ public class ExternalEventResource {
             description = "Tenant name",
             schema = @Schema(type = SchemaType.STRING))
     @Tag(ref = "ExternalEvent")
-    public Uni<ExternalEvent> post(@Valid ExternalEventRequest request) {
-        return repository.post(request);
+    public Uni<ExternalEvent> sendEvent(@Valid ExternalEventRequest request) {
+        return repository.sendEvent(request);
     }
 }

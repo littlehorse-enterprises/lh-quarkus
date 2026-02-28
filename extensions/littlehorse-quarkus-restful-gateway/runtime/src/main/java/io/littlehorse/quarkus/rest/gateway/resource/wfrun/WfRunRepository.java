@@ -19,11 +19,11 @@ public class WfRunRepository {
         this.context = context;
     }
 
-    public Uni<WfRun> run(WfRunRequest request) {
+    public Uni<WfRun> runWf(WfRunRequest request) {
         return context.getLittleHorseReactiveStub().runWf(request.toProtobuf());
     }
 
-    public Uni<VariableList> variables(String id) {
+    public Uni<VariableList> geVariables(String id) {
         LittleHorseReactiveStub stub = context.getLittleHorseReactiveStub();
         ListVariablesRequest request = ListVariablesRequest.newBuilder()
                 .setWfRunId(LHLibUtil.wfRunIdFromString(id))

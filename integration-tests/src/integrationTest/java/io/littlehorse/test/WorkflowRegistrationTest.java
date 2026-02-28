@@ -35,7 +35,7 @@ import java.util.UUID;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
-class WorkflowRegistrationIT {
+class WorkflowRegistrationTest {
 
     @InjectLittleHorseBlockingStub
     LittleHorseBlockingStub blockingStub;

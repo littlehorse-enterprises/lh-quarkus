@@ -15,7 +15,7 @@ public class ExternalEventRepository {
         this.context = context;
     }
 
-    public Uni<ExternalEvent> post(ExternalEventRequest request) {
+    public Uni<ExternalEvent> sendEvent(ExternalEventRequest request) {
         return context.getLittleHorseReactiveStub().putExternalEvent(request.toProtobuf());
     }
 }
