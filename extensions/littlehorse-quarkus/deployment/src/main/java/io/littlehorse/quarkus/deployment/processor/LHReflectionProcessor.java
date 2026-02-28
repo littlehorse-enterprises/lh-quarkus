@@ -9,6 +9,7 @@ import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.usertask.annotations.UserTaskField;
+import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
@@ -62,10 +63,22 @@ public class LHReflectionProcessor {
     }
 
     @BuildStep
-    void registerLHUserTaskFrom(
+    void registerLHUserTaskForm(
             BuildProducer<ReflectiveClassBuildItem> producer,
             CombinedIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHUserTaskForm.class).stream()
+                .map(AnnotationInstance::target)
+                .map(AnnotationTarget::asClass)
+                .map(ClassInfo::toString)
+                .map(newBuildItem)
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void registerLHStructDef(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            CombinedIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAnnotations(LHStructDef.class).stream()
                 .map(AnnotationInstance::target)
                 .map(AnnotationTarget::asClass)
                 .map(ClassInfo::toString)

@@ -24,4 +24,8 @@ public interface LHRuntimeConfig {
     @WithName("user-tasks.register.enabled")
     @WithDefault("true")
     boolean userTaskRegisterEnabled();
+
+    @WithName("structs.register.enabled")
+    @WithDefault("true")
+    boolean structsRegisterEnabled();
 }

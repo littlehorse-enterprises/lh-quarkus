@@ -1,26 +1,30 @@
-package io.littlehorse.quarkus.deployment.items;
+package io.littlehorse.quarkus.deployment.item;
 
-import io.littlehorse.quarkus.deployment.reflection.LHExponentialBackoffRetryDescriptor;
-import io.littlehorse.quarkus.deployment.reflection.LHWorkflowDescriptor;
+import io.littlehorse.quarkus.deployment.descriptor.LHExponentialBackoffRetryDescriptor;
+import io.littlehorse.quarkus.deployment.descriptor.LHWorkflowDescriptor;
 import io.littlehorse.quarkus.runtime.recordable.LHExponentialBackoffRetryRecordable;
-import io.littlehorse.quarkus.runtime.recordable.LHWorkflowDefinitionRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowFromMethodRecordable;
 import io.quarkus.builder.item.MultiBuildItem;
 
-public final class LHWorkflowDefinitionBuildItem extends MultiBuildItem {
+public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
+    private final String beanMethodName;
     private final LHWorkflowDescriptor descriptor;
 
-    public LHWorkflowDefinitionBuildItem(Class<?> beanClass, LHWorkflowDescriptor descriptor) {
+    public LHWorkflowFromMethodBuildItem(
+            Class<?> beanClass, String beanMethodName, LHWorkflowDescriptor descriptor) {
         this.beanClass = beanClass;
+        this.beanMethodName = beanMethodName;
         this.descriptor = descriptor;
     }
 
-    public LHWorkflowDefinitionRecordable toRecordable() {
+    public LHWorkflowFromMethodRecordable toRecordable() {
         LHExponentialBackoffRetryDescriptor backoffRetryDescriptor =
                 descriptor.getDefaultTaskExponentialBackoffRetry();
-        return new LHWorkflowDefinitionRecordable(
+        return new LHWorkflowFromMethodRecordable(
                 beanClass,
                 descriptor.getWfSpecName(),
+                beanMethodName,
                 descriptor.getParent(),
                 descriptor.getDefaultTaskTimeout(),
                 descriptor.getDefaultTaskRetries(),

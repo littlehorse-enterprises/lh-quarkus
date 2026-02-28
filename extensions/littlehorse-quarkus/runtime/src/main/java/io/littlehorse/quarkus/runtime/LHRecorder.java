@@ -1,5 +1,6 @@
 package io.littlehorse.quarkus.runtime;
 
+import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHUserTaskRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
@@ -20,5 +21,9 @@ public class LHRecorder {
 
     public void registerLHUserTaskForm(LHUserTaskRecordable recordable) {
         recordable.registerUserTask();
+    }
+
+    public void registerLHStructDef(LHStructDefRecordable recordable) {
+        recordable.registerStructDef();
     }
 }

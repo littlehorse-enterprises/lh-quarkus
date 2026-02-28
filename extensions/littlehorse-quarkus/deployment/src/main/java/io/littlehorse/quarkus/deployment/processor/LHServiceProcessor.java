@@ -1,18 +1,23 @@
 package io.littlehorse.quarkus.deployment.processor;
 
-import io.littlehorse.quarkus.deployment.items.LHTaskMethodBuildItem;
-import io.littlehorse.quarkus.deployment.items.LHUserTaskFormBuildItem;
-import io.littlehorse.quarkus.deployment.items.LHWorkflowDefinitionBuildItem;
-import io.littlehorse.quarkus.deployment.items.LHWorkflowFromMethodBuildItem;
-import io.littlehorse.quarkus.deployment.reflection.LHWorkflowDescriptor;
-import io.littlehorse.quarkus.deployment.reflection.OptionalAnnotation;
+import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
+import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
+import io.littlehorse.quarkus.deployment.descriptor.LHWorkflowDescriptor;
+import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHUserTaskFormBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHWorkflowDefinitionBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHWorkflowFromMethodBuildItem;
 import io.littlehorse.quarkus.runtime.LHRecorder;
+import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordableGraph;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordableGraph;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
+import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -75,7 +80,6 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
                     Class<?> beanClass = loadClass(beanClassName);
-
                     return new LHWorkflowDefinitionBuildItem(
                             beanClass, new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
                 })
@@ -116,6 +120,21 @@ class LHServiceProcessor {
     }
 
     @BuildStep
+    void scanLHStructDef(
+            BuildProducer<LHStructDefBuildItem> producer,
+            BeanArchiveIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAnnotations(LHStructDef.class).stream()
+                .map(annotated -> {
+                    String beanClassName = annotated.target().asClass().toString();
+                    Class<?> beanClass = loadClass(beanClassName);
+                    return new LHStructDefBuildItem(
+                            beanClass,
+                            new LHStructDefDescriptor(new OptionalAnnotation(annotated)));
+                })
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
     @Record(ExecutionTime.RUNTIME_INIT)
     ServiceStartBuildItem startLittleHorseService(
             LHRecorder recorder,
@@ -123,7 +142,15 @@ class LHServiceProcessor {
             List<LHTaskMethodBuildItem> taskMethodBuildItems,
             List<LHUserTaskFormBuildItem> userTaskFromBuildItems,
             List<LHWorkflowDefinitionBuildItem> workflowDefinitionBuildItems,
-            List<LHWorkflowFromMethodBuildItem> workflowFromMethodBuildItems) {
+            List<LHWorkflowFromMethodBuildItem> workflowFromMethodBuildItems,
+            List<LHStructDefBuildItem> structDefBuildItems) {
+
+        List<LHStructDefRecordable> structDefRecordables = structDefBuildItems.stream()
+                .map(LHStructDefBuildItem::toRecordable)
+                .toList();
+        LHStructDefRecordableGraph structDefRecordableGraph =
+                new LHStructDefRecordableGraph(structDefRecordables);
+        structDefRecordableGraph.toList().forEach(recorder::registerLHStructDef);
 
         taskMethodBuildItems.stream()
                 .map(LHTaskMethodBuildItem::toRecordable)

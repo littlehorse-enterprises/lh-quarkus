@@ -3,6 +3,7 @@ package io.littlehorse.quarkus.deployment.processor;
 import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.quarkus.runtime.LHExternalBeans;
 import io.littlehorse.quarkus.runtime.LHTaskStatusesContainer;
+import io.littlehorse.quarkus.runtime.register.LHStructDefRegister;
 import io.littlehorse.quarkus.runtime.register.LHTaskRegister;
 import io.littlehorse.quarkus.runtime.register.LHUserTaskRegister;
 import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
@@ -29,6 +30,13 @@ public class LHBeanProcessor {
     AdditionalBeanBuildItem produceLHUserTaskRegister() {
         return AdditionalBeanBuildItem.builder()
                 .addBeanClasses(LHUserTaskRegister.class)
+                .build();
+    }
+
+    @BuildStep
+    AdditionalBeanBuildItem produceLHStructDefRegister() {
+        return AdditionalBeanBuildItem.builder()
+                .addBeanClasses(LHStructDefRegister.class)
                 .build();
     }
 

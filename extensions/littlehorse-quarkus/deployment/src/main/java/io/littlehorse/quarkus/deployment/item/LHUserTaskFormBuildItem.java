@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.deployment.items;
+package io.littlehorse.quarkus.deployment.item;
 
 import io.littlehorse.quarkus.runtime.recordable.LHUserTaskRecordable;
 import io.quarkus.builder.item.MultiBuildItem;

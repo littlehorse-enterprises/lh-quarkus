@@ -48,3 +48,10 @@ repos:
         always_run: true
         pass_filenames: false
         entry: ./gradlew test
+      - id: java-int-test
+        stages: [ pre-commit ]
+        name: run int tests
+        language: system
+        always_run: true
+        pass_filenames: false
+        entry: ./gradlew integration-tests:quarkusIntTest

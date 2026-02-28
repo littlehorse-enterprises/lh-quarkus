@@ -724,3 +724,10 @@ Registers all `UserTaskDef` found when starting the application.
 * Type: boolean
 * Default: true
 * Importance: medium
+
+``quarkus.littlehorse.structs.register.enabled``
+Registers all `StructDef` found when starting the application.
+
+* Type: boolean
+* Default: true
+* Importance: medium
