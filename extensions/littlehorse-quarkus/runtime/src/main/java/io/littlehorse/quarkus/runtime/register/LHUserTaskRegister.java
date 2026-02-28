@@ -4,7 +4,6 @@ import io.littlehorse.quarkus.config.LHRuntimeConfig;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.PutUserTaskDefRequest;
-import io.littlehorse.sdk.usertask.UserTaskSchema;
 import io.quarkus.arc.Unremovable;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,12 +24,10 @@ public class LHUserTaskRegister {
         this.config = config;
     }
 
-    public void registerUserTask(Object bean, String name) {
+    public void registerUserTask(PutUserTaskDefRequest request) {
         if (!config.userTaskRegisterEnabled()) return;
 
-        UserTaskSchema schema = new UserTaskSchema(bean, name);
-        PutUserTaskDefRequest request = schema.compile();
-        log.info("Registering {}: {}", LHUserTaskForm.class.getSimpleName(), name);
+        log.info("Registering {}: {}", LHUserTaskForm.class.getSimpleName(), request.getName());
         blockingStub.putUserTaskDef(request);
     }
 }
