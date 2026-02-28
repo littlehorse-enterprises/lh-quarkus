@@ -2,17 +2,23 @@ package io.littlehorse.quarkus.runtime.recordable;
 
 import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
+import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
 import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
 import io.littlehorse.sdk.common.proto.ThreadRetentionPolicy;
 import io.littlehorse.sdk.common.proto.WorkflowRetentionPolicy;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
+import io.quarkus.runtime.annotations.RecordableConstructor;
 
 import jakarta.enterprise.inject.spi.CDI;
 
-public abstract class LHWorkflowRecordable extends LHRecordable {
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
+public class LHWorkflowRecordable extends LHRecordable {
+
+    private final String beanMethodName;
     private final String parent;
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
@@ -21,9 +27,11 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     private final String defaultThreadRetention;
     private final LHExponentialBackoffRetryRecordable retryRecordable;
 
+    @RecordableConstructor
     public LHWorkflowRecordable(
             Class<?> beanClass,
             String name,
+            String beanMethodName,
             String parent,
             String defaultTaskTimeout,
             String defaultTaskRetries,
@@ -32,6 +40,7 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
             String defaultThreadRetention,
             LHExponentialBackoffRetryRecordable retryRecordable) {
         super(beanClass, name);
+        this.beanMethodName = beanMethodName;
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
@@ -39,6 +48,10 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
         this.retention = retention;
         this.defaultThreadRetention = defaultThreadRetention;
         this.retryRecordable = retryRecordable;
+    }
+
+    public String getBeanMethodName() {
+        return beanMethodName;
     }
 
     public String getDefaultTaskRetries() {
@@ -68,8 +81,6 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     public LHExponentialBackoffRetryRecordable getRetryRecordable() {
         return retryRecordable;
     }
-
-    public abstract void buildWorkflowThread(WorkflowThread workflowThread);
 
     public void registerWorkflow() {
         if (!exists()) return;
@@ -138,5 +149,20 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
         }
 
         register.registerWorkflow(workflow);
+    }
+
+    public void buildWorkflowThread(WorkflowThread workflowThread) {
+        if (beanMethodName == null) {
+            LHWorkflowDefinition bean =
+                    (LHWorkflowDefinition) CDI.current().select(getBeanClass()).get();
+            bean.define(workflowThread);
+        } else {
+            try {
+                Method method = getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
+                method.invoke(getBean(), workflowThread);
+            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

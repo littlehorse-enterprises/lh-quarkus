@@ -3,25 +3,25 @@ package io.littlehorse.quarkus.deployment.item;
 import io.littlehorse.quarkus.deployment.descriptor.LHExponentialBackoffRetryDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHWorkflowDescriptor;
 import io.littlehorse.quarkus.runtime.recordable.LHExponentialBackoffRetryRecordable;
-import io.littlehorse.quarkus.runtime.recordable.LHWorkflowFromMethodRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.quarkus.builder.item.MultiBuildItem;
 
-public final class LHWorkflowFromMethodBuildItem extends MultiBuildItem {
+public final class LHWorkflowBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
     private final String beanMethodName;
     private final LHWorkflowDescriptor descriptor;
 
-    public LHWorkflowFromMethodBuildItem(
+    public LHWorkflowBuildItem(
             Class<?> beanClass, String beanMethodName, LHWorkflowDescriptor descriptor) {
         this.beanClass = beanClass;
         this.beanMethodName = beanMethodName;
         this.descriptor = descriptor;
     }
 
-    public LHWorkflowFromMethodRecordable toRecordable() {
+    public LHWorkflowRecordable toRecordable() {
         LHExponentialBackoffRetryDescriptor backoffRetryDescriptor =
                 descriptor.getDefaultTaskExponentialBackoffRetry();
-        return new LHWorkflowFromMethodRecordable(
+        return new LHWorkflowRecordable(
                 beanClass,
                 descriptor.getWfSpecName(),
                 beanMethodName,

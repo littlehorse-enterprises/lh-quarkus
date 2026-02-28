@@ -12,9 +12,9 @@ import java.util.Optional;
 
 public class LHWorkflowRecordableGraph {
 
-    private final List<? extends LHWorkflowRecordable> inputList;
+    private final List<LHWorkflowRecordable> inputList;
 
-    public LHWorkflowRecordableGraph(List<? extends LHWorkflowRecordable> inputList) {
+    public LHWorkflowRecordableGraph(List<LHWorkflowRecordable> inputList) {
         this.inputList = inputList;
     }
 
@@ -38,7 +38,7 @@ public class LHWorkflowRecordableGraph {
         Iterator<String> iterator = new TopologicalOrderIterator<>(directedGraph);
         List<LHWorkflowRecordable> result = new ArrayList<>();
         iterator.forEachRemaining(name -> {
-            Optional<? extends LHWorkflowRecordable> first = inputList.stream()
+            Optional<LHWorkflowRecordable> first = inputList.stream()
                     .filter(recordable -> name.equals(recordable.getName()))
                     .findFirst();
             first.ifPresent(result::add);

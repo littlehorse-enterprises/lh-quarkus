@@ -11,7 +11,8 @@ import java.util.List;
 class LHWorkflowRecordableGraphTest {
 
     private static LHWorkflowRecordable newRecordable(String name, String parent) {
-        return new LHWorkflowRecordable(null, name, parent, null, null, null, null, null, null) {
+        return new LHWorkflowRecordable(
+                null, name, null, parent, null, null, null, null, null, null) {
             @Override
             public void buildWorkflowThread(WorkflowThread workflowThread) {}
         };

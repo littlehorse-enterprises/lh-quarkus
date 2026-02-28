@@ -6,8 +6,7 @@ import io.littlehorse.quarkus.deployment.descriptor.LHWorkflowDescriptor;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHUserTaskFormBuildItem;
-import io.littlehorse.quarkus.deployment.item.LHWorkflowDefinitionBuildItem;
-import io.littlehorse.quarkus.deployment.item.LHWorkflowFromMethodBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
 import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordableGraph;
@@ -35,7 +34,6 @@ import org.jboss.jandex.MethodInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 class LHServiceProcessor {
 
@@ -68,8 +66,7 @@ class LHServiceProcessor {
 
     @BuildStep
     void scanLHWorkflowDefinition(
-            BuildProducer<LHWorkflowDefinitionBuildItem> producer,
-            BeanArchiveIndexBuildItem indexContainer) {
+            BuildProducer<LHWorkflowBuildItem> producer, BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHWorkflow.class).stream()
                 .filter(annotated -> annotated.target().kind().equals(Kind.CLASS))
                 .filter(annotated -> annotated
@@ -80,16 +77,17 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
                     Class<?> beanClass = loadClass(beanClassName);
-                    return new LHWorkflowDefinitionBuildItem(
-                            beanClass, new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
+                    return new LHWorkflowBuildItem(
+                            beanClass,
+                            null,
+                            new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
                 })
                 .forEach(producer::produce);
     }
 
     @BuildStep
     void scanLHWorkflowFromMethod(
-            BuildProducer<LHWorkflowFromMethodBuildItem> producer,
-            BeanArchiveIndexBuildItem indexContainer) {
+            BuildProducer<LHWorkflowBuildItem> producer, BeanArchiveIndexBuildItem indexContainer) {
         indexContainer.getIndex().getAnnotations(LHWorkflow.class).stream()
                 .filter(annotated -> annotated.target().kind().equals(Kind.METHOD))
                 .map(annotated -> {
@@ -97,7 +95,7 @@ class LHServiceProcessor {
                     String beanClassName = methodInfo.declaringClass().toString();
                     Class<?> beanClass = loadClass(beanClassName);
                     String beanMethodName = methodInfo.name();
-                    return new LHWorkflowFromMethodBuildItem(
+                    return new LHWorkflowBuildItem(
                             beanClass,
                             beanMethodName,
                             new LHWorkflowDescriptor(new OptionalAnnotation(annotated)));
@@ -141,8 +139,7 @@ class LHServiceProcessor {
             ShutdownContextBuildItem shutdownContext,
             List<LHTaskMethodBuildItem> taskMethodBuildItems,
             List<LHUserTaskFormBuildItem> userTaskFromBuildItems,
-            List<LHWorkflowDefinitionBuildItem> workflowDefinitionBuildItems,
-            List<LHWorkflowFromMethodBuildItem> workflowFromMethodBuildItems,
+            List<LHWorkflowBuildItem> workflowBuildItems,
             List<LHStructDefBuildItem> structDefBuildItems) {
 
         List<LHStructDefRecordable> structDefRecordables = structDefBuildItems.stream()
@@ -160,13 +157,9 @@ class LHServiceProcessor {
                 .map(LHUserTaskFormBuildItem::toRecordable)
                 .forEach(recorder::registerLHUserTaskForm);
 
-        List<LHWorkflowRecordable> workflowRecordables = Stream.concat(
-                        workflowDefinitionBuildItems.stream()
-                                .map(LHWorkflowDefinitionBuildItem::toRecordable),
-                        workflowFromMethodBuildItems.stream()
-                                .map(LHWorkflowFromMethodBuildItem::toRecordable))
+        List<LHWorkflowRecordable> workflowRecordables = workflowBuildItems.stream()
+                .map(LHWorkflowBuildItem::toRecordable)
                 .toList();
-
         LHWorkflowRecordableGraph workflowRecordableGraph =
                 new LHWorkflowRecordableGraph(workflowRecordables);
         workflowRecordableGraph.toList().forEach(recorder::registerLHWorkflow);
