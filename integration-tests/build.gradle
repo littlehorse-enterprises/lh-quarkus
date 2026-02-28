@@ -12,10 +12,7 @@ dependencies {
     implementation project(":littlehorse-quarkus-restful-gateway")
 
     // logs
-    implementation "org.jboss.logging:commons-logging-jboss-logging"
-    implementation "org.jboss.logmanager:log4j-jboss-logmanager"
-    implementation "org.jboss.slf4j:slf4j-jboss-logmanager"
-    implementation "org.jboss.logmanager:log4j2-jboss-logmanager"
+        implementation "org.jboss.slf4j:slf4j-jboss-logmanager"
 
     // tests
     testImplementation "io.quarkus:quarkus-junit5"
