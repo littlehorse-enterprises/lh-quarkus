@@ -18,7 +18,7 @@ public class LHRecordableDependenciesGraph<G extends LHRecordable> {
         this.inputList = inputList;
     }
 
-    public List<G> toList() {
+    public List<G> toOrderedList() {
         if (inputList == null || inputList.isEmpty()) {
             return List.of();
         }

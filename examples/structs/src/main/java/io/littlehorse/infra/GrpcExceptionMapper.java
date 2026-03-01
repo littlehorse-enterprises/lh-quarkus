@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.rest.gateway.infrastructure;
+package io.littlehorse.infra;
 
 import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;

@@ -143,7 +143,7 @@ class LHServiceProcessor {
                 .toList();
         LHRecordableDependenciesGraph<LHStructDefRecordable> structDefRecordableGraph =
                 new LHRecordableDependenciesGraph<>(structDefRecordables);
-        structDefRecordableGraph.toList().forEach(recorder::registerLHStructDef);
+        structDefRecordableGraph.toOrderedList().forEach(recorder::registerLHStructDef);
 
         taskMethodBuildItems.stream()
                 .map(LHTaskMethodBuildItem::toRecordable)
@@ -158,7 +158,7 @@ class LHServiceProcessor {
                 .toList();
         LHRecordableDependenciesGraph<LHWorkflowRecordable> workflowRecordableGraph =
                 new LHRecordableDependenciesGraph<>(workflowRecordables);
-        workflowRecordableGraph.toList().forEach(recorder::registerLHWorkflow);
+        workflowRecordableGraph.toOrderedList().forEach(recorder::registerLHWorkflow);
 
         return new ServiceStartBuildItem("LittleHorse");
     }

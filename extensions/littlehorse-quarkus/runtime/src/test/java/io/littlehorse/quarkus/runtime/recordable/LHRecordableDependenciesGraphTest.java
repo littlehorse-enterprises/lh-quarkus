@@ -25,7 +25,7 @@ class LHRecordableDependenciesGraphTest {
 
         LHRecordableDependenciesGraph<LHWorkflowRecordable> graph =
                 new LHRecordableDependenciesGraph<>(List.of(child, parent));
-        assertThat(graph.toList()).containsExactly(parent, child);
+        assertThat(graph.toOrderedList()).containsExactly(parent, child);
     }
 
     @Test
@@ -36,7 +36,7 @@ class LHRecordableDependenciesGraphTest {
 
         LHRecordableDependenciesGraph<LHWorkflowRecordable> graph =
                 new LHRecordableDependenciesGraph<>(List.of(child, parent1, parent2));
-        assertThat(graph.toList()).containsExactly(parent2, parent1, child);
+        assertThat(graph.toOrderedList()).containsExactly(parent2, parent1, child);
     }
 
     @Test
@@ -48,7 +48,7 @@ class LHRecordableDependenciesGraphTest {
 
         LHRecordableDependenciesGraph<LHWorkflowRecordable> graph =
                 new LHRecordableDependenciesGraph<>(List.of(child, parent1, parent2, other));
-        assertThat(graph.toList()).containsExactly(parent2, other, parent1, child);
+        assertThat(graph.toOrderedList()).containsExactly(parent2, other, parent1, child);
     }
 
     @Test
@@ -61,7 +61,7 @@ class LHRecordableDependenciesGraphTest {
 
         LHRecordableDependenciesGraph<LHWorkflowRecordable> graph =
                 new LHRecordableDependenciesGraph<>(List.of(wf4, wf5, wf3, wf1, wf2));
-        assertThat(graph.toList()).containsExactly(wf4, wf3, wf5, wf2, wf1);
+        assertThat(graph.toOrderedList()).containsExactly(wf4, wf3, wf5, wf2, wf1);
     }
 
     @Test
@@ -73,6 +73,6 @@ class LHRecordableDependenciesGraphTest {
 
         LHRecordableDependenciesGraph<LHWorkflowRecordable> graph =
                 new LHRecordableDependenciesGraph<>(List.of(wf4, wf5, wf1, wf2));
-        assertThat(graph.toList()).containsExactly(wf4, wf5, wf2, wf1);
+        assertThat(graph.toOrderedList()).containsExactly(wf4, wf5, wf2, wf1);
     }
 }
