@@ -51,6 +51,6 @@ public class LHStructDefRecordable extends LHRecordable {
 
         LHStructDefRegister register =
                 CDI.current().select(LHStructDefRegister.class).get();
-        register.registerStructDef(request);
+        register.registerStructDef(getName(), request);
     }
 }

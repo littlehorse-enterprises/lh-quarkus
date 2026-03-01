@@ -24,6 +24,6 @@ public class LHUserTaskFormRecordable extends LHRecordable {
         UserTaskSchema schema = new UserTaskSchema(
                 getBeanClass(), configEvaluator.expand(getName()).asString());
         PutUserTaskDefRequest request = schema.compile();
-        register.registerUserTask(request);
+        register.registerUserTask(getName(), request);
     }
 }

@@ -32,6 +32,6 @@ public class LHTaskMethodRecordable extends LHRecordable {
         LHTaskWorker worker = new LHTaskWorker(
                 bean(), getName(), config, configEvaluator.expand(getName()).getMembers());
         shutdownContext.addShutdownTask(new ShutdownContext.CloseRunnable(worker));
-        taskRegister.registerAndStartTask(worker);
+        taskRegister.registerAndStartTask(getName(), worker);
     }
 }

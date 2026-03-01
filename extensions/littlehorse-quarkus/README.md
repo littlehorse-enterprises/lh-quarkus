@@ -742,6 +742,8 @@ Enables health checks for the running `LHTaskWorker` list.
 
 ``quarkus.littlehorse.tasks.start.enabled``
 Automatically starts all `LHTaskWorker` found.
+To configure a specific task by its name, pass the name as follows:
+`quarkus.littlehorse.tasks.{taskDefName}.start.enabled`.
 
 * Type: boolean
 * Default: true
@@ -749,6 +751,8 @@ Automatically starts all `LHTaskWorker` found.
 
 ``quarkus.littlehorse.tasks.register.enabled``
 Registers all `TaskDef` found when starting the application.
+To configure a specific task by its name, pass the name as follows:
+`quarkus.littlehorse.tasks.{taskDefName}.register.enabled`.
 
 * Type: boolean
 * Default: true
@@ -756,6 +760,8 @@ Registers all `TaskDef` found when starting the application.
 
 ``quarkus.littlehorse.workflows.register.enabled``
 Registers all `WfSpec` found when starting the application.
+To configure a specific workflow by its name, pass the name as follows:
+`quarkus.littlehorse.workflows.{wfSpecName}.register.enabled`.
 
 * Type: boolean
 * Default: true
@@ -763,6 +769,8 @@ Registers all `WfSpec` found when starting the application.
 
 ``quarkus.littlehorse.user-tasks.register.enabled``
 Registers all `UserTaskDef` found when starting the application.
+To configure a specific user task by its name, pass the name as follows:
+`quarkus.littlehorse.user-tasks.{userTaskDefName}.register.enabled`.
 
 * Type: boolean
 * Default: true
@@ -770,6 +778,8 @@ Registers all `UserTaskDef` found when starting the application.
 
 ``quarkus.littlehorse.structs.register.enabled``
 Registers all `StructDef` found when starting the application.
+To configure a specific struct by its name, pass the name as follows:
+`quarkus.littlehorse.structs.{structDefName}.register.enabled`.
 
 * Type: boolean
 * Default: true

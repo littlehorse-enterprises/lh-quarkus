@@ -1,6 +1,7 @@
 package io.littlehorse.quarkus.runtime.register;
 
 import io.littlehorse.quarkus.config.LHRuntimeConfig;
+import io.littlehorse.quarkus.config.LHRuntimeConfig.WorkflowConfig;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.wfsdk.Workflow;
@@ -10,6 +11,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 @ApplicationScoped
 @Unremovable
@@ -24,11 +27,15 @@ public class LHWorkflowRegister {
         this.config = config;
     }
 
-    public void registerWorkflow(Workflow workflow) {
-        if (!config.workflowsRegisterEnabled()) return;
+    public void registerWorkflow(String name, Workflow workflow) {
+        boolean registerWorkflow = Optional.ofNullable(
+                        config.specificWorkflowConfigs().get(name))
+                .map(WorkflowConfig::registerEnabled)
+                .orElse(config.workflowsRegisterEnabled());
 
-        log.info("Registering {}: {}", LHWorkflow.class.getSimpleName(), workflow.getName());
+        if (!registerWorkflow) return;
 
+        log.info("Registering {}: {}", LHWorkflow.class.getSimpleName(), name);
         workflow.registerWfSpec(blockingStub);
     }
 }

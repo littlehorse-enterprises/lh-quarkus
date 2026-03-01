@@ -157,7 +157,7 @@ public class LHWorkflowRecordable extends LHRecordable {
             workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
         }
 
-        register.registerWorkflow(workflow);
+        register.registerWorkflow(getName(), workflow);
     }
 
     public void buildWorkflowThread(WorkflowThread workflowThread) {
