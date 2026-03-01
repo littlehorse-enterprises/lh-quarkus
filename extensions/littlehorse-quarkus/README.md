@@ -13,6 +13,7 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
   * [Creating a Task](#creating-a-task)
   * [Registering a Workflow](#registering-a-workflow)
   * [Registering User Tasks](#registering-user-tasks)
+  * [Registering Structs](#registering-structs)
   * [LittleHorse Clients](#littlehorse-clients)
   * [Dependency Injection](#dependency-injection)
   * [Enabling Task Health Checks](#enabling-task-health-checks)
@@ -257,6 +258,48 @@ Quarkus will register the [UserTaskDef](https://littlehorse.io/docs/server/conce
 when starting the application.
 
 More about user tasks at: [User Tasks](https://littlehorse.io/docs/server/concepts/user-tasks).
+
+## Registering Structs
+
+A `StructDef` is a user-definable schema for structured objects in LittleHorse.
+Getting started with structs is as simple as creating a model object and annotating
+it with `@LHStructDef`.
+
+```java
+@LHStructDef("person")
+public class Person {
+    private String firstName;
+    private String lastName;
+
+    public Person() {}
+
+    public Person(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+}
+```
+
+Quarkus will register the [StructDef](https://littlehorse.io/docs/server/concepts/structdefs#define-the-structdef)
+when starting the application.
+
+More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/structdefs).
 
 ## LittleHorse Clients
 
