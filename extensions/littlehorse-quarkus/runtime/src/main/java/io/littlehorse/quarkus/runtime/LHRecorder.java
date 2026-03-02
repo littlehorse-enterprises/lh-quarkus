@@ -2,6 +2,7 @@ package io.littlehorse.quarkus.runtime;
 
 import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.config.LHRuntimeConfig;
+import io.littlehorse.quarkus.runtime.health.LHTaskStatus;
 import io.littlehorse.quarkus.runtime.recordable.LHExponentialBackoffRetryRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
@@ -10,6 +11,7 @@ import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
+import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
 import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
@@ -23,6 +25,8 @@ import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.littlehorse.sdk.worker.LHStructDef;
+import io.littlehorse.sdk.worker.LHTaskMethod;
+import io.littlehorse.sdk.worker.LHTaskWorker;
 import io.quarkus.runtime.RuntimeValue;
 import io.quarkus.runtime.ShutdownContext;
 import io.quarkus.runtime.annotations.Recorder;
@@ -47,7 +51,39 @@ public class LHRecorder {
 
     public void registerAndStartTask(
             LHTaskMethodRecordable recordable, ShutdownContext shutdownContext) {
-        recordable.registerAndStartTask(shutdownContext);
+        if (!doesBeanExist(recordable.getBeanClass())) return;
+
+        ConfigEvaluator configEvaluator = new ConfigEvaluator();
+        String expandedName = configEvaluator.expand(recordable.getName()).asString();
+        Optional<LHRuntimeConfig.TaskConfig> taskConfig =
+                Optional.ofNullable(getLHRuntimeConfig().specificTaskConfigs().get(expandedName));
+
+        boolean registerTask = taskConfig
+                .map(LHRuntimeConfig.TaskConfig::registerEnabled)
+                .orElse(getLHRuntimeConfig().tasksRegisterEnabled());
+        boolean startTask = taskConfig
+                .map(LHRuntimeConfig.TaskConfig::startEnabled)
+                .orElse(getLHRuntimeConfig().tasksStartEnabled());
+
+        LHConfig config = getBean(LHConfig.class);
+        LHTaskStatusesContainer taskStatusesContainer = getBean(LHTaskStatusesContainer.class);
+        LHTaskWorker worker = new LHTaskWorker(
+                getBean(recordable.getBeanClass()),
+                recordable.getName(),
+                config,
+                configEvaluator.expand(recordable.getName()).getMembers());
+        shutdownContext.addShutdownTask(new ShutdownContext.CloseRunnable(worker));
+
+        if (registerTask) {
+            logEvent("Registering", LHTaskMethod.class, expandedName);
+            worker.registerTaskDef();
+        }
+
+        if (startTask) {
+            taskStatusesContainer.add(new LHTaskStatus(worker));
+            logEvent("Starting", LHTaskMethod.class, expandedName);
+            worker.start();
+        }
     }
 
     public void registerLHWorkflow(LHWorkflowRecordable recordable) {
@@ -145,7 +181,7 @@ public class LHRecorder {
             workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
         }
 
-        logRegistration(expandedName, LHWorkflow.class);
+        logEvent("Registering", LHWorkflow.class, expandedName);
         workflow.registerWfSpec(getBlockingStub());
     }
 
@@ -166,7 +202,7 @@ public class LHRecorder {
         UserTaskSchema schema = new UserTaskSchema(recordable.getBeanClass(), expandedName);
         PutUserTaskDefRequest request = schema.compile();
 
-        logRegistration(expandedName, LHUserTaskForm.class);
+        logEvent("Registering", LHUserTaskForm.class, expandedName);
         getBlockingStub().putUserTaskDef(request);
     }
 
@@ -198,7 +234,7 @@ public class LHRecorder {
             builder.setDescription(recordable.getDescription());
         }
 
-        logRegistration(expandedName, LHStructDef.class);
+        logEvent("Registering", LHStructDef.class, expandedName);
         getBlockingStub().putStructDef(builder.build());
     }
 
@@ -206,8 +242,8 @@ public class LHRecorder {
         return runtimeConfig.getValue();
     }
 
-    private static void logRegistration(String expandedName, Class<?> classType) {
-        log.info("Registering {}: {}", classType.getSimpleName(), expandedName);
+    private static void logEvent(String type, Class<?> classType, String expandedName) {
+        log.info("{} {}: {}", type, classType.getSimpleName(), expandedName);
     }
 
     private static LittleHorseBlockingStub getBlockingStub() {
