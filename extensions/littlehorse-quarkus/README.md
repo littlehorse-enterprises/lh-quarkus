@@ -784,3 +784,10 @@ To configure a specific struct by its name, pass the name as follows:
 * Type: boolean
 * Default: true
 * Importance: medium
+
+``quarkus.littlehorse.structs.{structDefName}.register.compatibility``
+Configure compatibility for a specific struct by its name.
+
+* Type: string
+* Default: NO_SCHEMA_UPDATES
+* Importance: medium

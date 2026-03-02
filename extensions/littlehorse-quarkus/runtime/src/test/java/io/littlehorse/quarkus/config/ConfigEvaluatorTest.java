@@ -4,17 +4,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.littlehorse.quarkus.config.ConfigEvaluator.ConfigExpression;
+import io.smallrye.config.SmallRyeConfig;
 
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 class ConfigEvaluatorTest {
+
+    private ConfigEvaluator evaluator;
+
+    @BeforeEach
+    void setUp() {
+        evaluator = new ConfigEvaluator(ConfigProvider.getConfig().unwrap(SmallRyeConfig.class));
+    }
+
     @Test
     void shouldReadConfig() {
         String expression = "my-value";
-        ConfigEvaluator evaluator = new ConfigEvaluator();
         ConfigExpression expanded = evaluator.expand(expression);
 
         assertThat(expanded.isExpression()).isFalse();
@@ -25,15 +35,12 @@ class ConfigEvaluatorTest {
     @Test
     void shouldFailIfNotFoundConfig() {
         String expression = "${not.a.config}";
-        ConfigEvaluator evaluator = new ConfigEvaluator();
-
         assertThrows(NoSuchElementException.class, () -> evaluator.expand(expression));
     }
 
     @Test
     void shouldExpandConfig() {
         String expression = "${my.config.test}";
-        ConfigEvaluator evaluator = new ConfigEvaluator();
         ConfigExpression expanded = evaluator.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
@@ -44,7 +51,6 @@ class ConfigEvaluatorTest {
     @Test
     void shouldExpandDefaultConfig() {
         String expression = "${not.a.config:default-value}";
-        ConfigEvaluator evaluator = new ConfigEvaluator();
         ConfigExpression expanded = evaluator.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
@@ -55,7 +61,6 @@ class ConfigEvaluatorTest {
     @Test
     void shouldExpandConcatenatedConfig() {
         String expression = "concatenation-${my.config.test}";
-        ConfigEvaluator evaluator = new ConfigEvaluator();
         ConfigExpression expanded = evaluator.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
@@ -66,7 +71,6 @@ class ConfigEvaluatorTest {
     @Test
     void shouldExpandMultipleConfig() {
         String expression = "${my.config.test}-${my.second.config.test}";
-        ConfigEvaluator evaluator = new ConfigEvaluator();
         ConfigExpression expanded = evaluator.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();
@@ -82,7 +86,6 @@ class ConfigEvaluatorTest {
     @Test
     void shouldComposeConfig() {
         String expression = "compose-${${my.compose.config}}";
-        ConfigEvaluator evaluator = new ConfigEvaluator();
         ConfigExpression expanded = evaluator.expand(expression);
 
         assertThat(expanded.isExpression()).isTrue();

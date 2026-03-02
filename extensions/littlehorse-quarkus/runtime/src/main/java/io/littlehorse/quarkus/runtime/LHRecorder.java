@@ -53,7 +53,7 @@ public class LHRecorder {
             LHTaskMethodRecordable recordable, ShutdownContext shutdownContext) {
         if (!doesBeanExist(recordable.getBeanClass())) return;
 
-        ConfigEvaluator configEvaluator = new ConfigEvaluator();
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.TaskConfig> taskConfig =
                 Optional.ofNullable(getLHRuntimeConfig().specificTaskConfigs().get(expandedName));
@@ -89,7 +89,7 @@ public class LHRecorder {
     public void registerLHWorkflow(LHWorkflowRecordable recordable) {
         if (!doesBeanExist(recordable.getBeanClass())) return;
 
-        ConfigEvaluator configEvaluator = new ConfigEvaluator();
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.WorkflowConfig> workflowConfig = Optional.ofNullable(
                 getLHRuntimeConfig().specificWorkflowConfigs().get(expandedName));
@@ -188,7 +188,7 @@ public class LHRecorder {
     public void registerLHUserTaskForm(LHUserTaskFormRecordable recordable) {
         if (!doesBeanExist(recordable.getBeanClass())) return;
 
-        ConfigEvaluator configEvaluator = new ConfigEvaluator();
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.UserTaskConfig> taskConfig = Optional.ofNullable(
                 getLHRuntimeConfig().specificUserTaskConfigs().get(expandedName));
@@ -209,7 +209,7 @@ public class LHRecorder {
     public void registerLHStructDef(LHStructDefRecordable recordable) {
         if (!doesBeanExist(recordable.getBeanClass())) return;
 
-        ConfigEvaluator configEvaluator = new ConfigEvaluator();
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.StructConfig> structConfig =
                 Optional.ofNullable(getLHRuntimeConfig().specificStructConfigs().get(expandedName));

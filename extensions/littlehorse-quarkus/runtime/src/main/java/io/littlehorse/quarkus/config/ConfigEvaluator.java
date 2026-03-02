@@ -1,21 +1,24 @@
 package io.littlehorse.quarkus.config;
 
+import io.quarkus.arc.Unremovable;
 import io.smallrye.common.expression.Expression;
 import io.smallrye.config.SmallRyeConfig;
 
-import org.eclipse.microprofile.config.ConfigProvider;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public final class ConfigEvaluator {
+@ApplicationScoped
+@Unremovable
+public class ConfigEvaluator {
 
     private final SmallRyeConfig config;
 
-    public ConfigEvaluator() {
-        this.config = ConfigProvider.getConfig().unwrap(SmallRyeConfig.class);
+    public ConfigEvaluator(SmallRyeConfig config) {
+        this.config = config;
     }
 
     public static class ConfigExpression {
