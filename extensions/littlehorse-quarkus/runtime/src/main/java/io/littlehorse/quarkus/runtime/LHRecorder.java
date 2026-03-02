@@ -6,9 +6,12 @@ import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHUserTaskFormRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
+import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.PutStructDefRequest;
+import io.littlehorse.sdk.common.proto.PutUserTaskDefRequest;
 import io.littlehorse.sdk.common.proto.StructDefCompatibilityType;
+import io.littlehorse.sdk.usertask.UserTaskSchema;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.quarkus.runtime.RuntimeValue;
@@ -41,7 +44,24 @@ public class LHRecorder {
     }
 
     public void registerLHUserTaskForm(LHUserTaskFormRecordable recordable) {
-        recordable.registerUserTask();
+        if (!doesBeanExist(recordable.getBeanClass())) return;
+
+        ConfigEvaluator configEvaluator = new ConfigEvaluator();
+        String expandedName = configEvaluator.expand(recordable.getName()).asString();
+        Optional<LHRuntimeConfig.UserTaskConfig> taskConfig = Optional.ofNullable(
+                getLHRuntimeConfig().specificUserTaskConfigs().get(expandedName));
+
+        boolean registerUserTask = taskConfig
+                .map(LHRuntimeConfig.UserTaskConfig::registerEnabled)
+                .orElse(getLHRuntimeConfig().userTaskRegisterEnabled());
+
+        if (!registerUserTask) return;
+
+        UserTaskSchema schema = new UserTaskSchema(recordable.getBeanClass(), expandedName);
+        PutUserTaskDefRequest request = schema.compile();
+
+        logRegistration(expandedName, LHUserTaskForm.class);
+        getBlockingStub().putUserTaskDef(request);
     }
 
     public void registerLHStructDef(LHStructDefRecordable recordable) {
@@ -51,6 +71,7 @@ public class LHRecorder {
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.StructConfig> structConfig =
                 Optional.ofNullable(getLHRuntimeConfig().specificStructConfigs().get(expandedName));
+
         boolean registerStruct = structConfig
                 .map(LHRuntimeConfig.StructConfig::registerEnabled)
                 .orElse(getLHRuntimeConfig().structsRegisterEnabled());
@@ -71,13 +92,16 @@ public class LHRecorder {
             builder.setDescription(recordable.getDescription());
         }
 
-        LittleHorseBlockingStub blockingStub = getBlockingStub();
-        log.info("Registering {}: {}", LHStructDef.class.getSimpleName(), expandedName);
-        blockingStub.putStructDef(builder.build());
+        logRegistration(expandedName, LHStructDef.class);
+        getBlockingStub().putStructDef(builder.build());
     }
 
     private LHRuntimeConfig getLHRuntimeConfig() {
         return runtimeConfig.getValue();
+    }
+
+    private static void logRegistration(String expandedName, Class<?> classType) {
+        log.info("Registering {}: {}", classType.getSimpleName(), expandedName);
     }
 
     private static LittleHorseBlockingStub getBlockingStub() {
