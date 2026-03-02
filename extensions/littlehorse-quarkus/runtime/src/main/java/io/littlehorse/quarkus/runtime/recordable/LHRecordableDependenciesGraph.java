@@ -10,15 +10,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class LHWorkflowRecordableGraph {
+public class LHRecordableDependenciesGraph<G extends LHRecordable> {
 
-    private final List<? extends LHWorkflowRecordable> inputList;
+    private final List<G> inputList;
 
-    public LHWorkflowRecordableGraph(List<? extends LHWorkflowRecordable> inputList) {
+    public LHRecordableDependenciesGraph(List<G> inputList) {
         this.inputList = inputList;
     }
 
-    public List<LHWorkflowRecordable> toList() {
+    public List<G> toOrderedList() {
         if (inputList == null || inputList.isEmpty()) {
             return List.of();
         }
@@ -27,18 +27,17 @@ public class LHWorkflowRecordableGraph {
 
         inputList.forEach(recordable -> directedGraph.addVertex(recordable.getName()));
         inputList.stream()
-                .filter(recordable -> recordable.getParent() != null)
-                .forEach(recordable -> directedGraph.addVertex(recordable.getParent()));
+                .flatMap(recordable -> recordable.dependencies().stream())
+                .forEach(directedGraph::addVertex);
 
-        inputList.stream()
-                .filter(recordable -> recordable.getParent() != null)
-                .forEach(recordable ->
-                        directedGraph.addEdge(recordable.getParent(), recordable.getName()));
+        inputList.forEach(recordable -> recordable
+                .dependencies()
+                .forEach(dependency -> directedGraph.addEdge(dependency, recordable.getName())));
 
         Iterator<String> iterator = new TopologicalOrderIterator<>(directedGraph);
-        List<LHWorkflowRecordable> result = new ArrayList<>();
+        List<G> result = new ArrayList<>();
         iterator.forEachRemaining(name -> {
-            Optional<? extends LHWorkflowRecordable> first = inputList.stream()
+            Optional<G> first = inputList.stream()
                     .filter(recordable -> name.equals(recordable.getName()))
                     .findFirst();
             first.ifPresent(result::add);

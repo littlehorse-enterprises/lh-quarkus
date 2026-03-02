@@ -1,0 +1,13 @@
+dependencies {
+    // quarkus
+    implementation enforcedPlatform("io.quarkus.platform:quarkus-bom:${quarkusVersion}")
+    implementation "io.quarkus:quarkus-arc"
+    implementation "io.quarkus:quarkus-rest"
+    implementation "io.quarkus:quarkus-rest-jackson"
+
+    // quarkus extension
+    implementation project(":littlehorse-quarkus")
+
+    // logs
+    implementation "org.jboss.slf4j:slf4j-jboss-logmanager"
+}

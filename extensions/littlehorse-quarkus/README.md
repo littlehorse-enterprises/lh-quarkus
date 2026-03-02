@@ -13,6 +13,7 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
   * [Creating a Task](#creating-a-task)
   * [Registering a Workflow](#registering-a-workflow)
   * [Registering User Tasks](#registering-user-tasks)
+  * [Registering Structs](#registering-structs)
   * [LittleHorse Clients](#littlehorse-clients)
   * [Dependency Injection](#dependency-injection)
   * [Enabling Task Health Checks](#enabling-task-health-checks)
@@ -257,6 +258,48 @@ Quarkus will register the [UserTaskDef](https://littlehorse.io/docs/server/conce
 when starting the application.
 
 More about user tasks at: [User Tasks](https://littlehorse.io/docs/server/concepts/user-tasks).
+
+## Registering Structs
+
+A `StructDef` is a user-definable schema for structured objects in LittleHorse.
+Getting started with structs is as simple as creating a model object and annotating
+it with `@LHStructDef`.
+
+```java
+@LHStructDef("person")
+public class Person {
+    private String firstName;
+    private String lastName;
+
+    public Person() {}
+
+    public Person(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+}
+```
+
+Quarkus will register the [StructDef](https://littlehorse.io/docs/server/concepts/structdefs#define-the-structdef)
+when starting the application.
+
+More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/structdefs).
 
 ## LittleHorse Clients
 
@@ -699,6 +742,8 @@ Enables health checks for the running `LHTaskWorker` list.
 
 ``quarkus.littlehorse.tasks.start.enabled``
 Automatically starts all `LHTaskWorker` found.
+To configure a specific task by its name, pass the name as follows:
+`quarkus.littlehorse.tasks.{taskDefName}.start.enabled`.
 
 * Type: boolean
 * Default: true
@@ -706,6 +751,8 @@ Automatically starts all `LHTaskWorker` found.
 
 ``quarkus.littlehorse.tasks.register.enabled``
 Registers all `TaskDef` found when starting the application.
+To configure a specific task by its name, pass the name as follows:
+`quarkus.littlehorse.tasks.{taskDefName}.register.enabled`.
 
 * Type: boolean
 * Default: true
@@ -713,6 +760,8 @@ Registers all `TaskDef` found when starting the application.
 
 ``quarkus.littlehorse.workflows.register.enabled``
 Registers all `WfSpec` found when starting the application.
+To configure a specific workflow by its name, pass the name as follows:
+`quarkus.littlehorse.workflows.{wfSpecName}.register.enabled`.
 
 * Type: boolean
 * Default: true
@@ -720,7 +769,25 @@ Registers all `WfSpec` found when starting the application.
 
 ``quarkus.littlehorse.user-tasks.register.enabled``
 Registers all `UserTaskDef` found when starting the application.
+To configure a specific user task by its name, pass the name as follows:
+`quarkus.littlehorse.user-tasks.{userTaskDefName}.register.enabled`.
 
 * Type: boolean
 * Default: true
+* Importance: medium
+
+``quarkus.littlehorse.structs.register.enabled``
+Registers all `StructDef` found when starting the application.
+To configure a specific struct by its name, pass the name as follows:
+`quarkus.littlehorse.structs.{structDefName}.register.enabled`.
+
+* Type: boolean
+* Default: true
+* Importance: medium
+
+``quarkus.littlehorse.structs.{structDefName}.register.compatibility``
+Configure compatibility for a specific struct by its name.
+
+* Type: string
+* Default: NO_SCHEMA_UPDATES
 * Importance: medium

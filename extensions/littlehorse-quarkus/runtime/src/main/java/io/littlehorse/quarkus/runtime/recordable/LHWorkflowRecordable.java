@@ -1,18 +1,12 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
-import io.littlehorse.quarkus.config.ConfigEvaluator;
-import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
-import io.littlehorse.sdk.common.proto.AllowedUpdateType;
-import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
-import io.littlehorse.sdk.common.proto.ThreadRetentionPolicy;
-import io.littlehorse.sdk.common.proto.WorkflowRetentionPolicy;
-import io.littlehorse.sdk.wfsdk.Workflow;
-import io.littlehorse.sdk.wfsdk.WorkflowThread;
+import io.quarkus.runtime.annotations.RecordableConstructor;
 
-import jakarta.enterprise.inject.spi.CDI;
+import java.util.List;
 
-public abstract class LHWorkflowRecordable extends LHRecordable {
+public class LHWorkflowRecordable extends LHRecordable {
 
+    private final String beanMethodName;
     private final String parent;
     private final String defaultTaskTimeout;
     private final String defaultTaskRetries;
@@ -21,9 +15,11 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
     private final String defaultThreadRetention;
     private final LHExponentialBackoffRetryRecordable retryRecordable;
 
+    @RecordableConstructor
     public LHWorkflowRecordable(
             Class<?> beanClass,
             String name,
+            String beanMethodName,
             String parent,
             String defaultTaskTimeout,
             String defaultTaskRetries,
@@ -32,6 +28,7 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
             String defaultThreadRetention,
             LHExponentialBackoffRetryRecordable retryRecordable) {
         super(beanClass, name);
+        this.beanMethodName = beanMethodName;
         this.parent = parent;
         this.defaultTaskTimeout = defaultTaskTimeout;
         this.defaultTaskRetries = defaultTaskRetries;
@@ -39,6 +36,10 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
         this.retention = retention;
         this.defaultThreadRetention = defaultThreadRetention;
         this.retryRecordable = retryRecordable;
+    }
+
+    public String getBeanMethodName() {
+        return beanMethodName;
     }
 
     public String getDefaultTaskRetries() {
@@ -69,74 +70,11 @@ public abstract class LHWorkflowRecordable extends LHRecordable {
         return retryRecordable;
     }
 
-    public abstract void buildWorkflowThread(WorkflowThread workflowThread);
-
-    public void registerWorkflow() {
-        if (!exists()) return;
-
-        ConfigEvaluator configEvaluator = new ConfigEvaluator();
-        LHWorkflowRegister register =
-                CDI.current().select(LHWorkflowRegister.class).get();
-
-        Workflow workflow = Workflow.newWorkflow(
-                configEvaluator.expand(getName()).asString(), this::buildWorkflowThread);
-
-        if (parent != null) {
-            workflow.setParent(configEvaluator.expand(parent).asString());
+    @Override
+    public List<String> dependencies() {
+        if (getParent() == null) {
+            return List.of();
         }
-
-        if (defaultTaskTimeout != null) {
-            workflow.setDefaultTaskTimeout(
-                    configEvaluator.expand(defaultTaskTimeout).asInt());
-        }
-
-        if (defaultTaskRetries != null) {
-            workflow.setDefaultTaskRetries(
-                    configEvaluator.expand(defaultTaskRetries).asInt());
-        }
-
-        if (updateType != null) {
-            workflow.withUpdateType(AllowedUpdateType.valueOf(
-                    configEvaluator.expand(defaultTaskRetries).asString().toUpperCase()));
-        }
-
-        if (retention != null) {
-            workflow.withRetentionPolicy(WorkflowRetentionPolicy.newBuilder()
-                    .setSecondsAfterWfTermination(
-                            configEvaluator.expand(retention).asLong())
-                    .build());
-        }
-
-        if (defaultThreadRetention != null) {
-            workflow.withDefaultThreadRetentionPolicy(ThreadRetentionPolicy.newBuilder()
-                    .setSecondsAfterThreadTermination(
-                            configEvaluator.expand(defaultThreadRetention).asLong())
-                    .build());
-        }
-
-        if (retryRecordable != null) {
-            ExponentialBackoffRetryPolicy.Builder backoffRetryBuilder =
-                    ExponentialBackoffRetryPolicy.newBuilder();
-
-            if (retryRecordable.getBaseIntervalMs() != null) {
-                backoffRetryBuilder.setBaseIntervalMs(configEvaluator
-                        .expand(retryRecordable.getBaseIntervalMs())
-                        .asInt());
-            }
-
-            if (retryRecordable.getMultiplier() != null) {
-                backoffRetryBuilder.setMultiplier(
-                        configEvaluator.expand(retryRecordable.getMultiplier()).asFloat());
-            }
-
-            if (retryRecordable.getMaxDelayMs() != null) {
-                backoffRetryBuilder.setMaxDelayMs(
-                        configEvaluator.expand(retryRecordable.getMaxDelayMs()).asLong());
-            }
-
-            workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
-        }
-
-        register.registerWorkflow(workflow);
+        return List.of(getParent());
     }
 }

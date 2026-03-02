@@ -1,4 +1,4 @@
-package io.littlehorse.quarkus.deployment.reflection;
+package io.littlehorse.quarkus.deployment.annotation;
 
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationValue;
@@ -32,6 +32,6 @@ public final class OptionalAnnotation {
     }
 
     public boolean isPreset() {
-        return annotationInstance != null;
+        return Optional.ofNullable(annotationInstance).isPresent();
     }
 }

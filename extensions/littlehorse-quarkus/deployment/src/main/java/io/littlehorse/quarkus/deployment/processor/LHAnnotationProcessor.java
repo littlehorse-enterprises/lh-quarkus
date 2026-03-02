@@ -3,6 +3,7 @@ package io.littlehorse.quarkus.deployment.processor;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
+import io.littlehorse.sdk.worker.LHStructDef;
 import io.quarkus.arc.deployment.BeanDefiningAnnotationBuildItem;
 import io.quarkus.deployment.annotations.BuildStep;
 
@@ -24,6 +25,12 @@ public class LHAnnotationProcessor {
     BeanDefiningAnnotationBuildItem produceLHWorkflow() {
         return new BeanDefiningAnnotationBuildItem(
                 DotName.createSimple(LHWorkflow.class), SINGLETON_ANNOTATION);
+    }
+
+    @BuildStep
+    BeanDefiningAnnotationBuildItem produceLHStructDef() {
+        return new BeanDefiningAnnotationBuildItem(
+                DotName.createSimple(LHStructDef.class), SINGLETON_ANNOTATION);
     }
 
     @BuildStep

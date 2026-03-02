@@ -1,4 +1,6 @@
-package io.littlehorse.quarkus.deployment.reflection;
+package io.littlehorse.quarkus.deployment.descriptor;
+
+import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 
 public final class LHExponentialBackoffRetryDescriptor {
 
