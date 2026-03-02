@@ -14,7 +14,7 @@ A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
   * [LittleHorse Client Configurations](#littlehorse-client-configurations)
 * [Endpoints](#endpoints)
   * [ExternalEvent](#externalevent)
-    * [Post](#post)
+    * [Send Event](#send-event)
       * [Body parameter](#body-parameter)
       * [Parameters](#parameters)
       * [Example responses](#example-responses)
@@ -28,37 +28,41 @@ A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
       * [Parameters](#parameters-2)
       * [Example responses](#example-responses-2)
       * [Responses](#responses-2)
-  * [WfRun](#wfrun)
-    * [Run](#run)
-      * [Body parameter](#body-parameter-1)
+    * [Get Workers](#get-workers)
       * [Parameters](#parameters-3)
       * [Example responses](#example-responses-3)
       * [Responses](#responses-3)
-    * [Get](#get-1)
+  * [WfRun](#wfrun)
+    * [Run Wf](#run-wf)
+      * [Body parameter](#body-parameter-1)
       * [Parameters](#parameters-4)
       * [Example responses](#example-responses-4)
       * [Responses](#responses-4)
-    * [Get Variables](#get-variables)
+    * [Get](#get-1)
       * [Parameters](#parameters-5)
       * [Example responses](#example-responses-5)
       * [Responses](#responses-5)
-  * [WfSpec](#wfspec)
-    * [Search](#search-1)
+    * [Get Variables](#get-variables)
       * [Parameters](#parameters-6)
       * [Example responses](#example-responses-6)
       * [Responses](#responses-6)
-    * [Get Latest](#get-latest)
+  * [WfSpec](#wfspec)
+    * [Search](#search-1)
       * [Parameters](#parameters-7)
       * [Example responses](#example-responses-7)
       * [Responses](#responses-7)
-    * [Get Version](#get-version)
+    * [Get Latest](#get-latest)
       * [Parameters](#parameters-8)
       * [Example responses](#example-responses-8)
       * [Responses](#responses-8)
-  * [Version](#version)
-    * [Get](#get-2)
+    * [Get Version](#get-version)
+      * [Parameters](#parameters-9)
       * [Example responses](#example-responses-9)
       * [Responses](#responses-9)
+  * [Version](#version)
+    * [Get](#get-2)
+      * [Example responses](#example-responses-10)
+      * [Responses](#responses-10)
 * [Schemas](#schemas)
   * [ExternalEvent](#externalevent-1)
   * [ExternalEventRequest](#externaleventrequest)
@@ -73,6 +77,7 @@ A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
     * [Properties](#properties-2)
   * [WfSpec](#wfspec-1)
   * [WfSpecIdList](#wfspecidlist)
+  * [TaskWorkerGroup](#taskworkergroup)
 <!-- TOC -->
 
 # Installation
@@ -230,7 +235,7 @@ Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Autho
 
 ## ExternalEvent
 
-### Post
+### Send Event
 
 ```
 POST /gateway/tenants/{tenant}/external-events
@@ -385,9 +390,60 @@ GET /gateway/tenants/{tenant}/task-defs/{name}
 | 404    | [Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)             | Record not found              | None                                                      |
 | 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | Internal error                | None                                                      |
 
+### Get Workers
+
+```
+GET /gateway/tenants/{tenant}/task-defs/{name}/workers
+```
+
+#### Parameters
+
+| Name   | In   | Type   | Required | Description |
+|--------|------|--------|----------|-------------|
+| name   | path | string | true     | none        |
+| tenant | path | string | true     | Tenant name |
+
+#### Example responses
+
+```
+200 Response
+```
+
+```json
+{
+  "id":  {
+    "taskDefId":  {
+      "name":  "greetings"
+    }
+  },
+  "createdAt":  "2026-02-28T15:42:10.467Z",
+  "taskWorkers":  {
+    "worker-0279f257b66a4cb885e854548ab6f131":  {
+      "taskWorkerId":  "worker-0279f257b66a4cb885e854548ab6f131",
+      "latestHeartbeat":  "2026-02-28T16:05:10.588Z",
+      "hosts":  [
+        {
+          "host":  "littlehorse",
+          "port":  2011
+        }
+      ]
+    }
+  }
+}
+```
+
+#### Responses
+
+| Status | Meaning                                                                    | Description                   | Schema                                                                    |
+|--------|----------------------------------------------------------------------------|-------------------------------|---------------------------------------------------------------------------|
+| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)                    | Record retrieved successfully | [TaskWorkerGroup](https://littlehorse.io/docs/server/api#taskworkergroup) |
+| 400    | [Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)           | Bad request                   | None                                                                      |
+| 404    | [Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)             | Record not found              | None                                                                      |
+| 500    | [Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1) | Internal error                | None                                                                      |
+
 ## WfRun
 
-### Run
+### Run Wf
 
 ```
 POST /gateway/tenants/{tenant}/wf-runs
@@ -956,3 +1012,7 @@ External documentation: [WfSpec](https://littlehorse.io/docs/server/api#wfspec).
 ## WfSpecIdList
 
 External documentation: [WfSpecIdList](https://littlehorse.io/docs/server/api#wfspecidlist).
+
+## TaskWorkerGroup
+
+External documentation: [TaskWorkerGroup](https://littlehorse.io/docs/server/api#taskworkergroup).

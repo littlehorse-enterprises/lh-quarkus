@@ -57,25 +57,25 @@ public class TaskDefResource {
             """;
     public static final String GET_WORKER_GROUP_EXAMPLE_RESPONSE = """
             {
-               "id":  {
-                 "taskDefId":  {
-                   "name":  "greetings"
-                 }
-               },
-               "createdAt":  "2026-02-28T15:42:10.467Z",
-               "taskWorkers":  {
-                 "worker-0279f257b66a4cb885e854548ab6f131":  {
-                   "taskWorkerId":  "worker-0279f257b66a4cb885e854548ab6f131",
-                   "latestHeartbeat":  "2026-02-28T16:05:10.588Z",
-                   "hosts":  [
-                     {
-                       "host":  "littlehorse",
-                       "port":  2011
-                     }
-                   ]
-                 }
-               }
-             }
+              "id":  {
+                "taskDefId":  {
+                  "name":  "greetings"
+                }
+              },
+              "createdAt":  "2026-02-28T15:42:10.467Z",
+              "taskWorkers":  {
+                "worker-0279f257b66a4cb885e854548ab6f131":  {
+                  "taskWorkerId":  "worker-0279f257b66a4cb885e854548ab6f131",
+                  "latestHeartbeat":  "2026-02-28T16:05:10.588Z",
+                  "hosts":  [
+                    {
+                      "host":  "littlehorse",
+                      "port":  2011
+                    }
+                  ]
+                }
+              }
+            }
             """;
     private final TaskDefRepository repository;
 
