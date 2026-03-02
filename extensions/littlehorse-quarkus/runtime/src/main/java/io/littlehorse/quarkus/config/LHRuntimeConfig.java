@@ -69,5 +69,9 @@ public interface LHRuntimeConfig {
         @WithName("register.enabled")
         @WithDefault("${quarkus.littlehorse.structs.register.enabled}")
         Boolean registerEnabled();
+
+        @WithName("register.compatibility")
+        @WithDefault("NO_SCHEMA_UPDATES")
+        String compatibility();
     }
 }
