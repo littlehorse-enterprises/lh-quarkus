@@ -4,7 +4,6 @@ import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.quarkus.runtime.LHExternalBeans;
 import io.littlehorse.quarkus.runtime.LHTaskStatusesContainer;
 import io.littlehorse.quarkus.runtime.register.LHTaskRegister;
-import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.deployment.annotations.BuildStep;
 
@@ -14,13 +13,6 @@ public class LHBeanProcessor {
     AdditionalBeanBuildItem produceLHExternalBeans() {
         return AdditionalBeanBuildItem.builder()
                 .addBeanClasses(LHExternalBeans.class)
-                .build();
-    }
-
-    @BuildStep
-    AdditionalBeanBuildItem produceLHWorkflowRegister() {
-        return AdditionalBeanBuildItem.builder()
-                .addBeanClasses(LHWorkflowRegister.class)
                 .build();
     }
 

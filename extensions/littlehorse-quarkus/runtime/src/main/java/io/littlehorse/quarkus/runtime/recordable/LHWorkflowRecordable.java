@@ -1,20 +1,7 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
-import io.littlehorse.quarkus.config.ConfigEvaluator;
-import io.littlehorse.quarkus.runtime.register.LHWorkflowRegister;
-import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
-import io.littlehorse.sdk.common.proto.AllowedUpdateType;
-import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
-import io.littlehorse.sdk.common.proto.ThreadRetentionPolicy;
-import io.littlehorse.sdk.common.proto.WorkflowRetentionPolicy;
-import io.littlehorse.sdk.wfsdk.Workflow;
-import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
-import jakarta.enterprise.inject.spi.CDI;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class LHWorkflowRecordable extends LHRecordable {
@@ -89,89 +76,5 @@ public class LHWorkflowRecordable extends LHRecordable {
             return List.of();
         }
         return List.of(getParent());
-    }
-
-    public void registerWorkflow() {
-        if (!exists()) return;
-
-        ConfigEvaluator configEvaluator = new ConfigEvaluator();
-        LHWorkflowRegister register =
-                CDI.current().select(LHWorkflowRegister.class).get();
-
-        Workflow workflow = Workflow.newWorkflow(
-                configEvaluator.expand(getName()).asString(), this::buildWorkflowThread);
-
-        if (parent != null) {
-            workflow.setParent(configEvaluator.expand(parent).asString());
-        }
-
-        if (defaultTaskTimeout != null) {
-            workflow.setDefaultTaskTimeout(
-                    configEvaluator.expand(defaultTaskTimeout).asInt());
-        }
-
-        if (defaultTaskRetries != null) {
-            workflow.setDefaultTaskRetries(
-                    configEvaluator.expand(defaultTaskRetries).asInt());
-        }
-
-        if (updateType != null) {
-            workflow.withUpdateType(AllowedUpdateType.valueOf(
-                    configEvaluator.expand(defaultTaskRetries).asString().toUpperCase()));
-        }
-
-        if (retention != null) {
-            workflow.withRetentionPolicy(WorkflowRetentionPolicy.newBuilder()
-                    .setSecondsAfterWfTermination(
-                            configEvaluator.expand(retention).asLong())
-                    .build());
-        }
-
-        if (defaultThreadRetention != null) {
-            workflow.withDefaultThreadRetentionPolicy(ThreadRetentionPolicy.newBuilder()
-                    .setSecondsAfterThreadTermination(
-                            configEvaluator.expand(defaultThreadRetention).asLong())
-                    .build());
-        }
-
-        if (retryRecordable != null) {
-            ExponentialBackoffRetryPolicy.Builder backoffRetryBuilder =
-                    ExponentialBackoffRetryPolicy.newBuilder();
-
-            if (retryRecordable.getBaseIntervalMs() != null) {
-                backoffRetryBuilder.setBaseIntervalMs(configEvaluator
-                        .expand(retryRecordable.getBaseIntervalMs())
-                        .asInt());
-            }
-
-            if (retryRecordable.getMultiplier() != null) {
-                backoffRetryBuilder.setMultiplier(
-                        configEvaluator.expand(retryRecordable.getMultiplier()).asFloat());
-            }
-
-            if (retryRecordable.getMaxDelayMs() != null) {
-                backoffRetryBuilder.setMaxDelayMs(
-                        configEvaluator.expand(retryRecordable.getMaxDelayMs()).asLong());
-            }
-
-            workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
-        }
-
-        register.registerWorkflow(getName(), workflow);
-    }
-
-    public void buildWorkflowThread(WorkflowThread workflowThread) {
-        if (beanMethodName == null) {
-            LHWorkflowDefinition bean =
-                    (LHWorkflowDefinition) CDI.current().select(getBeanClass()).get();
-            bean.define(workflowThread);
-        } else {
-            try {
-                Method method = getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
-                method.invoke(bean(), workflowThread);
-            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

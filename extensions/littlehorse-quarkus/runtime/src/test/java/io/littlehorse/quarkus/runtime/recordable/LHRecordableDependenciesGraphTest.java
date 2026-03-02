@@ -2,8 +2,6 @@ package io.littlehorse.quarkus.runtime.recordable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.littlehorse.sdk.wfsdk.WorkflowThread;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -12,10 +10,7 @@ class LHRecordableDependenciesGraphTest {
 
     private static LHWorkflowRecordable newRecordable(String name, String parent) {
         return new LHWorkflowRecordable(
-                null, name, null, parent, null, null, null, null, null, null) {
-            @Override
-            public void buildWorkflowThread(WorkflowThread workflowThread) {}
-        };
+                null, name, null, parent, null, null, null, null, null, null);
     }
 
     @Test
