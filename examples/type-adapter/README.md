@@ -6,7 +6,7 @@ You have to add a `LHTypeAdapter` class with a `@Singleton` annotation.
 
 ```java
 @Singleton
-public class UUUIDTypeAdapter implements LHStringAdapter<UUID> {
+public class UUIDTypeAdapter implements LHStringAdapter<UUID> {
 
     @Override
     public String toString(UUID src) {

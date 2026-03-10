@@ -3,6 +3,7 @@ package io.littlehorse.quarkus.runtime;
 import com.google.common.collect.Streams;
 
 import io.littlehorse.sdk.common.config.LHConfig;
+import io.littlehorse.sdk.common.config.LHConfig.LHConfigBuilder;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 import io.littlehorse.sdk.worker.adapter.LHTypeAdapter;
@@ -44,17 +45,17 @@ public class LHExternalBeans {
         // TODO: wait until this is done
         // https://github.com/littlehorse-enterprises/littlehorse/pull/2136/changes
 
-        LHConfig lhConfig = LHConfig.newBuilder().loadFromProperties(properties).build();
+        LHConfigBuilder lhConfigBuilder = LHConfig.newBuilder().loadFromProperties(properties);
 
         Optional.ofNullable(adapters).orElse(Collections.emptyList()).forEach(lhTypeAdapter -> {
             log.info(
                     "Registering {}: {}",
                     LHTypeAdapter.class.getSimpleName(),
                     lhTypeAdapter.getClass().getName());
-            lhConfig.registerTypeAdapter(lhTypeAdapter);
+            lhConfigBuilder.addTypeAdapter(lhTypeAdapter);
         });
 
-        return lhConfig;
+        return lhConfigBuilder.build();
     }
 
     @Produces

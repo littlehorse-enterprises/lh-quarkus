@@ -7,7 +7,7 @@ import jakarta.inject.Singleton;
 import java.util.UUID;
 
 @Singleton
-public class UUUIDTypeAdapter implements LHStringAdapter<UUID> {
+public class UUIDTypeAdapter implements LHStringAdapter<UUID> {
 
     @Override
     public String toString(UUID src) {
