@@ -5,6 +5,8 @@ import com.google.common.collect.Streams;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
+import io.littlehorse.sdk.worker.adapter.LHTypeAdapter;
+import io.quarkus.arc.All;
 import io.quarkus.arc.DefaultBean;
 import io.quarkus.arc.Unremovable;
 
@@ -13,17 +15,24 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 
 import org.eclipse.microprofile.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 @ApplicationScoped
 public class LHExternalBeans {
 
+    private static final Logger log = LoggerFactory.getLogger(LHExternalBeans.class);
+
     @Produces
     @DefaultBean
     @Singleton
     @Unremovable
-    LHConfig configuration(Config config) {
+    LHConfig configuration(Config config, @All List<LHTypeAdapter<?>> adapters) {
         Properties properties = new Properties();
         Streams.stream(config.getPropertyNames())
                 .map(propertyName -> new ServerConfig(
@@ -32,7 +41,20 @@ public class LHExternalBeans {
                 .forEach(serverConfig ->
                         properties.put(serverConfig.getKey(), serverConfig.getValue()));
 
-        return LHConfig.newBuilder().loadFromProperties(properties).build();
+        // TODO: wait until this is done
+        // https://github.com/littlehorse-enterprises/littlehorse/pull/2136/changes
+
+        LHConfig lhConfig = LHConfig.newBuilder().loadFromProperties(properties).build();
+
+        Optional.ofNullable(adapters).orElse(Collections.emptyList()).forEach(lhTypeAdapter -> {
+            log.info(
+                    "Registering {}: {}",
+                    LHTypeAdapter.class.getSimpleName(),
+                    lhTypeAdapter.getClass().getName());
+            lhConfig.registerTypeAdapter(lhTypeAdapter);
+        });
+
+        return lhConfig;
     }
 
     @Produces
