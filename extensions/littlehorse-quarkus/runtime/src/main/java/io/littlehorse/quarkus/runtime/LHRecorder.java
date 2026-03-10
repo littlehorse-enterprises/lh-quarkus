@@ -182,7 +182,9 @@ public class LHRecorder {
         }
 
         logEvent("Registering", LHWorkflow.class, expandedName);
-        workflow.registerWfSpec(getBlockingStub());
+
+        LHConfig config = getBean(LHConfig.class);
+        workflow.registerWfSpec(config);
     }
 
     public void registerLHUserTaskForm(LHUserTaskFormRecordable recordable) {

@@ -42,7 +42,7 @@ class LHExternalBeansTest {
                         .withValue(expectedVersion)
                         .build());
 
-        LHConfig configuration = lhBeans.configuration(mockConfig);
+        LHConfig configuration = lhBeans.configuration(mockConfig, null);
 
         assertThat(configuration.getApiBootstrapHost()).isEqualTo(expectedHost);
         assertThat(configuration.getTaskWorkerVersion()).isEqualTo(expectedVersion);
@@ -67,7 +67,7 @@ class LHExternalBeansTest {
                         .withValue(expectedVersion)
                         .build());
 
-        LHConfig configuration = lhBeans.configuration(mockConfig);
+        LHConfig configuration = lhBeans.configuration(mockConfig, null);
 
         assertThat(configuration.getApiBootstrapHost()).isEqualTo(expectedHost);
         assertThat(configuration.getTaskWorkerVersion()).isEqualTo(expectedVersion);
@@ -91,7 +91,7 @@ class LHExternalBeansTest {
                                 .withValue(expectedHost2)
                                 .build());
 
-        LHConfig configuration = lhBeans.configuration(mockConfig);
+        LHConfig configuration = lhBeans.configuration(mockConfig, null);
 
         assertThat(configuration.getApiBootstrapHost()).isEqualTo(expectedHost2);
     }
