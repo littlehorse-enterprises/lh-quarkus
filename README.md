@@ -52,9 +52,7 @@ These extensions follow the same versioning conventions as [LittleHorse](https:/
 
 | LittleHorse Extension Version | Quarkus Version |
 |-------------------------------|-----------------|
-| `0.14.*`                      | `3.24.*`        |
-| `0.15.*`                      | `3.29.*`        |
-| `0.16.*`                      | `3.32.*`        |
+| `1.0.*`                       | `3.32.*`        |
 
 ## Development
 
