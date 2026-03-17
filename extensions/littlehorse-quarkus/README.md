@@ -823,3 +823,12 @@ Configure compatibility for a specific struct by its name.
 * Type: string
 * Default: NO_SCHEMA_UPDATES
 * Importance: medium
+
+``quarkus.littlehorse.type-adapters.register.enabled``
+Registers all `LHTypeAdapter` found when starting the application.
+To configure a specific type adapter by its name, pass the name as follows:
+`quarkus.littlehorse.type-adapters."{typeAdapterClassName}".register.enabled`.
+
+* Type: boolean
+* Default: true
+* Importance: medium

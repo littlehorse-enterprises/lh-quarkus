@@ -69,11 +69,12 @@ class RESTfulGatewayWfSpecTest {
                 .get("/gateway/tenants/{tenant}/wf-specs")
                 .then()
                 .statusCode(200)
-                .body("results", hasSize(3))
+                .body("results", hasSize(4))
                 .body("bookmark", is(nullValue()))
-                .body("results[0].name", is("greetings"))
-                .body("results[1].name", is("json"))
-                .body("results[2].name", is("workflow-in-a-bean"))
+                .body("results[0].name", is("example-type-adapter"))
+                .body("results[1].name", is("greetings"))
+                .body("results[2].name", is("json"))
+                .body("results[3].name", is("workflow-in-a-bean"))
                 .log()
                 .all();
     }
@@ -91,7 +92,7 @@ class RESTfulGatewayWfSpecTest {
                 .then()
                 .statusCode(200)
                 .body("results", hasSize(limit))
-                .body("results[0].name", is("greetings"))
+                .body("results[0].name", is("example-type-adapter"))
                 .body("bookmark", is(notNullValue()))
                 .log()
                 .all();
@@ -103,9 +104,10 @@ class RESTfulGatewayWfSpecTest {
                 .get("/gateway/tenants/{tenant}/wf-specs")
                 .then()
                 .statusCode(200)
-                .body("results", hasSize(1))
+                .body("results", hasSize(2))
                 .body("bookmark", is(nullValue()))
-                .body("results[0].name", is("workflow-in-a-bean"))
+                .body("results[0].name", is("json"))
+                .body("results[1].name", is("workflow-in-a-bean"))
                 .log()
                 .all();
     }

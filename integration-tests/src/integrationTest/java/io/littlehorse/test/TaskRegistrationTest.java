@@ -34,6 +34,10 @@ class TaskRegistrationTest {
                             SearchTaskDefRequest.newBuilder().build());
                     TaskDefIdList expectedResult = TaskDefIdList.newBuilder()
                             .addResults(
+                                    TaskDefId.newBuilder().setName("echo-uuid").build())
+                            .addResults(
+                                    TaskDefId.newBuilder().setName("get-uuid").build())
+                            .addResults(
                                     TaskDefId.newBuilder().setName("greetings").build())
                             .addResults(TaskDefId.newBuilder().setName("print").build())
                             .addResults(TaskDefId.newBuilder()
@@ -47,7 +51,7 @@ class TaskRegistrationTest {
                                     .build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(5);
+                    assertThat(results.getResultsCount()).isEqualTo(7);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

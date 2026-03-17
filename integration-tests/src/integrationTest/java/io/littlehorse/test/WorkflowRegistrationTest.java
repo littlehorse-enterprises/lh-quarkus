@@ -36,17 +36,21 @@ class WorkflowRegistrationTest {
                 .untilAsserted(() -> {
                     WfSpecIdList results = blockingStub.searchWfSpec(
                             SearchWfSpecRequest.newBuilder().build());
+                    WfSpecId typeAdapter = WfSpecId.newBuilder()
+                            .setName("example-type-adapter")
+                            .build();
                     WfSpecId greetings =
                             WfSpecId.newBuilder().setName("greetings").build();
                     WfSpecId json = WfSpecId.newBuilder().setName("json").build();
                     WfSpecId beanWorkflow =
                             WfSpecId.newBuilder().setName("workflow-in-a-bean").build();
                     WfSpecIdList expectedResult = WfSpecIdList.newBuilder()
+                            .addResults(typeAdapter)
                             .addResults(greetings)
                             .addResults(json)
                             .addResults(beanWorkflow)
                             .build();
-                    assertThat(results.getResultsCount()).isEqualTo(3);
+                    assertThat(results.getResultsCount()).isEqualTo(4);
                     assertThat(results).isEqualTo(expectedResult);
 
                     Stream.of(

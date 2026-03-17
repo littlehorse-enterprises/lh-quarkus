@@ -74,4 +74,17 @@ public interface LHRuntimeConfig {
         @WithDefault("NO_SCHEMA_UPDATES")
         String compatibility();
     }
+
+    @WithName("type-adapters.register.enabled")
+    @WithDefault("true")
+    boolean typeAdaptersRegisterEnabled();
+
+    @WithName("type-adapters")
+    Map<String, TypeAdapterConfig> specificTypeAdapterConfigs();
+
+    interface TypeAdapterConfig {
+        @WithName("register.enabled")
+        @WithDefault("${quarkus.littlehorse.type-adapters.register.enabled}")
+        Boolean registerEnabled();
+    }
 }
