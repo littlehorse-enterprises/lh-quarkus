@@ -14,6 +14,7 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
   * [Registering a Workflow](#registering-a-workflow)
   * [Registering User Tasks](#registering-user-tasks)
   * [Registering Structs](#registering-structs)
+  * [Registering Type Adapters](#registering-type-adapters)
   * [LittleHorse Clients](#littlehorse-clients)
   * [Dependency Injection](#dependency-injection)
   * [Enabling Task Health Checks](#enabling-task-health-checks)
@@ -300,6 +301,37 @@ Quarkus will register the [StructDef](https://littlehorse.io/docs/server/concept
 when starting the application.
 
 More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/structdefs).
+
+## Registering Type Adapters
+
+Type Adapters allow the LittleHorse SDK to convert between your types and LittleHorse's native typing system.
+Check available type adapters at [Type Adapter Interfaces](https://littlehorse.io/next/docs/server/developer-guide/sdk-type-adapters#type-adapter-interfaces).
+
+Annotate a `LHTyperAdapter` object with the `@Singleton` annotation and Quarkus will register
+the type adapter for you. Example:
+
+```java
+@Singleton
+public class UUUIDTypeAdapter implements LHStringAdapter<UUID> {
+
+    @Override
+    public String toString(UUID src) {
+        return src.toString();
+    }
+
+    @Override
+    public UUID fromString(String src) {
+        return UUID.fromString(src);
+    }
+
+    @Override
+    public Class<UUID> getTypeClass() {
+        return UUID.class;
+    }
+}
+```
+
+More about type adapters at : [SDK Type Adapters](https://littlehorse.io/next/docs/server/developer-guide/sdk-type-adapters).
 
 ## LittleHorse Clients
 
@@ -790,4 +822,13 @@ Configure compatibility for a specific struct by its name.
 
 * Type: string
 * Default: NO_SCHEMA_UPDATES
+* Importance: medium
+
+``quarkus.littlehorse.type-adapters.register.enabled``
+Registers all `LHTypeAdapter` found when starting the application.
+To configure a specific type adapter by its name, pass the name as follows:
+`quarkus.littlehorse.type-adapters."{typeAdapterClassName}".register.enabled`.
+
+* Type: boolean
+* Default: true
 * Importance: medium
