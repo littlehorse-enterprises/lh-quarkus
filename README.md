@@ -1,8 +1,10 @@
 # LittleHorse Extensions for Quarkus
 
+<a href="https://github.com/littlehorse-enterprises/littlehorse"><img alt="littlehorse" src="https://raw.githubusercontent.com/littlehorse-enterprises/littlehorse/refs/heads/master/img/badges/blue.svg"/></a>
 <a href="https://github.com/littlehorse-enterprises/lh-quarkus"><img alt="github" src="https://img.shields.io/badge/GitHub-blueviolet?logo=github&logoColor=white"></a>
 <a href="https://quarkus.io/"><img alt="quarkus" src="https://img.shields.io/badge/Quarkus-ff004a?logo=quarkus&logoColor=white"/></a>
-<a href="https://littlehorse.io/"><img alt="littlehorse" src="https://raw.githubusercontent.com/littlehorse-enterprises/littlehorse/refs/heads/master/img/badges/blue.svg"/></a>
+<a href="https://littlehorse.io/docs/integrations/lh-quarkus/concepts"><img alt="docs" src="https://img.shields.io/badge/Docs-3ECC5F?logo=docusaurus&logoColor=white"/></a>
+<a href="https://launchpass.com/littlehorsecommunity/free"><img alt="slack" src="https://img.shields.io/badge/Slack-7a297c?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IB2cksfwAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+oDFRMQKtR1iZcAAAINSURBVFjDzVc9SyNRFD0nxEZiIxpktZUllYhgG2wU0myVTrHzB+wPSbu1aBcbGxEbsV1Y1m0USWtg2YCFikUKzzZ3wjjM+5hJNJ5mhnffe3Pm3XM/HhEJSU0AbQDPAA5J3mbsDQD7AGoAuiSvMClI6ugthpLaKXvbxtLoTOrjq8rHIDVn4JizGtq/GsFhyzG+IGk9efes7Y1L4N5jq4x7wsENSJ4B+IN3QuwfbAM4BvA0aQIxLgDJfwD2HCLdmAgBU+xWxJoHAGckX0pEVAvACoBLkj1fnIfQl7SZnIBn3oHNqUu6zs0Tkpoqh5sCBI4c9mbF0msZNCR9jZz7zTHerlpuL4vnwPoHe84510tq5OTxGJynNHTu0Mms2fMwtAI2KiaDIh+XtJgisJghcZOI1EFgkBQzZsJkPSI5/SXZd4TZMoAayTtPrngl+TsqEZH8ldkoRnS1wsnJ5YKUfdOONdYFIYxc4BWh2WdNUEVFGMJQUqNqbdSM54BaAL7kjO+YzwFgp0QIzwDYr1gPl4ek8s17NlnyrI9BrQKg6zCeRlbKOwC3JQl0XcXoWlLdbAceP26kRNovqIHOKAxJfpf0w8rxvXVB0SD508p5K+CyBKNyXE1t0gs1kAESLwBO3qsl8+WQbDl+tPJb/xACOZgDsAvgYloEEqxZCzZ+U+rBa8C+8umvZlO/nHLa1/P/IEM9Wljc62gAAAAASUVORK5CYII="/></a>
 
 ## Table of Content
 
@@ -26,6 +28,8 @@
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
 - [Structs](examples/structs): How to use and register structs.
 - [Type Adapters](examples/type-adapter): How to use and register type adapters.
+
+You can find additional rich documentation [here](https://littlehorse.io/docs/integrations/lh-quarkus/concepts).
 
 ## Extensions
 
