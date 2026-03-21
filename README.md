@@ -21,13 +21,13 @@
 
 ## Examples
 
-* [Basic Example](examples/basic): How to run a task and register a workflow.
-* [Child Workflow](examples/child-workflow): How to build parent and child workflows.
-* [Reactive](examples/reactive): How to use `LittleHorseReactiveStub` object.
-* [Rest](examples/rest): How to run a wf run request from a rest endpoint.
-* [User Tasks](examples/user-tasks): How to use and register user tasks.
-* [Structs](examples/structs): How to use and register structs.
-* [Type Adapters](examples/type-adapter): How to use and register type adapters.
+- [Basic Example](examples/basic): How to run a task and register a workflow.
+- [Child Workflow](examples/child-workflow): How to build parent and child workflows.
+- [Reactive](examples/reactive): How to use `LittleHorseReactiveStub` object.
+- [Rest](examples/rest): How to run a wf run request from a rest endpoint.
+- [User Tasks](examples/user-tasks): How to use and register user tasks.
+- [Structs](examples/structs): How to use and register structs.
+- [Type Adapters](examples/type-adapter): How to use and register type adapters.
 
 You can find additional rich documentation [here](https://littlehorse.io/docs/integrations/lh-quarkus/concepts).
 
