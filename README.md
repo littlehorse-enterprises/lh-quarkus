@@ -3,18 +3,20 @@
 <a href="https://github.com/littlehorse-enterprises/lh-quarkus"><img alt="github" src="https://img.shields.io/badge/GitHub-blueviolet?logo=github&logoColor=white"></a>
 <a href="https://quarkus.io/"><img alt="quarkus" src="https://img.shields.io/badge/Quarkus-ff004a?logo=quarkus&logoColor=white"/></a>
 <a href="https://littlehorse.io/"><img alt="littlehorse" src="https://raw.githubusercontent.com/littlehorse-enterprises/littlehorse/refs/heads/master/img/badges/blue.svg"/></a>
+<a href="https://littlehorse.io/docs/integrations/lh-quarkus/concepts"><img alt="docs" src="https://img.shields.io/badge/Docs-2496ED?logo=readthedocs&logoColor=white"/></a>
+<a href="https://launchpass.com/littlehorsecommunity/free"><img alt="slack" src="https://img.shields.io/badge/Slack-4A154B?logo=slack&logoColor=white"/></a>
 
 ## Table of Content
 
 <!-- TOC -->
-* [LittleHorse Extensions for Quarkus](#littlehorse-extensions-for-quarkus)
-  * [Table of Content](#table-of-content)
-  * [Examples](#examples)
-  * [Extensions](#extensions)
-  * [RESTful Gateway](#restful-gateway)
-  * [Versioning](#versioning)
-  * [Development](#development)
-  * [License](#license)
+- [LittleHorse Extensions for Quarkus](#littlehorse-extensions-for-quarkus)
+  - [Table of Content](#table-of-content)
+  - [Examples](#examples)
+  - [Extensions](#extensions)
+  - [RESTful Gateway](#restful-gateway)
+  - [Versioning](#versioning)
+  - [Development](#development)
+  - [License](#license)
 <!-- TOC -->
 
 ## Examples
@@ -26,6 +28,8 @@
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
 - [Structs](examples/structs): How to use and register structs.
 - [Type Adapters](examples/type-adapter): How to use and register type adapters.
+
+You can find additional rich documentation [here](https://littlehorse.io/docs/integrations/lh-quarkus/concepts).
 
 ## Extensions
 
