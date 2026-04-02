@@ -1,5 +1,7 @@
 package io.littlehorse.quarkus.runtime.health;
 
+import static io.littlehorse.sdk.worker.LHTaskWorkerHealthReason.UNHEALTHY;
+
 import io.littlehorse.sdk.worker.LHTaskWorker;
 
 public class LHTaskStatus {
@@ -14,6 +16,6 @@ public class LHTaskStatus {
     }
 
     public boolean isHealthy() {
-        return taskWorker.healthStatus().isHealthy();
+        return !UNHEALTHY.equals(taskWorker.healthStatus().getReason());
     }
 }
