@@ -1,11 +1,14 @@
 package io.littlehorse.quarkus.config;
 
+import io.littlehorse.sdk.common.proto.StructDefCompatibilityType;
+import io.littlehorse.sdk.worker.LHTaskWorkerHealthReason;
 import io.quarkus.runtime.annotations.ConfigPhase;
 import io.quarkus.runtime.annotations.ConfigRoot;
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 
+import java.util.List;
 import java.util.Map;
 
 @ConfigMapping(prefix = "quarkus.littlehorse")
@@ -25,11 +28,11 @@ public interface LHRuntimeConfig {
     interface TaskConfig {
         @WithName("register.enabled")
         @WithDefault("${quarkus.littlehorse.tasks.register.enabled}")
-        Boolean registerEnabled();
+        boolean registerEnabled();
 
         @WithName("start.enabled")
         @WithDefault("${quarkus.littlehorse.tasks.start.enabled}")
-        Boolean startEnabled();
+        boolean startEnabled();
     }
 
     @WithName("workflows.register.enabled")
@@ -42,7 +45,7 @@ public interface LHRuntimeConfig {
     interface WorkflowConfig {
         @WithName("register.enabled")
         @WithDefault("${quarkus.littlehorse.workflows.register.enabled}")
-        Boolean registerEnabled();
+        boolean registerEnabled();
     }
 
     @WithName("user-tasks.register.enabled")
@@ -55,7 +58,7 @@ public interface LHRuntimeConfig {
     interface UserTaskConfig {
         @WithName("register.enabled")
         @WithDefault("${quarkus.littlehorse.user-tasks.register.enabled}")
-        Boolean registerEnabled();
+        boolean registerEnabled();
     }
 
     @WithName("structs.register.enabled")
@@ -68,11 +71,11 @@ public interface LHRuntimeConfig {
     interface StructConfig {
         @WithName("register.enabled")
         @WithDefault("${quarkus.littlehorse.structs.register.enabled}")
-        Boolean registerEnabled();
+        boolean registerEnabled();
 
         @WithName("register.compatibility")
         @WithDefault("NO_SCHEMA_UPDATES")
-        String compatibility();
+        StructDefCompatibilityType compatibility();
     }
 
     @WithName("type-adapters.register.enabled")
@@ -85,6 +88,10 @@ public interface LHRuntimeConfig {
     interface TypeAdapterConfig {
         @WithName("register.enabled")
         @WithDefault("${quarkus.littlehorse.type-adapters.register.enabled}")
-        Boolean registerEnabled();
+        boolean registerEnabled();
     }
+
+    @WithName("health.statuses")
+    @WithDefault("HEALTHY,SERVER_REBALANCING")
+    List<LHTaskWorkerHealthReason> healthStatuses();
 }

@@ -1,5 +1,6 @@
 package io.littlehorse.quarkus.runtime.health;
 
+import io.littlehorse.quarkus.config.LHRuntimeConfig;
 import io.littlehorse.quarkus.runtime.LHTaskStatusesContainer;
 import io.quarkus.arc.lookup.LookupIfProperty;
 
@@ -15,9 +16,12 @@ import org.eclipse.microprofile.health.Readiness;
 public class LHTasksHealthCheck implements HealthCheck {
 
     private final LHTaskStatusesContainer taskStatusesContainer;
+    private final LHRuntimeConfig runtimeConfig;
 
-    public LHTasksHealthCheck(LHTaskStatusesContainer taskStatusesContainer) {
+    public LHTasksHealthCheck(
+            LHTaskStatusesContainer taskStatusesContainer, LHRuntimeConfig runtimeConfig) {
         this.taskStatusesContainer = taskStatusesContainer;
+        this.runtimeConfig = runtimeConfig;
     }
 
     @Override
@@ -28,7 +32,8 @@ public class LHTasksHealthCheck implements HealthCheck {
     private boolean isHealthy() {
         try {
             return taskStatusesContainer.getTaskStatuses().stream()
-                    .allMatch(LHTaskStatus::isHealthy);
+                    .allMatch(lhTaskStatus ->
+                            runtimeConfig.healthStatuses().contains(lhTaskStatus.getReason()));
         } catch (Exception e) {
             return false;
         }
