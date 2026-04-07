@@ -225,7 +225,6 @@ public class LHRecorder {
         LHStructDefType structDefType = new LHStructDefType(recordable.getBeanClass());
         StructDefCompatibilityType compatibilityType = structConfig
                 .map(LHRuntimeConfig.StructConfig::compatibility)
-                .map(StructDefCompatibilityType::valueOf)
                 .orElse(StructDefCompatibilityType.NO_SCHEMA_UPDATES);
         PutStructDefRequest.Builder builder = PutStructDefRequest.newBuilder()
                 .setStructDef(structDefType.getInlineStructDef())

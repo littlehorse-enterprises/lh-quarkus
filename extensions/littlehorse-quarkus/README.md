@@ -670,7 +670,7 @@ The bootstrap protocol for the LittleHorse Server.
 
 * Type: string
 * Default: PLAINTEXT
-* Valid Values: [PLAINTEXT, TLS]
+* Valid values: [PLAINTEXT, TLS]
 * Importance: high
 
 ``lhc.tenant.id``
@@ -772,6 +772,14 @@ Enables health checks for the running `LHTaskWorker` list.
 
 ### Runtime Configurations
 
+``quarkus.littlehorse.health.statuses``
+Defines which statuses are valid to declare the `LHTaskWorker` healthy.
+
+* Type: list<string>
+* Default: HEALTHY,SERVER_REBALANCING
+* Valid values: [HEALTHY, SERVER_REBALANCING]
+* Importance: medium
+
 ``quarkus.littlehorse.tasks.start.enabled``
 Automatically starts all `LHTaskWorker` found.
 To configure a specific task by its name, pass the name as follows:
@@ -822,6 +830,7 @@ Configure compatibility for a specific struct by its name.
 
 * Type: string
 * Default: NO_SCHEMA_UPDATES
+* Valid values: [NO_SCHEMA_UPDATES, FULLY_COMPATIBLE_SCHEMA_UPDATES] (see [StructDefCompatibilityType](https://littlehorse.io/docs/server/api#structdefcompatibilitytype))
 * Importance: medium
 
 ``quarkus.littlehorse.type-adapters.register.enabled``
