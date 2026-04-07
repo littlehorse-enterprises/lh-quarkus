@@ -14,7 +14,7 @@ public class LHTaskStatus {
         return taskWorker.getTaskDefName();
     }
 
-    public LHTaskWorkerHealthReason getReason() {
+    public LHTaskWorkerHealthReason getStatus() {
         return taskWorker.healthStatus().getReason();
     }
 }
