@@ -68,12 +68,12 @@ public class LittleHorseReactiveStub {
      * @return a LittleHorseReactiveStub pointing to a new tenant.
      */
     public LittleHorseReactiveStub withTenant(String tenant) {
-        CallCredentials tenantCredentials = new TenantMetadataProvider(tenant);
+        CallCredentials newTenantCredentials = new TenantMetadataProvider(tenant);
         CallCredentials credentials = Optional.ofNullable(futureStub.getCallOptions())
                 .map(CallOptions::getCredentials)
-                .map(callCredentials -> (CallCredentials)
-                        new CompositeCallCredentials(callCredentials, tenantCredentials))
-                .orElse(tenantCredentials);
+                .map(previousCredentials -> (CallCredentials)
+                        new CompositeCallCredentials(previousCredentials, newTenantCredentials))
+                .orElse(newTenantCredentials);
         return withCallCredentials(credentials);
     }
 
