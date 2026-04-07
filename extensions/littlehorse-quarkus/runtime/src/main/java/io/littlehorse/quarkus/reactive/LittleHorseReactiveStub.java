@@ -3,8 +3,11 @@ package io.littlehorse.quarkus.reactive;
 import io.grpc.CallCredentials;
 import io.grpc.CallOptions;
 import io.grpc.ClientInterceptor;
+import io.grpc.CompositeCallCredentials;
 import io.grpc.Deadline;
+import io.littlehorse.sdk.common.auth.TenantMetadataProvider;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
+import io.littlehorse.sdk.common.proto.TenantId;
 import io.quarkus.arc.DefaultBean;
 import io.quarkus.arc.Unremovable;
 import io.smallrye.mutiny.Uni;
@@ -17,6 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
@@ -53,13 +57,30 @@ public class LittleHorseReactiveStub {
                 });
     }
 
-    public LittleHorseReactiveStub withWaitForReady() {
-        return new LittleHorseReactiveStub(futureStub.withWaitForReady());
+    /**
+     * This method returns a LittleHorseReactiveStub pointing to a
+     * specified tenant.
+     * It Adds a TenantMetadataProvider to the end of the CallCredentials chain, keeping
+     * previous credentials configurations.
+     * If you need to totally override the CallCredentials configurations
+     * use withCallCredentials method.
+     *
+     * @param tenant Tenant ID.
+     * @return a LittleHorseReactiveStub pointing to a new tenant.
+     */
+    public LittleHorseReactiveStub withTenant(String tenant) {
+        CallCredentials tenantCredentials =
+                new TenantMetadataProvider(TenantId.newBuilder().setId(tenant).build());
+        CallCredentials credentials = Optional.ofNullable(futureStub.getCallOptions())
+                .map(CallOptions::getCredentials)
+                .map(callCredentials -> (CallCredentials)
+                        new CompositeCallCredentials(callCredentials, tenantCredentials))
+                .orElse(tenantCredentials);
+        return withCallCredentials(credentials);
     }
 
-    public Uni<com.google.protobuf.Empty> deletePrincipal(
-            io.littlehorse.sdk.common.proto.DeletePrincipalRequest request) {
-        return Uni.createFrom().future(futureStub.deletePrincipal(request));
+    public LittleHorseReactiveStub withWaitForReady() {
+        return new LittleHorseReactiveStub(futureStub.withWaitForReady());
     }
 
     public <T> LittleHorseReactiveStub withWaitForReady(CallOptions.Key<T> key, T value) {
@@ -104,6 +125,11 @@ public class LittleHorseReactiveStub {
 
     public LittleHorseReactiveStub withCallCredentials(CallCredentials credentials) {
         return new LittleHorseReactiveStub(futureStub.withCallCredentials(credentials));
+    }
+
+    public Uni<com.google.protobuf.Empty> deletePrincipal(
+            io.littlehorse.sdk.common.proto.DeletePrincipalRequest request) {
+        return Uni.createFrom().future(futureStub.deletePrincipal(request));
     }
 
     public Uni<com.google.protobuf.Empty> assignUserTaskRun(
@@ -540,5 +566,10 @@ public class LittleHorseReactiveStub {
     public Uni<io.littlehorse.sdk.common.proto.StructDefIdList> searchStructDef(
             io.littlehorse.sdk.common.proto.SearchStructDefRequest request) {
         return Uni.createFrom().future(futureStub.searchStructDef(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.InactiveThreadRun> getInactiveThreadRun(
+            io.littlehorse.sdk.common.proto.InactiveThreadRunId request) {
+        return Uni.createFrom().future(futureStub.getInactiveThreadRun(request));
     }
 }
