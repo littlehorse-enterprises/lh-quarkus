@@ -7,7 +7,6 @@ import io.grpc.CompositeCallCredentials;
 import io.grpc.Deadline;
 import io.littlehorse.sdk.common.auth.TenantMetadataProvider;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
-import io.littlehorse.sdk.common.proto.TenantId;
 import io.quarkus.arc.DefaultBean;
 import io.quarkus.arc.Unremovable;
 import io.smallrye.mutiny.Uni;
@@ -69,8 +68,7 @@ public class LittleHorseReactiveStub {
      * @return a LittleHorseReactiveStub pointing to a new tenant.
      */
     public LittleHorseReactiveStub withTenant(String tenant) {
-        CallCredentials tenantCredentials =
-                new TenantMetadataProvider(TenantId.newBuilder().setId(tenant).build());
+        CallCredentials tenantCredentials = new TenantMetadataProvider(tenant);
         CallCredentials credentials = Optional.ofNullable(futureStub.getCallOptions())
                 .map(CallOptions::getCredentials)
                 .map(callCredentials -> (CallCredentials)
