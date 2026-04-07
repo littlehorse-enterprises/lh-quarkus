@@ -4,7 +4,6 @@ import io.grpc.CallCredentials;
 import io.grpc.CompositeCallCredentials;
 import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.sdk.common.auth.TenantMetadataProvider;
-import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.TenantId;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -17,16 +16,16 @@ import java.util.Optional;
 @RequestScoped
 public class TenantContext {
     private static final String TENANT_PATH = "tenant";
-    private final LHConfig config;
 
     // context objects https://quarkus.io/guides/rest#accessing-context-objects
     private final UriInfo uriInfo;
     private final HttpHeaders httpHeaders;
+    private final LittleHorseReactiveStub stub;
 
-    public TenantContext(LHConfig config, UriInfo uriInfo, HttpHeaders httpHeaders) {
-        this.config = config;
+    public TenantContext(UriInfo uriInfo, HttpHeaders httpHeaders, LittleHorseReactiveStub stub) {
         this.uriInfo = uriInfo;
         this.httpHeaders = httpHeaders;
+        this.stub = stub;
     }
 
     public String getTenant() {
@@ -37,9 +36,7 @@ public class TenantContext {
     }
 
     public LittleHorseReactiveStub getLittleHorseReactiveStub() {
-        return new LittleHorseReactiveStub(config.getFutureStub(
-                        config.getApiBootstrapHost(), config.getApiBootstrapPort()))
-                .withCallCredentials(getCredentials());
+        return stub.withCallCredentials(getCredentials());
     }
 
     private Optional<String> getAuthorizationToken() {
