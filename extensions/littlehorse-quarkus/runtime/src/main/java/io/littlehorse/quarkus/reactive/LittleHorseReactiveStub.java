@@ -315,9 +315,9 @@ public class LittleHorseReactiveStub {
         return Uni.createFrom().future(futureStub.listNodeRuns(request));
     }
 
-    public Uni<io.littlehorse.sdk.common.proto.ListTaskMetricsResponse> listTaskDefMetrics(
+    public Uni<io.littlehorse.sdk.common.proto.MetricsList> listTaskMetrics(
             io.littlehorse.sdk.common.proto.ListTaskMetricsRequest request) {
-        return Uni.createFrom().future(futureStub.listTaskDefMetrics(request));
+        return Uni.createFrom().future(futureStub.listTaskMetrics(request));
     }
 
     public Uni<io.littlehorse.sdk.common.proto.TaskRunList> listTaskRuns(
@@ -335,9 +335,9 @@ public class LittleHorseReactiveStub {
         return Uni.createFrom().future(futureStub.listVariables(request));
     }
 
-    public Uni<io.littlehorse.sdk.common.proto.ListWfMetricsResponse> listWfSpecMetrics(
+    public Uni<io.littlehorse.sdk.common.proto.MetricsList> listWfMetrics(
             io.littlehorse.sdk.common.proto.ListWfMetricsRequest request) {
-        return Uni.createFrom().future(futureStub.listWfSpecMetrics(request));
+        return Uni.createFrom().future(futureStub.listWfMetrics(request));
     }
 
     public Uni<io.littlehorse.sdk.common.proto.WorkflowEventList> listWorkflowEvents(
@@ -569,5 +569,15 @@ public class LittleHorseReactiveStub {
     public Uni<io.littlehorse.sdk.common.proto.InactiveThreadRun> getInactiveThreadRun(
             io.littlehorse.sdk.common.proto.InactiveThreadRunId request) {
         return Uni.createFrom().future(futureStub.getInactiveThreadRun(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.MetricWindow> getMetricWindow(
+            io.littlehorse.sdk.common.proto.MetricWindowId request) {
+        return Uni.createFrom().future(futureStub.getMetricWindow(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.MetricWindowIdList> searchWfMetricWindow(
+            io.littlehorse.sdk.common.proto.SearchWfMetricWindowRequest request) {
+        return Uni.createFrom().future(futureStub.searchWfMetricWindow(request));
     }
 }
