@@ -1,0 +1,61 @@
+name: snapshot
+run-name: Snapshot ${{ github.ref_name }}
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  packages: write
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      snapshot-version: ${{ steps.get_version.outputs.snapshot-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Get snapshot version
+        id: get_version
+        run: |
+          version=$(grep '^lhVersion=' gradle.properties | cut -d'=' -f2)
+          echo "snapshot-version=$version" >> $GITHUB_OUTPUT
+
+  tests:
+    uses: ./.github/workflows/tests.yml
+
+  publish:
+    needs:
+      - prepare
+      - tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "corretto"
+          java-version: "17"
+      - name: Validate snapshot format
+        env:
+          VERSION: ${{ needs.prepare.outputs.snapshot-version }}
+        run: |
+          if ! printf '%s' "$VERSION" | grep -i -- '-SNAPSHOT$' >/dev/null; then
+              echo "ERROR: version does not end with -SNAPSHOT" >&2
+              exit 1
+          fi
+      - name: Set snapshot version
+        env:
+          VERSION: ${{ needs.prepare.outputs.snapshot-version }}
+        run: sed -i "s/extensionVersion=.*/extensionVersion=${VERSION}/g" gradle.properties
+      - name: Publish Snapshot
+        env:
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
+        run: ./gradlew publishToSonatype
