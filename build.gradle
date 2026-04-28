@@ -93,6 +93,7 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "lhServerVersion", "${lhServerVersion}"
         systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
@@ -102,6 +103,7 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "lhServerVersion", "${lhServerVersion}"
         systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
@@ -111,6 +113,7 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
             exceptionFormat = "full"
         }
         systemProperty "lhVersion", "${lhVersion}"
+        systemProperty "lhServerVersion", "${lhServerVersion}"
         systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 }
