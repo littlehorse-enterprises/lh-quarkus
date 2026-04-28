@@ -14,7 +14,7 @@ import java.util.Map;
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
     private static final String KAFKA_VERSION = System.getProperty("kafkaVersion", "latest");
-    private static final String LH_VERSION = System.getProperty("lhVersion", "latest");
+    private static final String LH_VERSION = System.getProperty("lhServerVersion", "latest");
 
     private static final Logger log = LoggerFactory.getLogger(ContainersTestResource.class);
 
