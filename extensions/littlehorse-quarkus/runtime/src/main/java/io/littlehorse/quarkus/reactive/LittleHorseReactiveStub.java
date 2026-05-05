@@ -580,4 +580,24 @@ public class LittleHorseReactiveStub {
             io.littlehorse.sdk.common.proto.SearchWfMetricWindowRequest request) {
         return Uni.createFrom().future(futureStub.searchWfMetricWindow(request));
     }
+
+    public Uni<com.google.protobuf.Empty> deleteQuota(
+            io.littlehorse.sdk.common.proto.DeleteQuotaRequest request) {
+        return Uni.createFrom().future(futureStub.deleteQuota(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.Quota> getQuota(
+            io.littlehorse.sdk.common.proto.QuotaId request) {
+        return Uni.createFrom().future(futureStub.getQuota(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.Quota> putQuota(
+            io.littlehorse.sdk.common.proto.PutQuotaRequest request) {
+        return Uni.createFrom().future(futureStub.putQuota(request));
+    }
+
+    public Uni<io.littlehorse.sdk.common.proto.QuotaIdList> searchQuota(
+            io.littlehorse.sdk.common.proto.SearchQuotaRequest request) {
+        return Uni.createFrom().future(futureStub.searchQuota(request));
+    }
 }
