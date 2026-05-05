@@ -42,15 +42,25 @@ class WorkflowRegistrationTest {
                     WfSpecId greetings =
                             WfSpecId.newBuilder().setName("greetings").build();
                     WfSpecId json = WfSpecId.newBuilder().setName("json").build();
+                    WfSpecId nestedChildWf =
+                            WfSpecId.newBuilder().setName("nested-child-wf").build();
+                    WfSpecId nestedGrandparentWf = WfSpecId.newBuilder()
+                            .setName("nested-grandparent-wf")
+                            .build();
+                    WfSpecId nestedParentWf =
+                            WfSpecId.newBuilder().setName("nested-parent-wf").build();
                     WfSpecId beanWorkflow =
                             WfSpecId.newBuilder().setName("workflow-in-a-bean").build();
                     WfSpecIdList expectedResult = WfSpecIdList.newBuilder()
                             .addResults(typeAdapter)
                             .addResults(greetings)
                             .addResults(json)
+                            .addResults(nestedChildWf)
+                            .addResults(nestedGrandparentWf)
+                            .addResults(nestedParentWf)
                             .addResults(beanWorkflow)
                             .build();
-                    assertThat(results.getResultsCount()).isEqualTo(4);
+                    assertThat(results.getResultsCount()).isEqualTo(7);
                     assertThat(results).isEqualTo(expectedResult);
 
                     Stream.of(

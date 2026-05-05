@@ -69,19 +69,22 @@ class RESTfulGatewayWfSpecTest {
                 .get("/gateway/tenants/{tenant}/wf-specs")
                 .then()
                 .statusCode(200)
-                .body("results", hasSize(4))
+                .body("results", hasSize(7))
                 .body("bookmark", is(nullValue()))
                 .body("results[0].name", is("example-type-adapter"))
                 .body("results[1].name", is("greetings"))
                 .body("results[2].name", is("json"))
-                .body("results[3].name", is("workflow-in-a-bean"))
+                .body("results[3].name", is("nested-child-wf"))
+                .body("results[4].name", is("nested-grandparent-wf"))
+                .body("results[5].name", is("nested-parent-wf"))
+                .body("results[6].name", is("workflow-in-a-bean"))
                 .log()
                 .all();
     }
 
     @Test
     void shouldSearchWfSpecWithBookmark() {
-        int limit = 2;
+        int limit = 4;
         Response getFirstObject = given().pathParam("tenant", "default")
                 .queryParam("limit", limit)
                 .when()
@@ -104,10 +107,11 @@ class RESTfulGatewayWfSpecTest {
                 .get("/gateway/tenants/{tenant}/wf-specs")
                 .then()
                 .statusCode(200)
-                .body("results", hasSize(2))
+                .body("results", hasSize(3))
                 .body("bookmark", is(nullValue()))
-                .body("results[0].name", is("json"))
-                .body("results[1].name", is("workflow-in-a-bean"))
+                .body("results[0].name", is("nested-grandparent-wf"))
+                .body("results[1].name", is("nested-parent-wf"))
+                .body("results[2].name", is("workflow-in-a-bean"))
                 .log()
                 .all();
     }
