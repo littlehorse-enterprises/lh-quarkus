@@ -1,6 +1,6 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
-import java.util.List;
+import java.util.Set;
 
 public abstract class LHRecordable {
 
@@ -20,7 +20,7 @@ public abstract class LHRecordable {
         return name;
     }
 
-    public List<String> dependencies() {
-        return List.of();
+    public Set<String> dependencies() {
+        return Set.of();
     }
 }

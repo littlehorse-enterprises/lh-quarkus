@@ -4,7 +4,8 @@ import io.littlehorse.sdk.common.proto.StructDefId;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LHStructDefRecordable extends LHRecordable {
 
@@ -21,12 +22,12 @@ public class LHStructDefRecordable extends LHRecordable {
     }
 
     @Override
-    public List<String> dependencies() {
+    public Set<String> dependencies() {
         LHStructDefType structDefType = new LHStructDefType(getBeanClass());
         return structDefType.getDependencyClasses().stream()
                 .map(LHStructDefType::getStructDefId)
                 .map(StructDefId::getName)
                 .filter(name -> !name.equals(getName()))
-                .toList();
+                .collect(Collectors.toSet());
     }
 }

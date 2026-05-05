@@ -21,6 +21,7 @@ import net.datafaker.Faker;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.UUID;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
@@ -34,8 +35,8 @@ class RESTfulGatewayTenantTest {
     @Test
     void shouldGetWfSpecFromTenant() {
         // create tenant
-        String tenant = faker.internet().domainWord();
-        String wfName = faker.internet().domainWord();
+        String tenant = faker.internet().domainWord() + UUID.randomUUID();
+        String wfName = faker.internet().domainWord() + UUID.randomUUID();
         registerTenantAndWf(tenant, wfName);
 
         // test
