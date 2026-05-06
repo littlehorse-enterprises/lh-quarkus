@@ -1,0 +1,66 @@
+{
+  "realm": "lh-gateway",
+  "enabled": true,
+  "sslRequired": "external",
+  "roles": {
+    "realm": [
+      {
+        "name": "gateway-admin",
+        "description": "Full access to the LH RESTful Gateway"
+      },
+      {
+        "name": "gateway-reader",
+        "description": "Read-only access to the LH RESTful Gateway"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "lh-gateway",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "lh-gateway-secret",
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "protocol": "openid-connect",
+      "defaultClientScopes": ["web-origins", "profile", "roles", "email"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@example.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["gateway-admin", "gateway-reader"]
+    },
+    {
+      "username": "reader",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "reader@example.com",
+      "firstName": "Reader",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "reader",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["gateway-reader"]
+    }
+  ]
+}

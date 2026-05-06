@@ -3,6 +3,7 @@ package io.littlehorse.quarkus.rest.gateway.resource.externalevent;
 import io.littlehorse.sdk.common.proto.ExternalEvent;
 import io.smallrye.mutiny.Uni;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -18,6 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @Path("/gateway/tenants/{tenant}/external-events")
+@RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}"})
 public class ExternalEventResource {
 
     public static final String POST_EXTERNALEVENT_EXAMPLE_RESPONSE = """

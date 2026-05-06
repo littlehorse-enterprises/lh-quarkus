@@ -4,6 +4,7 @@ import io.littlehorse.sdk.common.proto.VariableList;
 import io.littlehorse.sdk.common.proto.WfRun;
 import io.smallrye.mutiny.Uni;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -88,6 +89,7 @@ public class WfRunResource {
     }
 
     @POST
+    @RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}"})
     @APIResponse(responseCode = "400", description = "Bad request")
     @APIResponse(responseCode = "404", description = "Record not found")
     @APIResponse(responseCode = "409", description = "Record already exists")
@@ -117,6 +119,7 @@ public class WfRunResource {
 
     @GET
     @Path("/{id}/variables")
+    @RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}", "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"})
     @APIResponse(responseCode = "400", description = "Bad request")
     @APIResponse(responseCode = "404", description = "Record not found")
     @APIResponse(responseCode = "500", description = "Internal error")
@@ -145,6 +148,7 @@ public class WfRunResource {
 
     @GET
     @Path("/{id}")
+    @RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}", "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"})
     @APIResponse(responseCode = "400", description = "Bad request")
     @APIResponse(responseCode = "404", description = "Record not found")
     @APIResponse(responseCode = "500", description = "Internal error")

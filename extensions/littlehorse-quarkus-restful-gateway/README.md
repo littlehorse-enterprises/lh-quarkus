@@ -12,6 +12,14 @@ A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
 * [Configurations](#configurations)
   * [Passing Configurations](#passing-configurations)
   * [LittleHorse Client Configurations](#littlehorse-client-configurations)
+  * [OAuth 2 Configuration](#oauth-2-configuration)
+    * [Token Forward Mode (Default)](#token-forward-mode-default)
+    * [RBAC Mode](#rbac-mode)
+    * [OAuth 2 Gateway Configurations](#oauth-2-gateway-configurations)
+    * [OIDC Configurations (RBAC Mode)](#oidc-configurations-rbac-mode)
+    * [Role Permissions](#role-permissions)
+    * [Local Development with Keycloak](#local-development-with-keycloak)
+    * [Example: Enabling RBAC Mode](#example-enabling-rbac-mode)
 * [Endpoints](#endpoints)
   * [ExternalEvent](#externalevent)
     * [Send Event](#send-event)
@@ -230,6 +238,267 @@ Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Autho
 * Type: password
 * Default: null
 * Importance: low
+
+## OAuth 2 Configuration
+
+The gateway supports two OAuth 2 modes for handling authentication and authorization.
+
+### Token Forward Mode (Default)
+
+In this mode, the HTTP request carries the Bearer token in the `Authorization` header and it is passed directly
+to the LH gRPC server. This mode depends on LH for validating and authorizing the token.
+
+```properties
+quarkus.littlehorse.gateway.oauth2.mode=TOKEN_FORWARD
+quarkus.oidc.enabled=false
+quarkus.http.auth.proactive=false
+quarkus.http.auth.permission."permit-all".paths=/*
+quarkus.http.auth.permission."permit-all".policy=permit
+```
+
+### RBAC Mode
+
+In this mode, the HTTP request carries the Bearer token in the `Authorization` header and it is validated at
+the gateway layer. The token is **not** passed to the LH gRPC server. This mode depends on the gateway
+configurations and the roles configured on the IdP server.
+
+```properties
+quarkus.littlehorse.gateway.oauth2.mode=RBAC
+quarkus.oidc.enabled=true
+quarkus.oidc.auth-server-url=http://localhost:8888/realms/lh-gateway
+quarkus.oidc.client-id=lh-gateway
+quarkus.oidc.credentials.secret=lh-gateway-secret
+quarkus.http.auth.proactive=true
+quarkus.littlehorse.gateway.oauth2.rbac.admin-role=gateway-admin
+quarkus.littlehorse.gateway.oauth2.rbac.reader-role=gateway-reader
+```
+
+### OAuth 2 Gateway Configurations
+
+``quarkus.littlehorse.gateway.oauth2.mode``
+The OAuth 2 mode to use.
+
+* Type: string
+* Default: TOKEN_FORWARD
+* Valid Values: [TOKEN_FORWARD, RBAC]
+* Importance: high
+
+``quarkus.littlehorse.gateway.oauth2.rbac.admin-role``
+The role name that grants full access (read + write) to the gateway endpoints. Only used when mode is RBAC.
+
+* Type: string
+* Default: gateway-admin
+* Importance: high
+
+``quarkus.littlehorse.gateway.oauth2.rbac.reader-role``
+The role name that grants read-only access (GET endpoints) to the gateway endpoints. Only used when mode is RBAC.
+
+* Type: string
+* Default: gateway-reader
+* Importance: high
+
+### OIDC Configurations (RBAC Mode)
+
+When using RBAC mode, you need to configure Quarkus OIDC to validate tokens against your Identity Provider.
+
+``quarkus.oidc.enabled``
+Enable or disable OIDC token validation.
+
+* Type: boolean
+* Default: false
+* Importance: high
+
+``quarkus.oidc.auth-server-url``
+The base URL of the OIDC server (e.g., Keycloak realm URL).
+
+* Type: string
+* Importance: high
+
+``quarkus.oidc.client-id``
+The OIDC client ID.
+
+* Type: string
+* Importance: high
+
+``quarkus.oidc.credentials.secret``
+The OIDC client secret.
+
+* Type: password
+* Importance: high
+
+More about Quarkus OIDC configurations at: [Quarkus OIDC Configuration](https://quarkus.io/guides/security-oidc-configuration-properties-reference).
+
+### Role Permissions
+
+When RBAC mode is enabled, the gateway enforces role-based access on all endpoints:
+
+| Endpoint                                              | Method | Required Role      |
+|-------------------------------------------------------|--------|--------------------|
+| `GET /gateway/version`                                | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-specs`              | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-specs/{name}`       | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-specs/{name}/versions/{version}` | GET | admin or reader |
+| `GET /gateway/tenants/{tenant}/task-defs`             | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/task-defs/{name}`      | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/task-defs/{name}/workers` | GET | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-runs/{id}`          | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-runs/{id}/variables`| GET    | admin or reader    |
+| `POST /gateway/tenants/{tenant}/wf-runs`              | POST   | admin              |
+| `POST /gateway/tenants/{tenant}/external-events`      | POST   | admin              |
+
+The role names are configurable via `quarkus.littlehorse.gateway.oauth2.rbac.admin-role` and
+`quarkus.littlehorse.gateway.oauth2.rbac.reader-role`. The `@RolesAllowed` annotations use property
+expressions that are resolved at runtime, allowing you to match the role names configured in your IdP.
+
+### Local Development with Keycloak
+
+The project includes a Keycloak instance in the `docker-compose.yml` for local development.
+
+Start it with:
+
+```shell
+docker compose up keycloak -d
+```
+
+Keycloak is available at `http://localhost:8888` with admin credentials `admin`/`admin`.
+
+A pre-configured realm `lh-gateway` is automatically imported with:
+
+| Resource       | Value                |
+|----------------|----------------------|
+| Client ID      | `lh-gateway`         |
+| Client Secret  | `lh-gateway-secret`  |
+| Realm          | `lh-gateway`         |
+
+**Users:**
+
+| Username | Password | Roles                            |
+|----------|----------|----------------------------------|
+| admin    | admin    | gateway-admin, gateway-reader    |
+| reader   | reader   | gateway-reader                   |
+
+**Obtaining a token:**
+
+```shell
+curl -X POST http://localhost:8888/realms/lh-gateway/protocol/openid-connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=lh-gateway" \
+  -d "client_secret=lh-gateway-secret" \
+  -d "username=admin" \
+  -d "password=admin"
+```
+
+### Example: Enabling RBAC Mode
+
+This example shows how to configure the gateway with RBAC mode using Keycloak as the Identity Provider.
+
+**1. Add the required dependencies:**
+
+Gradle:
+
+```groovy
+implementation "io.quarkus:quarkus-oidc"
+implementation project(":littlehorse-quarkus")
+implementation project(":littlehorse-quarkus-restful-gateway")
+```
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-oidc</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.littlehorse</groupId>
+    <artifactId>littlehorse-quarkus</artifactId>
+    <version>${lhVersion}</version>
+</dependency>
+<dependency>
+    <groupId>io.littlehorse</groupId>
+    <artifactId>littlehorse-quarkus-restful-gateway</artifactId>
+    <version>${lhVersion}</version>
+</dependency>
+```
+
+**2. Configure `application.properties`:**
+
+```properties
+# LittleHorse connection
+lhc.api.host=localhost
+lhc.api.port=2023
+
+# OAuth 2 RBAC mode
+quarkus.littlehorse.gateway.oauth2.mode=RBAC
+
+# OIDC configuration (Keycloak)
+quarkus.oidc.enabled=true
+quarkus.oidc.auth-server-url=http://localhost:8888/realms/lh-gateway
+quarkus.oidc.client-id=lh-gateway
+quarkus.oidc.credentials.secret=lh-gateway-secret
+quarkus.http.auth.proactive=true
+
+# Role names (must match the roles configured in your IdP)
+quarkus.littlehorse.gateway.oauth2.rbac.admin-role=gateway-admin
+quarkus.littlehorse.gateway.oauth2.rbac.reader-role=gateway-reader
+```
+
+**3. Start the infrastructure:**
+
+```shell
+docker compose up -d
+```
+
+**4. Run the gateway application:**
+
+```shell
+./gradlew :restful-gateway:quarkusDev
+```
+
+**5. Obtain a token and make requests:**
+
+```shell
+# Get a token for the admin user (read + write access)
+TOKEN=$(curl -s -X POST http://localhost:8888/realms/lh-gateway/protocol/openid-connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=lh-gateway" \
+  -d "client_secret=lh-gateway-secret" \
+  -d "username=admin" \
+  -d "password=admin" | jq -r '.access_token')
+
+# Read operation (allowed for both admin and reader roles)
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/gateway/tenants/default/wf-specs
+
+# Write operation (allowed only for admin role)
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"wfSpecName": "greetings", "variables": {"name": "World"}}' \
+  http://localhost:8080/gateway/tenants/default/wf-runs
+```
+
+```shell
+# Get a token for the reader user (read-only access)
+TOKEN=$(curl -s -X POST http://localhost:8888/realms/lh-gateway/protocol/openid-connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=lh-gateway" \
+  -d "client_secret=lh-gateway-secret" \
+  -d "username=reader" \
+  -d "password=reader" | jq -r '.access_token')
+
+# Read operation (allowed)
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/gateway/tenants/default/wf-specs
+
+# Write operation (denied with 403 Forbidden)
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"wfSpecName": "greetings", "variables": {"name": "World"}}' \
+  http://localhost:8080/gateway/tenants/default/wf-runs
+```
 
 # Endpoints
 

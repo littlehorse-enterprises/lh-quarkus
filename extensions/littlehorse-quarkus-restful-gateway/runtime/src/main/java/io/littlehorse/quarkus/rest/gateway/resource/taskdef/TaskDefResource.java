@@ -5,6 +5,7 @@ import io.littlehorse.sdk.common.proto.TaskDefIdList;
 import io.littlehorse.sdk.common.proto.TaskWorkerGroup;
 import io.smallrye.mutiny.Uni;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.DefaultValue;
@@ -24,6 +25,7 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @Path("/gateway/tenants/{tenant}/task-defs")
+@RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}", "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"})
 public class TaskDefResource {
 
     public static final String SEARCH_TASKDEF_EXAMPLE_RESPONSE = """
