@@ -10,7 +10,10 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @Path("/gateway/version")
-@RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}", "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"})
+@RolesAllowed({
+    "${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}",
+    "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"
+})
 public class ServerInformationResource {
 
     private final ServerInformationRepository repository;

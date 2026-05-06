@@ -119,7 +119,10 @@ public class WfRunResource {
 
     @GET
     @Path("/{id}/variables")
-    @RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}", "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"})
+    @RolesAllowed({
+        "${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}",
+        "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"
+    })
     @APIResponse(responseCode = "400", description = "Bad request")
     @APIResponse(responseCode = "404", description = "Record not found")
     @APIResponse(responseCode = "500", description = "Internal error")
@@ -148,7 +151,10 @@ public class WfRunResource {
 
     @GET
     @Path("/{id}")
-    @RolesAllowed({"${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}", "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"})
+    @RolesAllowed({
+        "${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}",
+        "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"
+    })
     @APIResponse(responseCode = "400", description = "Bad request")
     @APIResponse(responseCode = "404", description = "Record not found")
     @APIResponse(responseCode = "500", description = "Internal error")
