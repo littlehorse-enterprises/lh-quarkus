@@ -16,7 +16,7 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
 
     private static final String KAFKA_VERSION = System.getProperty("kafkaVersion", "latest");
     private static final String LH_VERSION = Optional.ofNullable(System.getProperty("lhVersion"))
-            .map(v -> v.endsWith("SNAPSHOT") ? "master" : v)
+            .map(version -> version.endsWith("SNAPSHOT") ? "master" : version)
             .orElse("latest");
 
     private static final Logger log = LoggerFactory.getLogger(ContainersTestResource.class);
