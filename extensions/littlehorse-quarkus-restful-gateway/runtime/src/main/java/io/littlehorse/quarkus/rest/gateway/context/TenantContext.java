@@ -4,7 +4,6 @@ import io.grpc.CallCredentials;
 import io.grpc.CompositeCallCredentials;
 import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.quarkus.rest.gateway.config.LHGatewayOAuth2Config;
-import io.littlehorse.quarkus.rest.gateway.config.OAuth2Mode;
 import io.littlehorse.sdk.common.auth.TenantMetadataProvider;
 import io.littlehorse.sdk.common.proto.TenantId;
 
@@ -44,26 +43,19 @@ public class TenantContext {
     }
 
     public LittleHorseReactiveStub getLittleHorseReactiveStub() {
-        return stub.withCallCredentials(getCredentials());
+        return stub.withCallCredentials(buildCallCredentials());
     }
 
-    private Optional<String> getAuthorizationToken() {
-        return Optional.ofNullable(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION));
-    }
-
-    private CallCredentials getCredentials() {
+    private CallCredentials buildCallCredentials() {
         TenantMetadataProvider tenantProvider = new TenantMetadataProvider(getTenant());
-
-        // In RBAC mode, the token is validated at the gateway layer and NOT forwarded to LH
-        if (oauth2Config.oauth2Mode() == OAuth2Mode.RBAC) {
-            return tenantProvider;
-        }
-
-        // In TOKEN_FORWARD mode, pass the bearer token to LH gRPC server
-        return getAuthorizationToken()
-                .map(token -> (CallCredentials) new CompositeCallCredentials(
-                        tenantProvider, new TokenForwardingProvider(token)))
-                .orElse(tenantProvider);
+        return switch (oauth2Config.oauth2Mode()) {
+            case NONE, RBAC -> tenantProvider;
+            case TOKEN_FORWARD ->
+                Optional.ofNullable(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION))
+                        .map(token -> (CallCredentials) new CompositeCallCredentials(
+                                tenantProvider, new TokenForwardingProvider(token)))
+                        .orElse(tenantProvider);
+        };
     }
 
     public TenantId getTenantId() {

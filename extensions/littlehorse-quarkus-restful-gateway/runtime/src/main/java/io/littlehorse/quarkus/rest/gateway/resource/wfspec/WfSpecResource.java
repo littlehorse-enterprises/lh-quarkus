@@ -4,7 +4,6 @@ import io.littlehorse.sdk.common.proto.WfSpec;
 import io.littlehorse.sdk.common.proto.WfSpecIdList;
 import io.smallrye.mutiny.Uni;
 
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -26,10 +25,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @Path("/gateway/tenants/{tenant}/wf-specs")
-@RolesAllowed({
-    "${quarkus.littlehorse.gateway.oauth2.rbac.admin-role}",
-    "${quarkus.littlehorse.gateway.oauth2.rbac.reader-role}"
-})
 public class WfSpecResource {
 
     public static final String SEARCH_WFSPEC_EXAMPLE_RESPONSE = """

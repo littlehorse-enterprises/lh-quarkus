@@ -14,10 +14,10 @@ import io.smallrye.config.WithName;
 public interface LHGatewayOAuth2Config {
 
     /**
-     * The OAuth 2 mode to use. Default is TOKEN_FORWARD.
+     * The OAuth 2 mode to use. Default is NONE (disabled).
      */
     @WithName("oauth2.mode")
-    @WithDefault("TOKEN_FORWARD")
+    @WithDefault("NONE")
     OAuth2Mode oauth2Mode();
 
     /**
