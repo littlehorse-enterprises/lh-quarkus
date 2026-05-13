@@ -49,7 +49,6 @@ Check the configurations at [LittleHorse RESTful Gateway](extensions/littlehorse
 docker pull ghcr.io/littlehorse-enterprises/lh-restful-gateway:latest
 ```
 
-
 ## Versioning
 
 These extensions follow the same versioning conventions as [LittleHorse](https://github.com/littlehorse-enterprises/littlehorse/releases).
@@ -57,6 +56,7 @@ These extensions follow the same versioning conventions as [LittleHorse](https:/
 | LittleHorse Extension Version | Quarkus Version |
 |-------------------------------|-----------------|
 | `1.0.*`                       | `3.32.*`        |
+| `1.1.*`                       | `3.35.*`        |
 
 ## Development
 

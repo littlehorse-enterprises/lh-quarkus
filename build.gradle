@@ -4,6 +4,19 @@ plugins {
     id "io.quarkus"
 }
 
+def envFile = file(".env")
+if (envFile.exists()) {
+    envFile.readLines().each { line ->
+        line = line.trim()
+        if (line && !line.startsWith('#') && line.contains('=')) {
+            def (key, value) = line.split('=', 2)
+            def parts = key.trim().toLowerCase().split('_')
+            def camelCase = parts[0] + parts.drop(1).collect { it.capitalize() }.join('')
+            ext.set(camelCase, value.trim())
+        }
+    }
+}
+
 nexusPublishing {
     repositories {
         sonatype {
