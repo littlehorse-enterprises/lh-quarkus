@@ -9,15 +9,19 @@ import io.littlehorse.quarkus.config.LHBuildtimeConfig;
 import io.littlehorse.quarkus.config.LHBuildtimeConfig.SaddleConfig.BagConfig.Format;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
+import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructProperty;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
 
+import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +38,8 @@ public class LHSaddleProcessor {
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs,
             OutputTargetBuildItem outputTarget,
-            BuildProducer<GeneratedResourceBuildItem> resources) {
+            BuildProducer<GeneratedResourceBuildItem> resources)
+            throws IntrospectionException {
         LHBuildtimeConfig.SaddleConfig.BagConfig bag = config.saddle().bag();
 
         if (!bag.outputEnable()) {
@@ -62,19 +67,60 @@ public class LHSaddleProcessor {
     }
 
     private Map<String, Object> buildSaddlebag(
-            List<LHTaskMethodBuildItem> taskMethods, List<LHStructDefBuildItem> structDefs) {
-        Map<String, Object> tasks = new LinkedHashMap<>();
-        for (LHTaskMethodBuildItem item : taskMethods) {
-            tasks.put(item.toRecordable().getName(), null);
-        }
-        Map<String, Object> structs = new LinkedHashMap<>();
-        for (LHStructDefBuildItem item : structDefs) {
-            structs.put(item.toRecordable().getName(), null);
-        }
+            List<LHTaskMethodBuildItem> taskMethods, List<LHStructDefBuildItem> structDefs)
+            throws IntrospectionException {
+
+        Map<String, Object> tasks = buildSaddleBagTasks(taskMethods);
+        Map<String, Object> structs = buildSaddleBagStructs(structDefs);
+
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("tasks", tasks);
         root.put("structs", structs);
         return root;
+    }
+
+    private Map<String, Object> buildSaddleBagTasks(List<LHTaskMethodBuildItem> taskMethods) {
+        Map<String, Object> tasks = new LinkedHashMap<>();
+        for (LHTaskMethodBuildItem item : taskMethods) {
+            tasks.put(item.toRecordable().getName(), null);
+        }
+        return tasks;
+    }
+
+    private Map<String, Object> buildSaddleBagStructs(List<LHStructDefBuildItem> structDefs)
+            throws IntrospectionException {
+
+        Map<String, Object> structs = new LinkedHashMap<>();
+
+        for (LHStructDefBuildItem item : structDefs) {
+            Map<String, Object> internalStruct = new LinkedHashMap<>();
+
+            structs.put(item.toRecordable().getName(), internalStruct);
+            internalStruct.put("properties", buildStruct(item));
+        }
+        return structs;
+    }
+
+    private List<Map<String, Object>> buildStruct(LHStructDefBuildItem structDef)
+            throws IntrospectionException {
+
+        // Map<String, Object> struct = new LinkedHashMap<>();
+
+        LHStructDefType structDefType =
+                new LHStructDefType(structDef.toRecordable().getBeanClass());
+        List<LHStructProperty> properties = structDefType.getStructProperties();
+
+        List<Map<String, Object>> structProperties = new ArrayList<>();
+
+        for (LHStructProperty property : properties) {
+            Map<String, Object> props = new LinkedHashMap<>();
+
+            props.put("name", property.getFieldName());
+            props.put("type", property.getPropertyType().getClassType().getSimpleName());
+            structProperties.add(props);
+        }
+
+        return structProperties;
     }
 
     private byte[] serialize(Map<String, Object> data, Format format) {
