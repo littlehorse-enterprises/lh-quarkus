@@ -6,6 +6,7 @@ dependencies {
     implementation "io.quarkus:quarkus-grpc-common-deployment"
     implementation "io.quarkus:quarkus-smallrye-health-spi"
     implementation "io.quarkiverse.jgrapht:quarkus-jgrapht-deployment:${jgraphtVersion}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
 }
