@@ -1,27 +1,26 @@
 dependencies {
     implementation platform("io.quarkus:quarkus-bom:${quarkusVersion}")
+    implementation project(":littlehorse-saddle-bag")
     implementation project(":littlehorse-quarkus")
+    implementation project(":littlehorse-quarkus-deployment")
     implementation "io.quarkus:quarkus-core-deployment"
     implementation "io.quarkus:quarkus-arc-deployment"
-    implementation "io.quarkus:quarkus-grpc-common-deployment"
-    implementation "io.quarkus:quarkus-smallrye-health-spi"
-    implementation "io.quarkiverse.jgrapht:quarkus-jgrapht-deployment:${jgraphtVersion}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
-    testImplementation "net.datafaker:datafaker:${datafakerVersion}"
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = group
-            artifactId = "littlehorse-quarkus-deployment"
+            artifactId = "littlehorse-saddle-bag-deployment"
             version = version
             from components.java
             artifact sourcesJar
             artifact javadocJar
             pom {
-                name = "LittleHorse Quarkus Extension"
-                description = "LittleHorse Quarkus Extension"
+                name = "LittleHorse Saddle Bag Extension"
+                description = "LittleHorse Saddle Bag Extension for generating saddlebag descriptor files and docker images"
                 url = "https://github.com/littlehorse-enterprises/littlehorse"
                 licenses {
                     license {

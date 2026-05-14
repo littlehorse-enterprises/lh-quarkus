@@ -1,14 +1,15 @@
-package io.littlehorse.quarkus.deployment.processor;
+package io.littlehorse.quarkus.saddle.deployment.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
-import io.littlehorse.quarkus.config.LHBuildtimeConfig;
-import io.littlehorse.quarkus.config.LHBuildtimeConfig.SaddleConfig.BagConfig.Format;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
+import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
+import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
 import io.littlehorse.sdk.common.proto.ReturnType;
 import io.littlehorse.sdk.common.proto.TypeDefinition;
@@ -42,26 +43,26 @@ public class LHSaddleProcessor {
 
     @BuildStep
     void generateSaddlebag(
-            LHBuildtimeConfig config,
+            LHSaddleBagBuildtimeConfig config,
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs,
             OutputTargetBuildItem outputTarget,
             BuildProducer<GeneratedResourceBuildItem> resources)
             throws IntrospectionException {
-        LHBuildtimeConfig.SaddleConfig.BagConfig bag = config.saddle().bag();
+        OutputConfig output = config.saddle().bag().output();
 
-        if (!bag.outputEnable()) {
+        if (!output.enable()) {
             return;
         }
 
-        String extension = bag.outputFormat().name().toLowerCase();
-        String filename = Path.of(bag.outputPath())
-                .resolve(bag.outputFilename() + "." + extension)
+        String extension = output.format().name().toLowerCase();
+        String filename = Path.of(output.path())
+                .resolve(output.filename() + "." + extension)
                 .normalize()
                 .toString();
 
         Map<String, Object> saddlebag = buildSaddlebag(taskMethods, structDefs);
-        byte[] content = serialize(saddlebag, bag.outputFormat());
+        byte[] content = serialize(saddlebag, output.format());
 
         resources.produce(new GeneratedResourceBuildItem(filename, content));
 

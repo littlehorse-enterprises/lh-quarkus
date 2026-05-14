@@ -1,0 +1,9 @@
+name: LittleHorse Saddle Bag
+description: Generates saddlebag descriptor files for LittleHorse applications
+metadata:
+  keywords:
+    - littlehorse
+    - saddlebag
+  categories:
+    - "workflow"
+  status: "preview"

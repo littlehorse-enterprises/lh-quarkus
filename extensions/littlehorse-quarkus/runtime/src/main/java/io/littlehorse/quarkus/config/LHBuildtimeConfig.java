@@ -12,33 +12,4 @@ public interface LHBuildtimeConfig {
     @WithName("health.enabled")
     @WithDefault("true")
     boolean healthEnabled();
-
-    SaddleConfig saddle();
-
-    interface SaddleConfig {
-        BagConfig bag();
-
-        interface BagConfig {
-            @WithName("output.enable")
-            @WithDefault("false")
-            boolean outputEnable();
-
-            @WithName("output.path")
-            @WithDefault("META-INF/saddlebag/")
-            String outputPath();
-
-            @WithName("output.filename")
-            @WithDefault("saddlebag")
-            String outputFilename();
-
-            @WithName("output.format")
-            @WithDefault("yaml")
-            Format outputFormat();
-
-            enum Format {
-                JSON,
-                YAML
-            }
-        }
-    }
 }
