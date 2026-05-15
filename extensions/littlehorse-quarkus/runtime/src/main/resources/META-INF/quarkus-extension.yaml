@@ -1,8 +1,8 @@
-name: LittleHorse Quarkus
-description: This is the base Quarkus extension for LittleHorse
+name: "LittleHorse Quarkus"
+description: "This is the base Quarkus extension for LittleHorse"
 metadata:
   keywords:
-    - littlehorse
+    - "littlehorse"
   categories:
     - "workflow"
     - "workflow engine"
