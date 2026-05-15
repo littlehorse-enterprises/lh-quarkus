@@ -9,8 +9,15 @@ import io.littlehorse.quarkus.config.LHBuildtimeConfig;
 import io.littlehorse.quarkus.config.LHBuildtimeConfig.SaddleConfig.BagConfig.Format;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
+import io.littlehorse.sdk.common.proto.ReturnType;
+import io.littlehorse.sdk.common.proto.TypeDefinition;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructProperty;
+import io.littlehorse.sdk.wfsdk.internal.taskdefutil.LHTaskParameter;
+import io.littlehorse.sdk.wfsdk.internal.taskdefutil.LHTaskSignature;
+import io.littlehorse.sdk.worker.LHTaskMethod;
+import io.littlehorse.sdk.worker.LHTaskMethodHandle;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
@@ -19,6 +26,7 @@ import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -81,10 +89,35 @@ public class LHSaddleProcessor {
 
     private Map<String, Object> buildSaddleBagTasks(List<LHTaskMethodBuildItem> taskMethods) {
         Map<String, Object> tasks = new LinkedHashMap<>();
+
         for (LHTaskMethodBuildItem item : taskMethods) {
-            tasks.put(item.toRecordable().getName(), null);
+            tasks.put(item.toRecordable().getName(), buildSaddleBagTask(item));
         }
         return tasks;
+    }
+
+    private Map<String, Object> buildSaddleBagTask(LHTaskMethodBuildItem taskMethod) {
+
+        Map<String, Object> task = new LinkedHashMap<>();
+
+        String name = taskMethod.toRecordable().getName();
+
+        Method[] methods = taskMethod.toRecordable().getBeanClass().getMethods();
+        for (Method method : methods) {
+
+            LHTaskMethod annotation = method.getAnnotation(LHTaskMethod.class);
+            if (annotation != null && annotation.value().equals(name)) {
+
+                LHTaskMethodHandle handle = LHTaskMethodHandle.from(name, "", method);
+
+                LHTaskSignature signature =
+                        new LHTaskSignature(handle, LHTypeAdapterRegistry.empty(), Map.of());
+                task.put("returnType", resolveTaskReturnType(signature.getReturnType()));
+                task.put("javaReturnType", method.getReturnType().getSimpleName());
+                task.put("parameters", handleTaskParameters(signature.getVariableDefs()));
+            }
+        }
+        return task;
     }
 
     private Map<String, Object> buildSaddleBagStructs(List<LHStructDefBuildItem> structDefs)
@@ -104,8 +137,6 @@ public class LHSaddleProcessor {
     private List<Map<String, Object>> buildStruct(LHStructDefBuildItem structDef)
             throws IntrospectionException {
 
-        // Map<String, Object> struct = new LinkedHashMap<>();
-
         LHStructDefType structDefType =
                 new LHStructDefType(structDef.toRecordable().getBeanClass());
         List<LHStructProperty> properties = structDefType.getStructProperties();
@@ -121,6 +152,36 @@ public class LHSaddleProcessor {
         }
 
         return structProperties;
+    }
+
+    private List<Map<String, Object>> handleTaskParameters(
+            List<LHTaskParameter> lhTaskParameterList) {
+
+        List<Map<String, Object>> parameters = new ArrayList<>();
+
+        for (LHTaskParameter lhTaskParameter : lhTaskParameterList) {
+            Map<String, Object> param = new LinkedHashMap<>();
+
+            param.put(
+                    lhTaskParameter.getVariableName(),
+                    lhTaskParameter.getParameterType().getSimpleName());
+            parameters.add(param);
+        }
+        return parameters;
+    }
+
+    private static String resolveTaskReturnType(ReturnType returnType) {
+        if (!returnType.hasReturnType()) {
+            return "VOID";
+        }
+
+        TypeDefinition typeDefinition = returnType.getReturnType();
+        return switch (typeDefinition.getDefinedTypeCase()) {
+            case PRIMITIVE_TYPE -> typeDefinition.getPrimitiveType().name();
+            case STRUCT_DEF_ID -> "STRUCT:" + typeDefinition.getStructDefId().getName();
+            case INLINE_ARRAY_DEF -> "ARRAY";
+            case DEFINEDTYPE_NOT_SET -> "VOID";
+        };
     }
 
     private byte[] serialize(Map<String, Object> data, Format format) {
