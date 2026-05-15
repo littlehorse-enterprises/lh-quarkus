@@ -2,7 +2,7 @@ package io.littlehorse.saddlebag.structs;
 
 import io.littlehorse.sdk.worker.LHStructDef;
 
-@LHStructDef("order")
+@LHStructDef("${struct.order.name}")
 public class Order {
     private String productName;
     private int quantity;

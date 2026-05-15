@@ -6,8 +6,8 @@ import io.littlehorse.sdk.worker.LHTaskMethod;
 @LHTask
 public class PrimitiveTask {
 
-    public static final String ADD_NUMBERS = "add-numbers";
-    public static final String IS_ELIGIBLE = "is-eligible";
+    public static final String ADD_NUMBERS = "${task.add-numbers.name}";
+    public static final String IS_ELIGIBLE = "${task.is-eligible.name}";
 
     @LHTaskMethod(ADD_NUMBERS)
     public int addNumbers(int a, int b) {

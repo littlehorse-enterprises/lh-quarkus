@@ -8,8 +8,8 @@ import java.util.UUID;
 @LHTask
 public class TrackingTask {
 
-    public static final String GENERATE_TRACKING_ID = "generate-tracking-id";
-    public static final String LOOKUP_TRACKING = "lookup-tracking";
+    public static final String GENERATE_TRACKING_ID = "${task.generate-tracking-id.name}";
+    public static final String LOOKUP_TRACKING = "${task.lookup-tracking.name}";
 
     @LHTaskMethod(GENERATE_TRACKING_ID)
     public UUID generateTrackingId() {

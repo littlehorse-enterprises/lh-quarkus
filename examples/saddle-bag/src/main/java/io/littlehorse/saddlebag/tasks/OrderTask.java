@@ -8,8 +8,8 @@ import io.littlehorse.sdk.worker.LHTaskMethod;
 @LHTask
 public class OrderTask {
 
-    public static final String VALIDATE_ORDER = "validate-order";
-    public static final String SHIP_ORDER = "ship-order";
+    public static final String VALIDATE_ORDER = "${task.validate-order.name}";
+    public static final String SHIP_ORDER = "${task.ship-order.name}";
 
     @LHTaskMethod(VALIDATE_ORDER)
     public boolean validateOrder(Order order) {

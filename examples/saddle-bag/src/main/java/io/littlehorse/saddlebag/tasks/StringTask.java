@@ -6,8 +6,8 @@ import io.littlehorse.sdk.worker.LHTaskMethod;
 @LHTask
 public class StringTask {
 
-    public static final String GREET = "greet";
-    public static final String FORMAT_FULL_NAME = "format-full-name";
+    public static final String GREET = "${task.greet.name}";
+    public static final String FORMAT_FULL_NAME = "${task.format-full-name.name}";
 
     @LHTaskMethod(GREET)
     public String greet(String name) {

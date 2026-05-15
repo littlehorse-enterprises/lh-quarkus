@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
+import io.littlehorse.quarkus.config.ConfigEvaluator;
+import io.littlehorse.quarkus.config.ConfigEvaluator.ConfigExpression;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
@@ -25,6 +27,9 @@ import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
+import io.smallrye.config.SmallRyeConfig;
+
+import org.eclipse.microprofile.config.ConfigProvider;
 
 import java.beans.IntrospectionException;
 import java.io.IOException;
@@ -38,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 public class LHSaddleBagProcessor {
+
+    private record ResolvedConfig(String name, String configKey) {}
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
     private static final ObjectMapper YAML_MAPPER = new ObjectMapper(
@@ -56,7 +63,11 @@ public class LHSaddleBagProcessor {
         BagConfig bagConfig = config.saddle().bag();
         OutputConfig outputConfig = bagConfig.output();
 
-        Map<String, Object> saddlebag = buildSaddlebag(bagConfig, taskMethods, structDefs);
+        SmallRyeConfig smallRyeConfig = (SmallRyeConfig) ConfigProvider.getConfig();
+        ConfigEvaluator configEvaluator = new ConfigEvaluator(smallRyeConfig);
+
+        Map<String, Object> saddlebag =
+                buildSaddlebag(bagConfig, configEvaluator, taskMethods, structDefs);
 
         generateJarResource(saddlebag, resources);
 
@@ -91,6 +102,7 @@ public class LHSaddleBagProcessor {
 
     private Map<String, Object> buildSaddlebag(
             BagConfig bagConfig,
+            ConfigEvaluator configEvaluator,
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs)
             throws IntrospectionException {
@@ -101,8 +113,8 @@ public class LHSaddleBagProcessor {
         root.put("description", bagConfig.description());
         root.put("version", bagConfig.version());
         root.put("metadata", buildMetadata(bagConfig.metadata()));
-        root.put("tasks", buildSaddleBagTasks(taskMethods));
-        root.put("structs", buildSaddleBagStructs(structDefs));
+        root.put("tasks", buildSaddleBagTasks(configEvaluator, taskMethods));
+        root.put("structs", buildSaddleBagStructs(configEvaluator, structDefs));
         return root;
     }
 
@@ -116,11 +128,16 @@ public class LHSaddleBagProcessor {
         return map;
     }
 
-    private Map<String, Object> buildSaddleBagTasks(List<LHTaskMethodBuildItem> taskMethods) {
+    private Map<String, Object> buildSaddleBagTasks(
+            ConfigEvaluator configEvaluator, List<LHTaskMethodBuildItem> taskMethods) {
         Map<String, Object> tasks = new LinkedHashMap<>();
 
         for (LHTaskMethodBuildItem item : taskMethods) {
-            tasks.put(item.toRecordable().getName(), buildSaddleBagTask(item));
+            ResolvedConfig resolved =
+                    resolveConfigExpression(configEvaluator, item.toRecordable().getName());
+            Map<String, Object> task = buildSaddleBagTask(item);
+            task.put("configName", resolved.configKey());
+            tasks.put(resolved.name(), task);
         }
         return tasks;
     }
@@ -142,25 +159,53 @@ public class LHSaddleBagProcessor {
                 LHTaskSignature signature =
                         new LHTaskSignature(handle, LHTypeAdapterRegistry.empty(), Map.of());
                 task.put("returnType", resolveTaskReturnType(signature.getReturnType()));
-                task.put("javaReturnType", method.getReturnType().getSimpleName());
                 task.put("parameters", handleTaskParameters(signature.getVariableDefs()));
             }
         }
         return task;
     }
 
-    private Map<String, Object> buildSaddleBagStructs(List<LHStructDefBuildItem> structDefs)
+    private Map<String, Object> buildSaddleBagStructs(
+            ConfigEvaluator configEvaluator, List<LHStructDefBuildItem> structDefs)
             throws IntrospectionException {
 
         Map<String, Object> structs = new LinkedHashMap<>();
 
         for (LHStructDefBuildItem item : structDefs) {
+            ResolvedConfig resolved =
+                    resolveConfigExpression(configEvaluator, item.toRecordable().getName());
             Map<String, Object> internalStruct = new LinkedHashMap<>();
 
-            structs.put(item.toRecordable().getName(), internalStruct);
+            structs.put(resolved.name(), internalStruct);
+            internalStruct.put("configName", resolved.configKey());
             internalStruct.put("properties", buildStruct(item));
         }
         return structs;
+    }
+
+    private ResolvedConfig resolveConfigExpression(
+            ConfigEvaluator configEvaluator, String rawName) {
+        ConfigExpression expression = configEvaluator.expand(rawName);
+
+        if (!expression.isExpression()) {
+            throw new IllegalArgumentException(
+                    "Name must be a configuration expression (e.g. ${task.my-task.name}), but got: "
+                            + rawName);
+        }
+
+        if (expression.getMembersCount() != 1) {
+            throw new IllegalArgumentException(
+                    "Configuration expression must have exactly one member, but got: " + rawName);
+        }
+
+        String resolved = expression.asString();
+        if (resolved == null || resolved.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Configuration expression resolved to an empty value: " + rawName);
+        }
+
+        String configKey = expression.getMembers().keySet().iterator().next();
+        return new ResolvedConfig(resolved, configKey);
     }
 
     private List<Map<String, Object>> buildStruct(LHStructDefBuildItem structDef)
