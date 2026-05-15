@@ -8,6 +8,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
+import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig;
+import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.MetadataConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
@@ -51,16 +53,16 @@ public class LHSaddleBagProcessor {
             OutputTargetBuildItem outputTarget,
             BuildProducer<GeneratedResourceBuildItem> resources)
             throws IntrospectionException {
-        OutputConfig output = config.saddle().bag().output();
+        BagConfig bagConfig = config.saddle().bag();
+        OutputConfig outputConfig = bagConfig.output();
 
-        if (!output.enable()) {
-            return;
-        }
-
-        Map<String, Object> saddlebag = buildSaddlebag(taskMethods, structDefs);
+        Map<String, Object> saddlebag = buildSaddlebag(bagConfig, taskMethods, structDefs);
 
         generateJarResource(saddlebag, resources);
-        generateOutputTargetFile(saddlebag, output, outputTarget.getOutputDirectory());
+
+        if (outputConfig.enable()) {
+            generateOutputTargetFile(saddlebag, outputConfig, outputTarget.getOutputDirectory());
+        }
     }
 
     private void generateJarResource(
@@ -70,13 +72,13 @@ public class LHSaddleBagProcessor {
     }
 
     private void generateOutputTargetFile(
-            Map<String, Object> saddlebag, OutputConfig output, Path outputDirectory) {
-        String extension = output.format().name().toLowerCase();
-        String filename = Path.of(output.path())
-                .resolve(output.filename() + "." + extension)
+            Map<String, Object> saddlebag, OutputConfig outputConfig, Path outputDirectory) {
+        String extension = outputConfig.format().name().toLowerCase();
+        String filename = Path.of(outputConfig.path())
+                .resolve(outputConfig.filename() + "." + extension)
                 .normalize()
                 .toString();
-        byte[] content = serialize(saddlebag, output.format());
+        byte[] content = serialize(saddlebag, outputConfig.format());
 
         Path outputFile = outputDirectory.resolve(filename).normalize();
         try {
@@ -88,16 +90,30 @@ public class LHSaddleBagProcessor {
     }
 
     private Map<String, Object> buildSaddlebag(
-            List<LHTaskMethodBuildItem> taskMethods, List<LHStructDefBuildItem> structDefs)
+            BagConfig bagConfig,
+            List<LHTaskMethodBuildItem> taskMethods,
+            List<LHStructDefBuildItem> structDefs)
             throws IntrospectionException {
 
-        Map<String, Object> tasks = buildSaddleBagTasks(taskMethods);
-        Map<String, Object> structs = buildSaddleBagStructs(structDefs);
-
         Map<String, Object> root = new LinkedHashMap<>();
-        root.put("tasks", tasks);
-        root.put("structs", structs);
+        root.put("name", bagConfig.name());
+        root.put("title", bagConfig.title());
+        root.put("description", bagConfig.description());
+        root.put("version", bagConfig.version());
+        root.put("metadata", buildMetadata(bagConfig.metadata()));
+        root.put("tasks", buildSaddleBagTasks(taskMethods));
+        root.put("structs", buildSaddleBagStructs(structDefs));
         return root;
+    }
+
+    private Map<String, Object> buildMetadata(MetadataConfig metadataConfig) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("tags", metadataConfig.tags());
+        map.put("licence", metadataConfig.licence());
+        map.put("documentation-url", metadataConfig.documentationUrl());
+        map.put("icon-url", metadataConfig.iconUrl());
+        map.put("support-email", metadataConfig.supportEmail());
+        return map;
     }
 
     private Map<String, Object> buildSaddleBagTasks(List<LHTaskMethodBuildItem> taskMethods) {
