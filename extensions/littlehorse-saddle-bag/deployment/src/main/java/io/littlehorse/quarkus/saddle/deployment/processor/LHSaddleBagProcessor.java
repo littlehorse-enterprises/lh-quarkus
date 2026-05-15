@@ -35,11 +35,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LHSaddleProcessor {
+public class LHSaddleBagProcessor {
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
     private static final ObjectMapper YAML_MAPPER = new ObjectMapper(
             new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+
+    private static final String JAR_RESOURCE_PATH = "META-INF/saddle-bag/saddle-bag.json";
 
     @BuildStep
     void generateSaddlebag(
@@ -55,18 +57,28 @@ public class LHSaddleProcessor {
             return;
         }
 
+        Map<String, Object> saddlebag = buildSaddlebag(taskMethods, structDefs);
+
+        generateJarResource(saddlebag, resources);
+        generateOutputTargetFile(saddlebag, output, outputTarget.getOutputDirectory());
+    }
+
+    private void generateJarResource(
+            Map<String, Object> saddlebag, BuildProducer<GeneratedResourceBuildItem> resources) {
+        byte[] content = serialize(saddlebag, Format.JSON);
+        resources.produce(new GeneratedResourceBuildItem(JAR_RESOURCE_PATH, content));
+    }
+
+    private void generateOutputTargetFile(
+            Map<String, Object> saddlebag, OutputConfig output, Path outputDirectory) {
         String extension = output.format().name().toLowerCase();
         String filename = Path.of(output.path())
                 .resolve(output.filename() + "." + extension)
                 .normalize()
                 .toString();
-
-        Map<String, Object> saddlebag = buildSaddlebag(taskMethods, structDefs);
         byte[] content = serialize(saddlebag, output.format());
 
-        resources.produce(new GeneratedResourceBuildItem(filename, content));
-
-        Path outputFile = outputTarget.getOutputDirectory().resolve(filename).normalize();
+        Path outputFile = outputDirectory.resolve(filename).normalize();
         try {
             Files.createDirectories(outputFile.getParent());
             Files.write(outputFile, content);

@@ -34,10 +34,10 @@ public interface LHSaddleBagBuildtimeConfig {
                 @WithDefault("true")
                 boolean enable();
 
-                @WithDefault("META-INF/saddlebag/")
+                @WithDefault("saddle-bag/")
                 String path();
 
-                @WithDefault("saddlebag")
+                @WithDefault("saddle-bag")
                 String filename();
 
                 @WithDefault("yaml")
