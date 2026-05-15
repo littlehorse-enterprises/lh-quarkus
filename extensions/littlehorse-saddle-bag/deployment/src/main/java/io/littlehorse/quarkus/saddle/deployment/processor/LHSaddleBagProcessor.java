@@ -236,9 +236,9 @@ public class LHSaddleBagProcessor {
         for (LHTaskParameter lhTaskParameter : lhTaskParameterList) {
             Map<String, Object> param = new LinkedHashMap<>();
 
-            param.put(
-                    lhTaskParameter.getVariableName(),
-                    lhTaskParameter.getParameterType().getSimpleName());
+            param.put("name", lhTaskParameter.getVariableName());
+            param.put("type", lhTaskParameter.getParameterType().getSimpleName());
+
             parameters.add(param);
         }
         return parameters;
