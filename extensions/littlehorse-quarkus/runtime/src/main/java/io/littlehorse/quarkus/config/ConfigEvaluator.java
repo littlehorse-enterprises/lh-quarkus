@@ -2,9 +2,10 @@ package io.littlehorse.quarkus.config;
 
 import io.quarkus.arc.Unremovable;
 import io.smallrye.common.expression.Expression;
-import io.smallrye.config.SmallRyeConfig;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
+import org.eclipse.microprofile.config.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,9 +16,9 @@ import java.util.Optional;
 @Unremovable
 public class ConfigEvaluator {
 
-    private final SmallRyeConfig config;
+    private final Config config;
 
-    public ConfigEvaluator(SmallRyeConfig config) {
+    public ConfigEvaluator(Config config) {
         this.config = config;
     }
 

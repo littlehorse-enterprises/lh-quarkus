@@ -27,7 +27,6 @@ import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
-import io.smallrye.config.SmallRyeConfig;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 
@@ -63,8 +62,7 @@ public class LHSaddleBagProcessor {
         BagConfig bagConfig = config.saddle().bag();
         OutputConfig outputConfig = bagConfig.output();
 
-        SmallRyeConfig smallRyeConfig = (SmallRyeConfig) ConfigProvider.getConfig();
-        ConfigEvaluator configEvaluator = new ConfigEvaluator(smallRyeConfig);
+        ConfigEvaluator configEvaluator = new ConfigEvaluator(ConfigProvider.getConfig());
 
         Map<String, Object> saddlebag =
                 buildSaddlebag(bagConfig, configEvaluator, taskMethods, structDefs);
