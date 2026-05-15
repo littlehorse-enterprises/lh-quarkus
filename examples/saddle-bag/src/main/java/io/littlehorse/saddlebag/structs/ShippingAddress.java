@@ -2,7 +2,9 @@ package io.littlehorse.saddlebag.structs;
 
 import io.littlehorse.sdk.worker.LHStructDef;
 
-@LHStructDef("${struct.shipping-address.name}")
+@LHStructDef(
+        value = "${struct.shipping-address.name}",
+        description = "Shipping destination address with street, city, state, and zip code")
 public class ShippingAddress {
     private String street;
     private String city;

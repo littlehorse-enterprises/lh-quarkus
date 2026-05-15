@@ -137,6 +137,7 @@ public class LHSaddleBagProcessor {
                     resolveConfigExpression(configEvaluator, item.toRecordable().getName());
             Map<String, Object> task = buildSaddleBagTask(item);
             task.put("configName", resolved.configKey());
+            task.put("description", item.toRecordable().getDescription());
             tasks.put(resolved.name(), task);
         }
         return tasks;
@@ -158,8 +159,9 @@ public class LHSaddleBagProcessor {
 
                 LHTaskSignature signature =
                         new LHTaskSignature(handle, LHTypeAdapterRegistry.empty(), Map.of());
-                task.put("returnType", resolveTaskReturnType(signature.getReturnType()));
-                task.put("parameters", handleTaskParameters(signature.getVariableDefs()));
+                task.put(
+                        "output", Map.of("type", resolveTaskReturnType(signature.getReturnType())));
+                task.put("inputs", handleTaskParameters(signature.getVariableDefs()));
             }
         }
         return task;
@@ -178,6 +180,7 @@ public class LHSaddleBagProcessor {
 
             structs.put(resolved.name(), internalStruct);
             internalStruct.put("configName", resolved.configKey());
+            internalStruct.put("description", item.toRecordable().getDescription());
             internalStruct.put("properties", buildStruct(item));
         }
         return structs;

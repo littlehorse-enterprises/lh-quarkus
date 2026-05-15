@@ -11,12 +11,16 @@ public class OrderTask {
     public static final String VALIDATE_ORDER = "${task.validate-order.name}";
     public static final String SHIP_ORDER = "${task.ship-order.name}";
 
-    @LHTaskMethod(VALIDATE_ORDER)
+    @LHTaskMethod(
+            value = VALIDATE_ORDER,
+            description = "Validates that an order has positive quantity and price")
     public boolean validateOrder(Order order) {
         return order.getQuantity() > 0 && order.getPrice() > 0;
     }
 
-    @LHTaskMethod(SHIP_ORDER)
+    @LHTaskMethod(
+            value = SHIP_ORDER,
+            description = "Ships an order to the specified address and returns a confirmation")
     public String shipOrder(Order order, ShippingAddress address) {
         return "Shipping %s to %s".formatted(order.getProductName(), address);
     }
