@@ -2,6 +2,13 @@ name: tests
 run-name: Test branch "${{ github.head_ref }}"
 on:
   workflow_call:
+    inputs:
+      LH_VERSION:
+        required: true
+        type: string
+
+env:
+  LH_VERSION: ${{ inputs.LH_VERSION }}
 
 jobs:
   format:

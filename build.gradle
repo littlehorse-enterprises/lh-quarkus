@@ -18,8 +18,13 @@ allprojects {
     apply plugin: "java"
     apply plugin: "idea"
 
+    ext {
+        lhVersion = System.getenv('LH_VERSION') ?: lhVersion
+        kafkaVersion = System.getenv('KAFKA_VERSION') ?: kafkaVersion
+    }
+
     group = "io.littlehorse"
-    version = "${extensionVersion}"
+    version = "${lhVersion}"
 
     test {
         testLogging {

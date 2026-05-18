@@ -4,11 +4,13 @@ import io.littlehorse.sdk.common.proto.LittleHorseVersion;
 
 public record ServerInformationResponse(String version) {
     public ServerInformationResponse(LittleHorseVersion littleHorseVersion) {
-        this("%d.%d.%d%s"
+        this("%d.%d%s%s"
                 .formatted(
                         littleHorseVersion.getMajorVersion(),
                         littleHorseVersion.getMinorVersion(),
-                        littleHorseVersion.getPatchVersion(),
+                        littleHorseVersion.hasPatchVersion()
+                                ? "." + littleHorseVersion.getPatchVersion()
+                                : "",
                         littleHorseVersion.hasPreReleaseIdentifier()
                                 ? "-" + littleHorseVersion.getPreReleaseIdentifier()
                                 : ""));

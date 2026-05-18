@@ -17,14 +17,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Load .env
+        run: cat .env >> $GITHUB_ENV
+
       - name: Get snapshot version
         id: get_version
         run: |
-          version=$(grep '^lhVersion=' gradle.properties | cut -d'=' -f2)
-          echo "snapshot-version=$version" >> $GITHUB_OUTPUT
+          echo "snapshot-version=$LH_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Validate snapshot format
+        env:
+          VERSION: ${{ steps.get_version.outputs.snapshot-version }}
+        run: |
+          if ! printf '%s' "$VERSION" | grep -i -- '-SNAPSHOT$' >/dev/null; then
+              echo "ERROR: version does not end with -SNAPSHOT" >&2
+              exit 1
+          fi
 
   tests:
+    needs:
+      - prepare
     uses: ./.github/workflows/tests.yml
+    with:
+      LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
 
   publish:
     needs:
@@ -34,27 +50,60 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: "corretto"
-          java-version: "17"
-      - name: Validate snapshot format
-        env:
-          VERSION: ${{ needs.prepare.outputs.snapshot-version }}
-        run: |
-          if ! printf '%s' "$VERSION" | grep -i -- '-SNAPSHOT$' >/dev/null; then
-              echo "ERROR: version does not end with -SNAPSHOT" >&2
-              exit 1
-          fi
-      - name: Set snapshot version
-        env:
-          VERSION: ${{ needs.prepare.outputs.snapshot-version }}
-        run: sed -i "s/extensionVersion=.*/extensionVersion=${VERSION}/g" gradle.properties
+          java-version: "25"
+
       - name: Publish Snapshot
         env:
+          LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
         run: ./gradlew publishToSonatype
+  
+  restful-gateway:
+    needs:
+      - prepare
+      - tests
+    env:
+      LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "graalvm"
+          java-version: "25"
+
+      - name: Build Jar
+        run: ./gradlew restful-gateway:build
+
+      - name: Build Native
+        run: >
+          ./gradlew restful-gateway:build
+          -Dquarkus.native.enabled=true
+          -Dquarkus.package.runner-suffix=-run
+          -Dquarkus.package.output-name=quarkus
+          -Dquarkus.package.jar.enabled=false
+          -Dquarkus.native.container-build=false
+
+      - name: Build and Publish
+        uses: littlehorse-enterprises/publish-image@v1
+        with:
+          image-name: lh-restful-gateway
+          dockerfile: ./restful-gateway/Dockerfile
+          context: ./restful-gateway
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          ghcr-root: true
+          tags: |
+            type=raw,value=latest,enable=false
+            type=raw,value=${{ needs.prepare.outputs.snapshot-version }},enable=true
+    

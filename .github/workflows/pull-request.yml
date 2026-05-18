@@ -5,5 +5,23 @@ on:
   pull_request:
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      snapshot-version: ${{ steps.get_version.outputs.snapshot-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Load .env
+        run: cat .env >> $GITHUB_ENV
+
+      - name: Get snapshot version
+        id: get_version
+        run: echo "snapshot-version=$LH_VERSION" >> $GITHUB_OUTPUT
   tests:
+    needs:
+      - prepare
     uses: ./.github/workflows/tests.yml
+    with:
+      LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
