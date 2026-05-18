@@ -56,7 +56,7 @@ Execute native tests:
 ./gradlew publishToMavenLocal
 ```
 
-> Optionally you can pass `-PextensionVersion=<version>`
+> Make sure to set the `LH_VERSION` environment variable to the version of LH you want to publish (e.g., `1.2-SNAPSHOT`).
 
 ## Apply Code Style
 
