@@ -167,7 +167,9 @@ public class LHSaddleBagProcessor {
                                             .getPrimitiveType()
                                             .name()));
                 }
-                task.put("inputs", handleTaskParameters(signature.getVariableDefs()));
+                if (!signature.getVariableDefs().isEmpty()) {
+                    task.put("inputs", handleTaskParameters(signature.getVariableDefs()));
+                }
             }
         }
         return task;
