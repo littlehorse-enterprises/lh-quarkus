@@ -1,0 +1,56 @@
+dependencies {
+    implementation platform("io.quarkus:quarkus-bom:${quarkusVersion}")
+    implementation project(":littlehorse-saddle-bag")
+    implementation project(":littlehorse-quarkus")
+    implementation project(":littlehorse-quarkus-deployment")
+    implementation "io.quarkus:quarkus-core-deployment"
+    implementation "io.quarkus:quarkus-arc-deployment"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml"
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = group
+            artifactId = "littlehorse-saddle-bag-deployment"
+            version = version
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = "LittleHorse Saddle Bag Extension"
+                description = "LittleHorse Saddle Bag Extension for generating saddlebag descriptor files and docker images"
+                url = "https://github.com/littlehorse-enterprises/littlehorse"
+                licenses {
+                    license {
+                        name = "Apache License, Version 2.0"
+                        url = "https://www.apache.org/licenses/LICENSE-2.0"
+                    }
+                }
+                developers {
+                    developer {
+                        name = "LittleHorse Engineering"
+                        email = "engineering@littlehorse.io"
+                    }
+                }
+                scm {
+                    url = "https://github.com/littlehorse-enterprises/lh-quarkus"
+                    connection = "scm:git:git//github.com/littlehorse-enterprises/lh-quarkus.git"
+                    developerConnection = "scm:git:ssh://github.com/littlehorse-enterprises/lh-quarkus.git"
+                }
+                packaging = "jar"
+            }
+        }
+    }
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("publish") }
+
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+
+    sign publishing.publications.mavenJava
+}

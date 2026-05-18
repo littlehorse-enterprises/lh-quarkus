@@ -1,0 +1,9 @@
+name: "LittleHorse Saddle Bag"
+description: "This is the LittleHorse Saddle Bag Extension for generating saddlebag descriptor files and docker images"
+metadata:
+  keywords:
+    - "littlehorse"
+    - "saddlebag"
+  categories:
+    - "workflow"
+  status: "preview"

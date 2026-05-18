@@ -2,9 +2,10 @@ package io.littlehorse.quarkus.config;
 
 import io.quarkus.arc.Unremovable;
 import io.smallrye.common.expression.Expression;
-import io.smallrye.config.SmallRyeConfig;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
+import org.eclipse.microprofile.config.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,23 +16,35 @@ import java.util.Optional;
 @Unremovable
 public class ConfigEvaluator {
 
-    private final SmallRyeConfig config;
+    private final Config config;
 
-    public ConfigEvaluator(SmallRyeConfig config) {
+    public ConfigEvaluator(Config config) {
         this.config = config;
     }
 
     public static class ConfigExpression {
+        private final String expression;
         private final String result;
         private final Map<String, String> members;
+        private final int membersCount;
 
-        private ConfigExpression(String result, Map<String, String> members) {
+        private ConfigExpression(String expression, String result, Map<String, String> members) {
+            this.expression = expression;
             this.result = result;
             this.members = members;
+            this.membersCount = members != null ? members.size() : 0;
+        }
+
+        public String getExpression() {
+            return expression;
         }
 
         public boolean isExpression() {
             return members != null && !members.isEmpty();
+        }
+
+        public int getMembersCount() {
+            return membersCount;
         }
 
         public String asString() {
@@ -76,9 +89,9 @@ public class ConfigEvaluator {
                 }
             });
 
-            return new ConfigExpression(result, Map.copyOf(configs));
+            return new ConfigExpression(expression, result, Map.copyOf(configs));
         }
 
-        return new ConfigExpression(expression, Map.of());
+        return new ConfigExpression(expression, expression, Map.of());
     }
 }

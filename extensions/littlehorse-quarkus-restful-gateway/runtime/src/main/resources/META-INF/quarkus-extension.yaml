@@ -1,8 +1,8 @@
-name: LittleHorse Quarkus RESTful Gateway
-description: This is a RESTful gateway for LittleHorse.
+name: "LittleHorse Quarkus RESTful Gateway"
+description: "This is a RESTful gateway for LittleHorse"
 metadata:
   keywords:
-    - littlehorse
+    - "littlehorse"
   categories:
     - "workflow"
     - "workflow engine"

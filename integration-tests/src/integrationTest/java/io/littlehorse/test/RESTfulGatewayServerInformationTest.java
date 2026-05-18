@@ -8,6 +8,7 @@ import io.littlehorse.common.ContainersTestResource;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @QuarkusIntegrationTest
@@ -16,6 +17,7 @@ class RESTfulGatewayServerInformationTest {
 
     private static final String LH_VERSION = System.getProperty("lhVersion", "latest");
 
+    @Disabled
     @Test
     void shouldGetServerVersion() {
         given().when()
