@@ -15,8 +15,6 @@ import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleCon
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
-import io.littlehorse.sdk.common.proto.ReturnType;
-import io.littlehorse.sdk.common.proto.TypeDefinition;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructProperty;
 import io.littlehorse.sdk.wfsdk.internal.taskdefutil.LHTaskParameter;
@@ -157,8 +155,18 @@ public class LHSaddleBagProcessor {
 
                 LHTaskSignature signature =
                         new LHTaskSignature(handle, LHTypeAdapterRegistry.empty(), Map.of());
-                task.put(
-                        "output", Map.of("type", resolveTaskReturnType(signature.getReturnType())));
+
+                if (signature.getReturnType().hasReturnType()) {
+                    task.put(
+                            "output",
+                            Map.of(
+                                    "type",
+                                    signature
+                                            .getReturnType()
+                                            .getReturnType()
+                                            .getPrimitiveType()
+                                            .name()));
+                }
                 task.put("inputs", handleTaskParameters(signature.getVariableDefs()));
             }
         }
@@ -222,7 +230,12 @@ public class LHSaddleBagProcessor {
             Map<String, Object> props = new LinkedHashMap<>();
 
             props.put("name", property.getFieldName());
-            props.put("type", property.getPropertyType().getClassType().getSimpleName());
+            props.put(
+                    "type",
+                    property.getPropertyType()
+                            .getTypeDefinition()
+                            .getPrimitiveType()
+                            .name());
             structProperties.add(props);
         }
 
@@ -238,25 +251,17 @@ public class LHSaddleBagProcessor {
             Map<String, Object> param = new LinkedHashMap<>();
 
             param.put("name", lhTaskParameter.getVariableName());
-            param.put("type", lhTaskParameter.getParameterType().getSimpleName());
+            param.put(
+                    "type",
+                    lhTaskParameter
+                            .getVariableDef()
+                            .getTypeDef()
+                            .getPrimitiveType()
+                            .name());
 
             parameters.add(param);
         }
         return parameters;
-    }
-
-    private static String resolveTaskReturnType(ReturnType returnType) {
-        if (!returnType.hasReturnType()) {
-            return "VOID";
-        }
-
-        TypeDefinition typeDefinition = returnType.getReturnType();
-        return switch (typeDefinition.getDefinedTypeCase()) {
-            case PRIMITIVE_TYPE -> typeDefinition.getPrimitiveType().name();
-            case STRUCT_DEF_ID -> "STRUCT:" + typeDefinition.getStructDefId().getName();
-            case INLINE_ARRAY_DEF -> "ARRAY";
-            case DEFINEDTYPE_NOT_SET -> "VOID";
-        };
     }
 
     private byte[] serialize(Map<String, Object> data, Format format) {
