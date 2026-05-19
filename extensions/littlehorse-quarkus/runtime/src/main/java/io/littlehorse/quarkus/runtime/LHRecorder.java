@@ -81,7 +81,9 @@ public class LHRecorder {
 
     public void registerLHWorkflows(List<LHWorkflowRecordable> workflowRecordables) {
         LHRecordableDependenciesGraph<LHWorkflowRecordable> workflowRecordableGraph =
-                new LHRecordableDependenciesGraph<>(workflowRecordables.filter(recordable -> doesBeanExist(recordable.getBeanClass())).toList());
+                new LHRecordableDependenciesGraph<>(workflowRecordables.stream()
+                        .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                        .toList());
         workflowRecordableGraph.toOrderedList().forEach(this::registerLHWorkflow);
     }
 
@@ -128,7 +130,9 @@ public class LHRecorder {
 
     public void registerLHStructDefs(List<LHStructDefRecordable> structDefRecordables) {
         LHRecordableDependenciesGraph<LHStructDefRecordable> structDefRecordableGraph =
-                new LHRecordableDependenciesGraph<>(structDefRecordables.filter(recordable -> doesBeanExist(recordable.getBeanClass())).toList());
+                new LHRecordableDependenciesGraph<>(structDefRecordables.stream()
+                        .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                        .toList());
         structDefRecordableGraph.toOrderedList().forEach(this::registerLHStructDef);
     }
 
