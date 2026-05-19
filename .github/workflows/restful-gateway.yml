@@ -3,12 +3,12 @@ run-name: Publishing RESTful Gateway for "${{ github.head_ref }}"
 on:
   workflow_call:
     inputs:
-      LH_VERSION:
+      version:
         required: true
         type: string
 
 env:
-  LH_VERSION: ${{ inputs.LH_VERSION }}
+  ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
 
 permissions:
   contents: read
@@ -49,4 +49,4 @@ jobs:
           ghcr-root: true
           tags: |
             type=raw,value=latest,enable=false
-            type=raw,value=${{ env.LH_VERSION }},enable=true
+            type=raw,value=${{ inputs.version }},enable=true

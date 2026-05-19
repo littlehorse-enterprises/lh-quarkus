@@ -13,15 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Load .env
-        run: cat .env >> $GITHUB_ENV
-
       - name: Get snapshot version
         id: get_version
-        run: echo "snapshot-version=$LH_VERSION" >> $GITHUB_OUTPUT
+        run: echo "snapshot-version=$(cat gradle.properties | grep ^version= | cut -d'=' -f2)" >> $GITHUB_OUTPUT
   tests:
     needs:
       - prepare
     uses: ./.github/workflows/tests.yml
     with:
-      LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
+      version: ${{ needs.prepare.outputs.snapshot-version }}

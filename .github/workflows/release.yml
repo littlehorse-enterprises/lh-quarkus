@@ -24,12 +24,12 @@ jobs:
       - prepare
     uses: ./.github/workflows/tests.yml
     with:
-      LH_VERSION: ${{ needs.prepare.outputs.tag }}
+      version: ${{ needs.prepare.outputs.tag }}
 
   publish:
     runs-on: ubuntu-latest
     env:
-      LH_VERSION: ${{ needs.prepare.outputs.tag }}
+      ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.tag }}
     needs:
       - prepare
       - tests
@@ -78,4 +78,4 @@ jobs:
       - publish
     uses: ./.github/workflows/restful-gateway.yml
     with:
-      LH_VERSION: ${{ needs.prepare.outputs.tag }}
+      version: ${{ needs.prepare.outputs.tag }}

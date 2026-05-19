@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - fix/beam-list
 
 permissions:
   contents: read
@@ -19,13 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Load .env
-        run: cat .env >> $GITHUB_ENV
-
       - name: Get snapshot version
         id: get_version
         run: |
-          echo "snapshot-version=$LH_VERSION" >> $GITHUB_OUTPUT
+          echo "snapshot-version=$(cat gradle.properties | grep ^version= | cut -d'=' -f2)" >> $GITHUB_OUTPUT
 
       - name: Validate snapshot format
         env:
@@ -41,7 +39,7 @@ jobs:
       - prepare
     uses: ./.github/workflows/tests.yml
     with:
-      LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
+      version: ${{ needs.prepare.outputs.snapshot-version }}
 
   publish:
     needs:
@@ -60,19 +58,19 @@ jobs:
 
       - name: Publish Snapshot
         env:
-          LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
+          ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.snapshot-version }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
         run: ./gradlew publishToSonatype
-  
+
   restful-gateway:
     needs:
       - prepare
       - tests
     env:
-      LH_VERSION: ${{ needs.prepare.outputs.snapshot-version }}
+      ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.snapshot-version }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -107,4 +105,3 @@ jobs:
           tags: |
             type=raw,value=latest,enable=false
             type=raw,value=${{ needs.prepare.outputs.snapshot-version }},enable=true
-    
