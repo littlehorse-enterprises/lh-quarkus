@@ -18,13 +18,8 @@ allprojects {
     apply plugin: "java"
     apply plugin: "idea"
 
-    ext {
-        lhVersion = System.getenv('LH_VERSION') ?: lhVersion
-        kafkaVersion = System.getenv('KAFKA_VERSION') ?: kafkaVersion
-    }
-
     group = "io.littlehorse"
-    version = "${lhVersion}"
+    version = "${version}"
 
     test {
         testLogging {
@@ -97,8 +92,6 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
             events "passed", "skipped", "failed"
             exceptionFormat = "full"
         }
-        systemProperty "lhVersion", "${lhVersion}"
-        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
     testNative {
@@ -106,8 +99,6 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
             events "passed", "skipped", "failed"
             exceptionFormat = "full"
         }
-        systemProperty "lhVersion", "${lhVersion}"
-        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
 
     test {
@@ -115,7 +106,17 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
             events "passed", "skipped", "failed"
             exceptionFormat = "full"
         }
-        systemProperty "lhVersion", "${lhVersion}"
-        systemProperty "kafkaVersion", "${kafkaVersion}"
     }
+}
+
+tasks.register("dockerComposeUp", Exec) {
+    description = "Starts docker-compose with versions from gradle.properties"
+    commandLine "docker", "compose", "up", "-d"
+    environment "LH_VERSION", version
+    environment "KAFKA_VERSION", kafkaVersion
+}
+
+tasks.register("dockerComposeDown", Exec) {
+    description = "Stops docker-compose"
+    commandLine "docker", "compose", "down"
 }

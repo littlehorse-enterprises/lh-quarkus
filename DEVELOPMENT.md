@@ -21,11 +21,17 @@ pre-commit install
 Run LH:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
+```
+
+Stop LH:
+
+```shell
+./gradlew dockerComposeDown
 ```
 
 | Container             | Port |
-|-----------------------|------|
+| --------------------- | ---- |
 | LittleHorse           | 2023 |
 | Kafka                 | 9092 |
 | LittleHorse Dashboard | 3000 |
@@ -56,7 +62,7 @@ Execute native tests:
 ./gradlew publishToMavenLocal
 ```
 
-> Make sure to set the `LH_VERSION` environment variable to the version of LH you want to publish (e.g., `1.2-SNAPSHOT`).
+> The LH version is defined in `gradle.properties` (`version` property) and passed automatically to docker-compose via the Gradle tasks.
 
 ## Apply Code Style
 
