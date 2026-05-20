@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - fix/beam-list
 
 permissions:
   contents: read
@@ -15,19 +14,18 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      snapshot-version: ${{ steps.get_version.outputs.snapshot-version }}
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Get snapshot version
+      - name: Get version
         id: get_version
-        run: |
-          echo "snapshot-version=$(cat gradle.properties | grep ^version= | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+        run: echo "version=$(sed -n 's/^version=//p' gradle.properties)" >> $GITHUB_OUTPUT
 
       - name: Validate snapshot format
         env:
-          VERSION: ${{ steps.get_version.outputs.snapshot-version }}
+          VERSION: ${{ steps.get_version.outputs.version }}
         run: |
           if ! printf '%s' "$VERSION" | grep -i -- '-SNAPSHOT$' >/dev/null; then
               echo "ERROR: version does not end with -SNAPSHOT" >&2
@@ -39,7 +37,7 @@ jobs:
       - prepare
     uses: ./.github/workflows/tests.yml
     with:
-      version: ${{ needs.prepare.outputs.snapshot-version }}
+      version: ${{ needs.prepare.outputs.version }}
 
   publish:
     needs:
@@ -58,7 +56,7 @@ jobs:
 
       - name: Publish Snapshot
         env:
-          ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.snapshot-version }}
+          ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.version }}
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
           ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
@@ -70,7 +68,7 @@ jobs:
       - prepare
       - tests
     env:
-      ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.snapshot-version }}
+      ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.version }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -104,4 +102,4 @@ jobs:
           ghcr-root: true
           tags: |
             type=raw,value=latest,enable=false
-            type=raw,value=${{ needs.prepare.outputs.snapshot-version }},enable=true
+            type=raw,value=${{ needs.prepare.outputs.version }},enable=true

@@ -8,17 +8,17 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      snapshot-version: ${{ steps.get_version.outputs.snapshot-version }}
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Get snapshot version
+      - name: Get version
         id: get_version
-        run: echo "snapshot-version=$(cat gradle.properties | grep ^version= | cut -d'=' -f2)" >> $GITHUB_OUTPUT
+        run: echo "version=$(sed -n 's/^version=//p' gradle.properties)" >> $GITHUB_OUTPUT
   tests:
     needs:
       - prepare
     uses: ./.github/workflows/tests.yml
     with:
-      version: ${{ needs.prepare.outputs.snapshot-version }}
+      version: ${{ needs.prepare.outputs.version }}
