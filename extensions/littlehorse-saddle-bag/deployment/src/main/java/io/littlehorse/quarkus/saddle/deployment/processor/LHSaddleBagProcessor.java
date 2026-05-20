@@ -9,6 +9,7 @@ import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.config.ConfigEvaluator.ConfigExpression;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.saddle.config.LHRequiredConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.MetadataConfig;
@@ -137,9 +138,34 @@ public class LHSaddleBagProcessor {
             Map<String, Object> task = buildSaddleBagTask(item);
             task.put("configName", resolved.configKey());
             task.put("description", item.toRecordable().getDescription());
+
+            List<Map<String, Object>> requiredConfigs =
+                    buildRequiredConfigs(item.toRecordable().getBeanClass());
+            if (!requiredConfigs.isEmpty()) {
+                task.put("requiredConfigs", requiredConfigs);
+            }
+
             tasks.put(resolved.name(), task);
         }
         return tasks;
+    }
+
+    private List<Map<String, Object>> buildRequiredConfigs(Class<?> beanClass) {
+        List<Map<String, Object>> configs = new ArrayList<>();
+
+        LHRequiredConfig[] annotations = beanClass.getAnnotationsByType(LHRequiredConfig.class);
+        for (LHRequiredConfig annotation : annotations) {
+            Map<String, Object> config = new LinkedHashMap<>();
+            config.put("key", annotation.value());
+            config.put("description", annotation.description());
+            config.put("secret", annotation.secret());
+            if (!annotation.defaultValue().isEmpty()) {
+                config.put("defaultValue", annotation.defaultValue());
+            }
+            configs.add(config);
+        }
+
+        return configs;
     }
 
     private Map<String, Object> buildSaddleBagTask(LHTaskMethodBuildItem taskMethod) {
