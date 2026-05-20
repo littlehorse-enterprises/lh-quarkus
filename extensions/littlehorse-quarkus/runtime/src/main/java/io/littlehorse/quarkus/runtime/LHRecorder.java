@@ -42,9 +42,15 @@ public class LHRecorder {
         this.runtimeConfig = runtimeConfig;
     }
 
-    public void registerAndStartTask(
+    public void registerAndStartTasks(
+            List<LHTaskMethodRecordable> taskMethodRecordables, ShutdownContext shutdownContext) {
+        taskMethodRecordables.stream()
+                .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                .forEach(recordable -> registerAndStartTask(recordable, shutdownContext));
+    }
+
+    private void registerAndStartTask(
             LHTaskMethodRecordable recordable, ShutdownContext shutdownContext) {
-        if (!doesBeanExist(recordable.getBeanClass())) return;
 
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
@@ -107,9 +113,13 @@ public class LHRecorder {
         workflow.registerWfSpec(config);
     }
 
-    public void registerLHUserTaskForm(LHUserTaskFormRecordable recordable) {
-        if (!doesBeanExist(recordable.getBeanClass())) return;
+    public void registerLHUserTaskForms(List<LHUserTaskFormRecordable> userTaskFormRecordables) {
+        userTaskFormRecordables.stream()
+                .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                .forEach(this::registerLHUserTaskForm);
+    }
 
+    private void registerLHUserTaskForm(LHUserTaskFormRecordable recordable) {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.UserTaskConfig> taskConfig = Optional.ofNullable(
