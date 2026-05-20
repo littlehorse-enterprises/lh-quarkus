@@ -20,6 +20,6 @@ dependencies {
     testImplementation "io.quarkus:quarkus-junit5-mockito"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
-    testImplementation "io.littlehorse:littlehorse-test-utils-container:${lhVersion}"
+    testImplementation "io.littlehorse:littlehorse-test-utils-container:${version}"
     testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
 }

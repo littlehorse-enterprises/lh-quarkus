@@ -10,14 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
 
-    private static final String KAFKA_VERSION = System.getProperty("kafkaVersion", "latest");
-    private static final String LH_VERSION = Optional.ofNullable(System.getProperty("lhVersion"))
-            .map(version -> version.endsWith("SNAPSHOT") ? "master" : version)
-            .orElse("latest");
+    private static final String KAFKA_VERSION = System.getProperty("kafkaVersion");
+    private static final String LH_VERSION = System.getProperty("version");
 
     private static final Logger log = LoggerFactory.getLogger(ContainersTestResource.class);
 

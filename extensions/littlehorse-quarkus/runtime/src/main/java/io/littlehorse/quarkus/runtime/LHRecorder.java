@@ -81,13 +81,13 @@ public class LHRecorder {
 
     public void registerLHWorkflows(List<LHWorkflowRecordable> workflowRecordables) {
         LHRecordableDependenciesGraph<LHWorkflowRecordable> workflowRecordableGraph =
-                new LHRecordableDependenciesGraph<>(workflowRecordables);
+                new LHRecordableDependenciesGraph<>(workflowRecordables.stream()
+                        .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                        .toList());
         workflowRecordableGraph.toOrderedList().forEach(this::registerLHWorkflow);
     }
 
-    public void registerLHWorkflow(LHWorkflowRecordable recordable) {
-        if (!doesBeanExist(recordable.getBeanClass())) return;
-
+    private void registerLHWorkflow(LHWorkflowRecordable recordable) {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.WorkflowConfig> workflowConfig = Optional.ofNullable(
@@ -130,13 +130,13 @@ public class LHRecorder {
 
     public void registerLHStructDefs(List<LHStructDefRecordable> structDefRecordables) {
         LHRecordableDependenciesGraph<LHStructDefRecordable> structDefRecordableGraph =
-                new LHRecordableDependenciesGraph<>(structDefRecordables);
+                new LHRecordableDependenciesGraph<>(structDefRecordables.stream()
+                        .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                        .toList());
         structDefRecordableGraph.toOrderedList().forEach(this::registerLHStructDef);
     }
 
-    public void registerLHStructDef(LHStructDefRecordable recordable) {
-        if (!doesBeanExist(recordable.getBeanClass())) return;
-
+    private void registerLHStructDef(LHStructDefRecordable recordable) {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.StructConfig> structConfig =

@@ -23,7 +23,7 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 # Unit tests
 ./gradlew test
 
-# Integration tests (requires docker compose up -d)
+# Integration tests (requires ./gradlew dockerComposeUp)
 ./gradlew integration-tests:quarkusIntTest
 
 # Native integration tests
@@ -55,10 +55,16 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 ## Development Environment
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
-Starts LittleHorse (port 2023), Kafka (9092), and LH Dashboard (3000).
+Starts LittleHorse (port 2023), Kafka (9092), and LH Dashboard (3000). Versions are sourced from `gradle.properties`.
+
+To stop:
+
+```shell
+./gradlew dockerComposeDown
+```
 
 ## References
 
