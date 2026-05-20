@@ -23,6 +23,7 @@ import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHTaskMethodHandle;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
+import io.quarkus.deployment.builditem.ApplicationInfoBuildItem;
 import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
 
@@ -52,6 +53,7 @@ public class LHSaddleBagProcessor {
     @BuildStep
     void generateSaddlebag(
             LHSaddleBagBuildtimeConfig config,
+            ApplicationInfoBuildItem applicationInfo,
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs,
             OutputTargetBuildItem outputTarget,
@@ -62,8 +64,8 @@ public class LHSaddleBagProcessor {
 
         ConfigEvaluator configEvaluator = new ConfigEvaluator(ConfigProvider.getConfig());
 
-        Map<String, Object> saddlebag =
-                buildSaddlebag(bagConfig, configEvaluator, taskMethods, structDefs);
+        Map<String, Object> saddlebag = buildSaddlebag(
+                bagConfig, applicationInfo.getVersion(), configEvaluator, taskMethods, structDefs);
 
         generateJarResource(saddlebag, resources);
 
@@ -98,6 +100,7 @@ public class LHSaddleBagProcessor {
 
     private Map<String, Object> buildSaddlebag(
             BagConfig bagConfig,
+            String version,
             ConfigEvaluator configEvaluator,
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs)
@@ -107,7 +110,7 @@ public class LHSaddleBagProcessor {
         root.put("name", bagConfig.name());
         root.put("title", bagConfig.title());
         root.put("description", bagConfig.description());
-        root.put("version", bagConfig.version());
+        root.put("version", version);
         root.put("metadata", buildMetadata(bagConfig.metadata()));
         root.put("tasks", buildSaddleBagTasks(configEvaluator, taskMethods));
         root.put("structs", buildSaddleBagStructs(configEvaluator, structDefs));
