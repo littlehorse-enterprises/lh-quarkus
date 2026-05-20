@@ -88,6 +88,8 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
     apply plugin: "io.quarkus"
 
     quarkusIntTest {
+        systemProperty "version", version
+        systemProperty "kafkaVersion", kafkaVersion
         testLogging {
             events "passed", "skipped", "failed"
             exceptionFormat = "full"
@@ -95,6 +97,8 @@ configure(otherProjects.split(',').collect { project(":$it") }) {
     }
 
     testNative {
+        systemProperty "version", version
+        systemProperty "kafkaVersion", kafkaVersion
         testLogging {
             events "passed", "skipped", "failed"
             exceptionFormat = "full"

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 @QuarkusTestResource(ContainersTestResource.class)
 class RESTfulGatewayServerInformationTest {
 
-    private static final String LH_VERSION = System.getProperty("version", "latest");
+    private static final String LH_VERSION = System.getProperty("version");
 
     @Test
     void shouldGetServerVersion() {
