@@ -1,8 +1,11 @@
 package io.littlehorse.quarkus.runtime.recordable;
 
+import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.StructDefId;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.quarkus.runtime.annotations.RecordableConstructor;
+
+import jakarta.enterprise.inject.spi.CDI;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,7 +26,9 @@ public class LHStructDefRecordable extends LHRecordable {
 
     @Override
     public Set<String> dependencies() {
-        LHStructDefType structDefType = new LHStructDefType(getBeanClass());
+        LHConfig config = CDI.current().select(LHConfig.class).get();
+        LHStructDefType structDefType =
+                new LHStructDefType(getBeanClass(), config.getTypeAdapterRegistry());
         return structDefType.getDependencyClasses().stream()
                 .map(LHStructDefType::getStructDefId)
                 .map(StructDefId::getName)

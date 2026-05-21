@@ -2,6 +2,7 @@ package io.littlehorse.quarkus.runtime.recordable;
 
 import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
+import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
 import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
 import io.littlehorse.sdk.common.proto.ThreadRetentionPolicy;
@@ -95,6 +96,7 @@ public class LHWorkflowRecordable extends LHRecordable {
     }
 
     public Workflow toWorkflow() {
+        LHConfig config = CDI.current().select(LHConfig.class).get();
         ConfigEvaluator configEvaluator =
                 CDI.current().select(ConfigEvaluator.class).get();
         String expandedName = configEvaluator.expand(getName()).asString();
@@ -177,6 +179,8 @@ public class LHWorkflowRecordable extends LHRecordable {
 
             workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
         }
+
+        workflow.compileWorkflow(config);
 
         return workflow;
     }
