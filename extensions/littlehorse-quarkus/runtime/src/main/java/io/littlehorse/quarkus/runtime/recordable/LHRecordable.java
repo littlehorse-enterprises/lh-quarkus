@@ -31,8 +31,7 @@ public abstract class LHRecordable {
      * @return the expanded name of the recordable
      */
     public String getExpandedName() {
-        ConfigEvaluator configEvaluator =
-                CDI.current().select(ConfigEvaluator.class).get();
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         return configEvaluator.expand(getName()).asString();
     }
 
@@ -44,5 +43,13 @@ public abstract class LHRecordable {
      */
     public Set<String> dependencies() {
         return Set.of();
+    }
+
+    protected static <T> T getBean(Class<T> beanClass) {
+        return CDI.current().select(beanClass).get();
+    }
+
+    protected static <T> boolean doesBeanExist(Class<T> beanClass) {
+        return CDI.current().select(beanClass).isResolvable();
     }
 }

@@ -11,8 +11,6 @@ import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
-import jakarta.enterprise.inject.spi.CDI;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -96,22 +94,21 @@ public class LHWorkflowRecordable extends LHRecordable {
     }
 
     public Workflow toWorkflow() {
-        LHConfig config = CDI.current().select(LHConfig.class).get();
-        ConfigEvaluator configEvaluator =
-                CDI.current().select(ConfigEvaluator.class).get();
+        LHConfig config = getBean(LHConfig.class);
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(getName()).asString();
 
         Workflow workflow = Workflow.newWorkflow(expandedName, thread -> {
             if (getBeanMethodName() == null) {
-                LHWorkflowDefinition workflowDefinitionBean = (LHWorkflowDefinition)
-                        CDI.current().select(getBeanClass()).get();
+                LHWorkflowDefinition workflowDefinitionBean =
+                        (LHWorkflowDefinition) getBean(getBeanClass());
                 workflowDefinitionBean.define(thread);
                 return;
             }
 
             try {
                 Method method = getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
-                method.invoke(CDI.current().select(getBeanClass()).get(), thread);
+                method.invoke(getBean(getBeanClass()), thread);
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
