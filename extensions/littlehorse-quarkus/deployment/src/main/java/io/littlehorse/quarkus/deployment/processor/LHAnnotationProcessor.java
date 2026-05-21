@@ -1,7 +1,7 @@
 package io.littlehorse.quarkus.deployment.processor;
 
+import io.littlehorse.quarkus.adapter.LHTypeAdapter;
 import io.littlehorse.quarkus.task.LHTask;
-import io.littlehorse.quarkus.task.LHTypeAdapter;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.worker.LHStructDef;

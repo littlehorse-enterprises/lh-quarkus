@@ -1,6 +1,6 @@
 package io.littlehorse.adapter;
 
-import io.littlehorse.quarkus.task.LHTypeAdapter;
+import io.littlehorse.quarkus.adapter.LHTypeAdapter;
 import io.littlehorse.sdk.common.adapter.LHStringAdapter;
 import io.littlehorse.sdk.common.proto.VariableType;
 
