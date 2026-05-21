@@ -24,8 +24,6 @@ public interface LHSaddleBagBuildtimeConfig {
 
             String description();
 
-            String version();
-
             MetadataConfig metadata();
 
             OutputConfig output();

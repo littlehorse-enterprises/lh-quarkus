@@ -14,6 +14,7 @@ import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleCon
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.MetadataConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
+import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructProperty;
@@ -23,6 +24,7 @@ import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHTaskMethodHandle;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
+import io.quarkus.deployment.builditem.ApplicationInfoBuildItem;
 import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
 
@@ -52,6 +54,7 @@ public class LHSaddleBagProcessor {
     @BuildStep
     void generateSaddlebag(
             LHSaddleBagBuildtimeConfig config,
+            ApplicationInfoBuildItem applicationInfo,
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs,
             OutputTargetBuildItem outputTarget,
@@ -62,8 +65,8 @@ public class LHSaddleBagProcessor {
 
         ConfigEvaluator configEvaluator = new ConfigEvaluator(ConfigProvider.getConfig());
 
-        Map<String, Object> saddlebag =
-                buildSaddlebag(bagConfig, configEvaluator, taskMethods, structDefs);
+        Map<String, Object> saddlebag = buildSaddlebag(
+                bagConfig, applicationInfo.getVersion(), configEvaluator, taskMethods, structDefs);
 
         generateJarResource(saddlebag, resources);
 
@@ -98,6 +101,7 @@ public class LHSaddleBagProcessor {
 
     private Map<String, Object> buildSaddlebag(
             BagConfig bagConfig,
+            String version,
             ConfigEvaluator configEvaluator,
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs)
@@ -107,7 +111,7 @@ public class LHSaddleBagProcessor {
         root.put("name", bagConfig.name());
         root.put("title", bagConfig.title());
         root.put("description", bagConfig.description());
-        root.put("version", bagConfig.version());
+        root.put("version", version);
         root.put("metadata", buildMetadata(bagConfig.metadata()));
         root.put("tasks", buildSaddleBagTasks(configEvaluator, taskMethods));
         root.put("structs", buildSaddleBagStructs(configEvaluator, structDefs));
@@ -134,9 +138,34 @@ public class LHSaddleBagProcessor {
             Map<String, Object> task = buildSaddleBagTask(item);
             task.put("configName", resolved.configKey());
             task.put("description", item.toRecordable().getDescription());
+
+            List<Map<String, Object>> requiredConfigs =
+                    buildRequiredConfigs(item.toRecordable().getBeanClass());
+            if (!requiredConfigs.isEmpty()) {
+                task.put("configs", requiredConfigs);
+            }
+
             tasks.put(resolved.name(), task);
         }
         return tasks;
+    }
+
+    private List<Map<String, Object>> buildRequiredConfigs(Class<?> beanClass) {
+        List<Map<String, Object>> configs = new ArrayList<>();
+
+        LHTaskConfig[] annotations = beanClass.getAnnotationsByType(LHTaskConfig.class);
+        for (LHTaskConfig annotation : annotations) {
+            Map<String, Object> config = new LinkedHashMap<>();
+            config.put("key", annotation.value());
+            config.put("description", annotation.description());
+            config.put("sensitive", annotation.sensitive());
+            if (!annotation.defaultValue().isEmpty()) {
+                config.put("defaultValue", annotation.defaultValue());
+            }
+            configs.add(config);
+        }
+
+        return configs;
     }
 
     private Map<String, Object> buildSaddleBagTask(LHTaskMethodBuildItem taskMethod) {

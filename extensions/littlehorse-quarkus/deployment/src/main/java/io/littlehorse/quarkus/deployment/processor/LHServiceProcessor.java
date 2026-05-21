@@ -11,6 +11,8 @@ import io.littlehorse.quarkus.deployment.item.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
 import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHUserTaskFormRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
@@ -142,13 +144,15 @@ class LHServiceProcessor {
                 .toList();
         recorder.registerLHStructDefs(structDefRecordables);
 
-        taskMethodBuildItems.stream()
+        List<LHTaskMethodRecordable> taskMethodRecordables = taskMethodBuildItems.stream()
                 .map(LHTaskMethodBuildItem::toRecordable)
-                .forEach(recordable -> recorder.registerAndStartTask(recordable, shutdownContext));
+                .toList();
+        recorder.registerAndStartTasks(taskMethodRecordables, shutdownContext);
 
-        userTaskFromBuildItems.stream()
+        List<LHUserTaskFormRecordable> userTaskFormRecordables = userTaskFromBuildItems.stream()
                 .map(LHUserTaskFormBuildItem::toRecordable)
-                .forEach(recorder::registerLHUserTaskForm);
+                .toList();
+        recorder.registerLHUserTaskForms(userTaskFormRecordables);
 
         List<LHWorkflowRecordable> workflowRecordables = workflowBuildItems.stream()
                 .map(LHWorkflowBuildItem::toRecordable)
