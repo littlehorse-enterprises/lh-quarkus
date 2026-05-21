@@ -9,12 +9,12 @@ import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.config.ConfigEvaluator.ConfigExpression;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
-import io.littlehorse.quarkus.saddle.config.LHRequiredConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.MetadataConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
+import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructProperty;
@@ -142,7 +142,7 @@ public class LHSaddleBagProcessor {
             List<Map<String, Object>> requiredConfigs =
                     buildRequiredConfigs(item.toRecordable().getBeanClass());
             if (!requiredConfigs.isEmpty()) {
-                task.put("requiredConfigs", requiredConfigs);
+                task.put("configs", requiredConfigs);
             }
 
             tasks.put(resolved.name(), task);
@@ -153,12 +153,12 @@ public class LHSaddleBagProcessor {
     private List<Map<String, Object>> buildRequiredConfigs(Class<?> beanClass) {
         List<Map<String, Object>> configs = new ArrayList<>();
 
-        LHRequiredConfig[] annotations = beanClass.getAnnotationsByType(LHRequiredConfig.class);
-        for (LHRequiredConfig annotation : annotations) {
+        LHTaskConfig[] annotations = beanClass.getAnnotationsByType(LHTaskConfig.class);
+        for (LHTaskConfig annotation : annotations) {
             Map<String, Object> config = new LinkedHashMap<>();
             config.put("key", annotation.value());
             config.put("description", annotation.description());
-            config.put("secret", annotation.secret());
+            config.put("sensitive", annotation.sensitive());
             if (!annotation.defaultValue().isEmpty()) {
                 config.put("defaultValue", annotation.defaultValue());
             }

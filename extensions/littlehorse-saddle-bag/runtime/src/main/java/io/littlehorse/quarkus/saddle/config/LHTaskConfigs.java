@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Container annotation for repeatable {@link LHRequiredConfig} annotations.
+ * Container annotation for repeatable {@link LHTaskConfig} annotations.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LHRequiredConfigs {
-    LHRequiredConfig[] value();
+public @interface LHTaskConfigs {
+    LHTaskConfig[] value();
 }

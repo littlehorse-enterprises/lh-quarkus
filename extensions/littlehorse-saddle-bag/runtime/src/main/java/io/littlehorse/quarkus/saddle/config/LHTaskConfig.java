@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
  * <p>Example:
  * <pre>{@code
  * @LHTask
- * @LHRequiredConfig(value = "smtp.host", description = "SMTP server hostname")
- * @LHRequiredConfig(value = "smtp.password", description = "SMTP password", secret = true)
+ * @LHTaskConfig(value = "smtp.host", description = "SMTP server hostname")
+ * @LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true)
  * public class EmailTask {
  *     // ...
  * }
@@ -25,8 +25,8 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(LHRequiredConfigs.class)
-public @interface LHRequiredConfig {
+@Repeatable(LHTaskConfigs.class)
+public @interface LHTaskConfig {
 
     /**
      * The configuration property key (e.g., {@code "smtp.host"}, {@code "api.service.url"}).
@@ -40,9 +40,9 @@ public @interface LHRequiredConfig {
 
     /**
      * Whether this configuration property contains sensitive data (e.g., passwords, API keys).
-     * Secret values should not be logged or exposed in plain text.
+     * Sensitive values should not be logged or exposed in plain text.
      */
-    boolean secret() default false;
+    boolean sensitive() default false;
 
     /**
      * Default value for this configuration property. Empty string means no default (mandatory).
