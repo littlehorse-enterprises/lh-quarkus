@@ -1,12 +1,12 @@
 package io.littlehorse.saddlebag.adapter;
 
+import io.littlehorse.quarkus.task.LHTypeAdapter;
 import io.littlehorse.sdk.common.adapter.LHStringAdapter;
-
-import jakarta.inject.Singleton;
+import io.littlehorse.sdk.common.proto.VariableType;
 
 import java.util.UUID;
 
-@Singleton
+@LHTypeAdapter(variableType = VariableType.STR, adaptedType = UUID.class)
 public class UUIDTypeAdapter implements LHStringAdapter<UUID> {
 
     @Override

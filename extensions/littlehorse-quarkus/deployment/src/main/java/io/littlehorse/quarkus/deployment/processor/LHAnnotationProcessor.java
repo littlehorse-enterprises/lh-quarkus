@@ -1,6 +1,7 @@
 package io.littlehorse.quarkus.deployment.processor;
 
 import io.littlehorse.quarkus.task.LHTask;
+import io.littlehorse.quarkus.task.LHTypeAdapter;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.worker.LHStructDef;
@@ -37,5 +38,11 @@ public class LHAnnotationProcessor {
     BeanDefiningAnnotationBuildItem produceLHUserTaskForm() {
         return new BeanDefiningAnnotationBuildItem(
                 DotName.createSimple(LHUserTaskForm.class), SINGLETON_ANNOTATION);
+    }
+
+    @BuildStep
+    BeanDefiningAnnotationBuildItem produceLHTypeAdapter() {
+        return new BeanDefiningAnnotationBuildItem(
+                DotName.createSimple(LHTypeAdapter.class), SINGLETON_ANNOTATION);
     }
 }

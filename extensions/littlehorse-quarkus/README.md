@@ -307,12 +307,11 @@ More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/s
 Type Adapters allow the LittleHorse SDK to convert between your types and LittleHorse's native typing system.
 Check available type adapters at [Type Adapter Interfaces](https://littlehorse.io/next/docs/server/developer-guide/sdk-type-adapters#type-adapter-interfaces).
 
-Annotate a `LHTyperAdapter` object with the `@Singleton` annotation and Quarkus will register
-the type adapter for you. Example:
+Annotate a type adapter class with the `@LHTypeAdapter` annotation specifying the target `VariableType` and the adapted Java class. Quarkus will register the type adapter for you. Example:
 
 ```java
-@Singleton
-public class UUUIDTypeAdapter implements LHStringAdapter<UUID> {
+@LHTypeAdapter(variableType = VariableType.STR, adaptedType = UUID.class)
+public class UUIDTypeAdapter implements LHStringAdapter<UUID> {
 
     @Override
     public String toString(UUID src) {
