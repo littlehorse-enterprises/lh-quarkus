@@ -13,7 +13,6 @@
   * [Table of Content](#table-of-content)
   * [Examples](#examples)
   * [Extensions](#extensions)
-  * [RESTful Gateway](#restful-gateway)
   * [Versioning](#versioning)
   * [Development](#development)
   * [License](#license)
@@ -25,6 +24,7 @@
 - [Child Workflow](examples/child-workflow): How to build parent and child workflows.
 - [Reactive](examples/reactive): How to use `LittleHorseReactiveStub` object.
 - [Rest](examples/rest): How to run a wf run request from a rest endpoint.
+- [Saddle Bag](examples/saddle-bag): How to create a saddle bag.
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
 - [Structs](examples/structs): How to use and register structs.
 - [Type Adapters](examples/type-adapter): How to use and register type adapters.
@@ -34,20 +34,15 @@ You can find additional rich documentation [here](https://littlehorse.io/docs/in
 ## Extensions
 
 <a href="https://central.sonatype.com/search?q=littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/badge/central-orange?logo=sonatype&logoColor=white"></a>
-
-- [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on Quarkus and LittleHorse.
-- [LittleHorse Quarkus RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway): RESTful gateway for LittleHorse.
-
-## RESTful Gateway
-
 <a href="https://github.com/orgs/littlehorse-enterprises/packages?repo_name=lh-quarkus"><img alt="GitHub" src="https://img.shields.io/badge/ghcr-orange?logo=docker&logoColor=white"></a>
 
-This gateway allows you to interact with [LittleHorse](https://littlehorse.io/) in a RESTful style.
-Check the configurations at [LittleHorse RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway).
-
-```shell
-docker pull ghcr.io/littlehorse-enterprises/lh-restful-gateway:latest
-```
+- [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on Quarkus and LittleHorse. Check the configurations at [LittleHorse Quarkus Configurations](extensions/littlehorse-quarkus#configurations).
+- [LittleHorse Quarkus RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway): RESTful gateway for LittleHorse. This gateway allows you to interact with [LittleHorse](https://littlehorse.io/) in a RESTful style.
+Check the configurations at [LittleHorse RESTful Gateway Configurations](extensions/littlehorse-quarkus-restful-gateway#configurations).
+  ```shell
+  docker pull ghcr.io/littlehorse-enterprises/lh-restful-gateway:latest
+  ```
+- [LittleHorse Quarkus Saddle Bag](extensions/littlehorse-saddle-bag): For creating saddle bags. Check the configurations at [LittleHorse Saddle Bag Configurations](extensions/littlehorse-saddle-bag#configurations).
 
 ## Versioning
 
