@@ -1,12 +1,15 @@
 package io.littlehorse.quarkus.deployment.processor;
 
+import io.littlehorse.quarkus.adapter.LHTypeAdapter;
 import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHTaskMethodDescriptor;
+import io.littlehorse.quarkus.deployment.descriptor.LHTypeAdapterDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHUserTaskFormDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHWorkflowDescriptor;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHTypeAdapterBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
 import io.littlehorse.quarkus.runtime.LHRecorder;
@@ -125,6 +128,22 @@ class LHServiceProcessor {
                     return new LHStructDefBuildItem(
                             beanClass,
                             new LHStructDefDescriptor(new OptionalAnnotation(annotated)));
+                })
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void scanLHTypeAdapter(
+            BuildProducer<LHTypeAdapterBuildItem> producer,
+            BeanArchiveIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAnnotations(LHTypeAdapter.class).stream()
+                .filter(annotated -> annotated.target().kind().equals(Kind.CLASS))
+                .map(annotated -> {
+                    String beanClassName = annotated.target().asClass().toString();
+                    Class<?> beanClass = loadClass(beanClassName);
+                    LHTypeAdapterDescriptor descriptor = new LHTypeAdapterDescriptor(annotated);
+                    Class<?> adaptedType = loadClass(descriptor.getAdaptedTypeName());
+                    return new LHTypeAdapterBuildItem(beanClass, adaptedType, descriptor);
                 })
                 .forEach(producer::produce);
     }
