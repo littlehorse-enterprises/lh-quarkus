@@ -1,22 +1,21 @@
 package io.littlehorse.quarkus.deployment.descriptor;
 
+import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.sdk.common.proto.VariableType;
-
-import org.jboss.jandex.AnnotationInstance;
 
 public final class LHTypeAdapterDescriptor {
 
-    private final AnnotationInstance annotation;
+    private final OptionalAnnotation annotation;
 
-    public LHTypeAdapterDescriptor(AnnotationInstance annotation) {
+    public LHTypeAdapterDescriptor(OptionalAnnotation annotation) {
         this.annotation = annotation;
     }
 
     public String getAdaptedTypeName() {
-        return annotation.value("adaptedType").asClass().toString();
+        return annotation.getClassValue("adaptedType");
     }
 
     public VariableType getVariableType() {
-        return VariableType.valueOf(annotation.value("variableType").asEnum());
+        return VariableType.valueOf(annotation.getEnumValue("variableType"));
     }
 }

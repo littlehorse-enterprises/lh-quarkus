@@ -15,6 +15,6 @@ public final class LHStructDefDescriptor {
     }
 
     public String getDescription() {
-        return annotation.getValue("description");
+        return annotation.getStringValue("description");
     }
 }

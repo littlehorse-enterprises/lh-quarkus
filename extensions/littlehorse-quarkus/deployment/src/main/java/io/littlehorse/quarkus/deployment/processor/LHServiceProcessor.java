@@ -141,7 +141,8 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
                     Class<?> beanClass = loadClass(beanClassName);
-                    LHTypeAdapterDescriptor descriptor = new LHTypeAdapterDescriptor(annotated);
+                    LHTypeAdapterDescriptor descriptor =
+                            new LHTypeAdapterDescriptor(new OptionalAnnotation(annotated));
                     Class<?> adaptedType = loadClass(descriptor.getAdaptedTypeName());
                     return new LHTypeAdapterBuildItem(beanClass, adaptedType, descriptor);
                 })
