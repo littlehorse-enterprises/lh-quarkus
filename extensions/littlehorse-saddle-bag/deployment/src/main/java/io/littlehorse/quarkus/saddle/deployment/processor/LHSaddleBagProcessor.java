@@ -9,6 +9,8 @@ import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.config.ConfigEvaluator.ConfigExpression;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHTypeAdapterBuildItem;
+import io.littlehorse.quarkus.runtime.recordable.LHTypeAdapterRecordable;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.MetadataConfig;
@@ -16,6 +18,7 @@ import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleCon
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
+import io.littlehorse.sdk.common.proto.VariableType;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructProperty;
 import io.littlehorse.sdk.wfsdk.internal.taskdefutil.LHTaskParameter;
@@ -57,6 +60,7 @@ public class LHSaddleBagProcessor {
             ApplicationInfoBuildItem applicationInfo,
             List<LHTaskMethodBuildItem> taskMethods,
             List<LHStructDefBuildItem> structDefs,
+            List<LHTypeAdapterBuildItem> typeAdapters,
             OutputTargetBuildItem outputTarget,
             BuildProducer<GeneratedResourceBuildItem> resources)
             throws IntrospectionException {
@@ -65,8 +69,15 @@ public class LHSaddleBagProcessor {
 
         ConfigEvaluator configEvaluator = new ConfigEvaluator(ConfigProvider.getConfig());
 
+        Map<Class<?>, VariableType> typeAdapterMap = buildTypeAdapterMap(typeAdapters);
+
         Map<String, Object> saddlebag = buildSaddlebag(
-                bagConfig, applicationInfo.getVersion(), configEvaluator, taskMethods, structDefs);
+                bagConfig,
+                applicationInfo.getVersion(),
+                configEvaluator,
+                taskMethods,
+                structDefs,
+                typeAdapterMap);
 
         generateJarResource(saddlebag, resources);
 
@@ -99,12 +110,27 @@ public class LHSaddleBagProcessor {
         }
     }
 
+    private Map<Class<?>, VariableType> buildTypeAdapterMap(
+            List<LHTypeAdapterBuildItem> typeAdapters) {
+        if (typeAdapters == null || typeAdapters.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<Class<?>, VariableType> map = new LinkedHashMap<>();
+        for (LHTypeAdapterBuildItem item : typeAdapters) {
+            LHTypeAdapterRecordable recordable = item.toRecordable();
+            map.put(recordable.getAdaptedType(), recordable.getVariableType());
+        }
+        return map;
+    }
+
     private Map<String, Object> buildSaddlebag(
             BagConfig bagConfig,
             String version,
             ConfigEvaluator configEvaluator,
             List<LHTaskMethodBuildItem> taskMethods,
-            List<LHStructDefBuildItem> structDefs)
+            List<LHStructDefBuildItem> structDefs,
+            Map<Class<?>, VariableType> typeAdapterMap)
             throws IntrospectionException {
 
         Map<String, Object> root = new LinkedHashMap<>();
@@ -113,7 +139,7 @@ public class LHSaddleBagProcessor {
         root.put("description", bagConfig.description());
         root.put("version", version);
         root.put("metadata", buildMetadata(bagConfig.metadata()));
-        root.put("tasks", buildSaddleBagTasks(configEvaluator, taskMethods));
+        root.put("tasks", buildSaddleBagTasks(configEvaluator, taskMethods, typeAdapterMap));
         root.put("structs", buildSaddleBagStructs(configEvaluator, structDefs));
         return root;
     }
@@ -129,13 +155,15 @@ public class LHSaddleBagProcessor {
     }
 
     private Map<String, Object> buildSaddleBagTasks(
-            ConfigEvaluator configEvaluator, List<LHTaskMethodBuildItem> taskMethods) {
+            ConfigEvaluator configEvaluator,
+            List<LHTaskMethodBuildItem> taskMethods,
+            Map<Class<?>, VariableType> typeAdapterMap) {
         Map<String, Object> tasks = new LinkedHashMap<>();
 
         for (LHTaskMethodBuildItem item : taskMethods) {
             ResolvedConfig resolved =
                     resolveConfigExpression(configEvaluator, item.toRecordable().getName());
-            Map<String, Object> task = buildSaddleBagTask(item);
+            Map<String, Object> task = buildSaddleBagTask(item, typeAdapterMap);
             task.put("configName", resolved.configKey());
             task.put("description", item.toRecordable().getDescription());
 
@@ -168,7 +196,8 @@ public class LHSaddleBagProcessor {
         return configs;
     }
 
-    private Map<String, Object> buildSaddleBagTask(LHTaskMethodBuildItem taskMethod) {
+    private Map<String, Object> buildSaddleBagTask(
+            LHTaskMethodBuildItem taskMethod, Map<Class<?>, VariableType> typeAdapterMap) {
 
         Map<String, Object> task = new LinkedHashMap<>();
 
@@ -180,24 +209,32 @@ public class LHSaddleBagProcessor {
             LHTaskMethod annotation = method.getAnnotation(LHTaskMethod.class);
             if (annotation != null && annotation.value().equals(name)) {
 
-                LHTaskMethodHandle handle = LHTaskMethodHandle.from(name, "", method);
-
-                LHTaskSignature signature =
-                        new LHTaskSignature(handle, LHTypeAdapterRegistry.empty(), Map.of());
-
-                if (signature.getReturnType().hasReturnType()) {
+                Class<?> returnType = method.getReturnType();
+                if (typeAdapterMap.containsKey(returnType)) {
                     task.put(
                             "output",
-                            Map.of(
-                                    "type",
-                                    signature
-                                            .getReturnType()
-                                            .getReturnType()
-                                            .getPrimitiveType()
-                                            .name()));
+                            Map.of("type", typeAdapterMap.get(returnType).name()));
+                } else {
+                    LHTaskMethodHandle handle = LHTaskMethodHandle.from(name, "", method);
+                    LHTaskSignature signature =
+                            new LHTaskSignature(handle, LHTypeAdapterRegistry.empty(), Map.of());
+
+                    if (signature.getReturnType().hasReturnType()) {
+                        task.put(
+                                "output",
+                                Map.of(
+                                        "type",
+                                        signature
+                                                .getReturnType()
+                                                .getReturnType()
+                                                .getPrimitiveType()
+                                                .name()));
+                    }
                 }
-                if (!signature.getVariableDefs().isEmpty()) {
-                    task.put("inputs", handleTaskParameters(signature.getVariableDefs()));
+
+                List<Map<String, Object>> inputs = handleTaskParameters(method, typeAdapterMap);
+                if (!inputs.isEmpty()) {
+                    task.put("inputs", inputs);
                 }
             }
         }
@@ -274,21 +311,36 @@ public class LHSaddleBagProcessor {
     }
 
     private List<Map<String, Object>> handleTaskParameters(
-            List<LHTaskParameter> lhTaskParameterList) {
+            Method method, Map<Class<?>, VariableType> typeAdapterMap) {
 
         List<Map<String, Object>> parameters = new ArrayList<>();
 
-        for (LHTaskParameter lhTaskParameter : lhTaskParameterList) {
+        LHTaskMethodHandle handle = LHTaskMethodHandle.from(
+                method.getAnnotation(LHTaskMethod.class).value(), "", method);
+        LHTaskSignature signature =
+                new LHTaskSignature(handle, LHTypeAdapterRegistry.empty(), Map.of());
+
+        java.lang.reflect.Parameter[] methodParams = method.getParameters();
+        List<LHTaskParameter> taskParams = signature.getVariableDefs();
+
+        for (int i = 0; i < taskParams.size(); i++) {
+            LHTaskParameter lhTaskParameter = taskParams.get(i);
+            Class<?> paramType = methodParams[i].getType();
             Map<String, Object> param = new LinkedHashMap<>();
 
             param.put("name", lhTaskParameter.getVariableName());
-            param.put(
-                    "type",
-                    lhTaskParameter
-                            .getVariableDef()
-                            .getTypeDef()
-                            .getPrimitiveType()
-                            .name());
+
+            if (typeAdapterMap.containsKey(paramType)) {
+                param.put("type", typeAdapterMap.get(paramType).name());
+            } else {
+                param.put(
+                        "type",
+                        lhTaskParameter
+                                .getVariableDef()
+                                .getTypeDef()
+                                .getPrimitiveType()
+                                .name());
+            }
 
             parameters.add(param);
         }
