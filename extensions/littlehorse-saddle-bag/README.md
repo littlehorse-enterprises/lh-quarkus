@@ -61,6 +61,7 @@ Add the required configuration to your `application.properties`:
 # Bag metadata
 quarkus.littlehorse.saddle.bag.name=my-service
 quarkus.littlehorse.saddle.bag.title=My Service
+quarkus.littlehorse.saddle.bag.author=Example Team
 quarkus.littlehorse.saddle.bag.description=A task worker service for order processing
 quarkus.littlehorse.saddle.bag.metadata.tags=orders,processing
 quarkus.littlehorse.saddle.bag.metadata.licence=Apache-2.0
@@ -184,6 +185,7 @@ Example output (`saddle-bag.yaml`):
 ```yaml
 name: "my-service"
 title: "My Service"
+author: "Example Team"
 description: "A task worker service for order processing"
 version: "1.0.0"
 metadata:
@@ -231,6 +233,12 @@ The name of the saddle bag (identifies the service/package).
 
 ``quarkus.littlehorse.saddle.bag.title``
 A human-readable title for the saddle bag.
+
+* Type: string
+* Importance: high
+
+``quarkus.littlehorse.saddle.bag.author``
+The author or owning team for the saddle bag.
 
 * Type: string
 * Importance: high

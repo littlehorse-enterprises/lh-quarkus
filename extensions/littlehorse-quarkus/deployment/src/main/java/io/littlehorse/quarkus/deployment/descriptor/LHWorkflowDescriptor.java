@@ -15,27 +15,27 @@ public final class LHWorkflowDescriptor {
     }
 
     public String getParent() {
-        return annotation.getValue("parent");
+        return annotation.getStringValue("parent");
     }
 
     public String getDefaultTaskTimeout() {
-        return annotation.getValue("defaultTaskTimeout");
+        return annotation.getStringValue("defaultTaskTimeout");
     }
 
     public String getDefaultTaskRetries() {
-        return annotation.getValue("defaultTaskRetries");
+        return annotation.getStringValue("defaultTaskRetries");
     }
 
     public String getUpdateType() {
-        return annotation.getValue("updateType");
+        return annotation.getStringValue("updateType");
     }
 
     public String getRetention() {
-        return annotation.getValue("retention");
+        return annotation.getStringValue("retention");
     }
 
     public String getDefaultThreadRetention() {
-        return annotation.getValue("defaultThreadRetention");
+        return annotation.getStringValue("defaultThreadRetention");
     }
 
     public LHExponentialBackoffRetryDescriptor getDefaultTaskExponentialBackoffRetry() {

@@ -22,6 +22,8 @@ public interface LHSaddleBagBuildtimeConfig {
 
             String title();
 
+            String author();
+
             String description();
 
             MetadataConfig metadata();

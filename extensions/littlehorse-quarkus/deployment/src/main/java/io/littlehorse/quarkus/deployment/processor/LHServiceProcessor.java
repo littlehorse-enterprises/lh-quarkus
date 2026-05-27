@@ -1,14 +1,18 @@
 package io.littlehorse.quarkus.deployment.processor;
 
+import io.littlehorse.quarkus.adapter.LHTypeAdapter;
 import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHTaskMethodDescriptor;
+import io.littlehorse.quarkus.deployment.descriptor.LHTypeAdapterDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHUserTaskFormDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHWorkflowDescriptor;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHTypeAdapterBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHUserTaskFormBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
+import io.littlehorse.quarkus.deployment.util.ClassLoadingUtils;
 import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
@@ -35,14 +39,6 @@ import java.util.List;
 
 class LHServiceProcessor {
 
-    private static Class<?> loadClass(String className) {
-        try {
-            return Thread.currentThread().getContextClassLoader().loadClass(className);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @BuildStep
     void scanLHTaskMethod(
             BuildProducer<LHTaskMethodBuildItem> producer,
@@ -52,7 +48,7 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     MethodInfo methodInfo = annotated.target().asMethod();
                     String beanClassName = methodInfo.declaringClass().toString();
-                    Class<?> beanClass = loadClass(beanClassName);
+                    Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
                     return new LHTaskMethodBuildItem(
                             beanClass,
                             new LHTaskMethodDescriptor(new OptionalAnnotation(annotated)));
@@ -72,7 +68,7 @@ class LHServiceProcessor {
                         .contains(DotName.createSimple(LHWorkflowDefinition.class)))
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
-                    Class<?> beanClass = loadClass(beanClassName);
+                    Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
                     return new LHWorkflowBuildItem(
                             beanClass,
                             null,
@@ -89,7 +85,7 @@ class LHServiceProcessor {
                 .map(annotated -> {
                     MethodInfo methodInfo = annotated.target().asMethod();
                     String beanClassName = methodInfo.declaringClass().toString();
-                    Class<?> beanClass = loadClass(beanClassName);
+                    Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
                     String beanMethodName = methodInfo.name();
                     return new LHWorkflowBuildItem(
                             beanClass,
@@ -106,7 +102,7 @@ class LHServiceProcessor {
         indexContainer.getIndex().getAnnotations(LHUserTaskForm.class).stream()
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
-                    Class<?> beanClass = loadClass(beanClassName);
+                    Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
                     return new LHUserTaskFormBuildItem(
                             beanClass,
                             new LHUserTaskFormDescriptor(new OptionalAnnotation(annotated)));
@@ -121,10 +117,26 @@ class LHServiceProcessor {
         indexContainer.getIndex().getAnnotations(LHStructDef.class).stream()
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
-                    Class<?> beanClass = loadClass(beanClassName);
+                    Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
                     return new LHStructDefBuildItem(
                             beanClass,
                             new LHStructDefDescriptor(new OptionalAnnotation(annotated)));
+                })
+                .forEach(producer::produce);
+    }
+
+    @BuildStep
+    void scanLHTypeAdapter(
+            BuildProducer<LHTypeAdapterBuildItem> producer,
+            BeanArchiveIndexBuildItem indexContainer) {
+        indexContainer.getIndex().getAnnotations(LHTypeAdapter.class).stream()
+                .filter(annotated -> annotated.target().kind().equals(Kind.CLASS))
+                .map(annotated -> {
+                    String beanClassName = annotated.target().asClass().toString();
+                    Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
+                    return new LHTypeAdapterBuildItem(
+                            beanClass,
+                            new LHTypeAdapterDescriptor(new OptionalAnnotation(annotated)));
                 })
                 .forEach(producer::produce);
     }

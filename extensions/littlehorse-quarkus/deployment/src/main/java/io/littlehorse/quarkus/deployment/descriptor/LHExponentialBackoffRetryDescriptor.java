@@ -11,14 +11,14 @@ public final class LHExponentialBackoffRetryDescriptor {
     }
 
     public String getBaseIntervalMs() {
-        return annotation.getValue("baseIntervalMs");
+        return annotation.getStringValue("baseIntervalMs");
     }
 
     public String getMultiplier() {
-        return annotation.getValue("multiplier");
+        return annotation.getStringValue("multiplier");
     }
 
     public String getMaxDelayMs() {
-        return annotation.getValue("maxDelayMs");
+        return annotation.getStringValue("maxDelayMs");
     }
 }
