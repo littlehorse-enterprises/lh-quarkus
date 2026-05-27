@@ -136,6 +136,7 @@ public class LHSaddleBagProcessor {
         Map<String, Object> root = new LinkedHashMap<>();
         root.put("name", bagConfig.name());
         root.put("title", bagConfig.title());
+        root.put("author", bagConfig.author());
         root.put("description", bagConfig.description());
         root.put("version", version);
         root.put("metadata", buildMetadata(bagConfig.metadata()));
