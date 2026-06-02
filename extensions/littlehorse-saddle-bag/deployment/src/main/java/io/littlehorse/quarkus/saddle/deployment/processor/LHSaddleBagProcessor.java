@@ -2,6 +2,7 @@ package io.littlehorse.quarkus.saddle.deployment.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
@@ -51,6 +52,7 @@ public class LHSaddleBagProcessor {
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
     private static final ObjectMapper YAML_MAPPER = new ObjectMapper(
             new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+    private static final JavaPropsMapper PROPS_MAPPER = new JavaPropsMapper();
 
     private static final String JAR_RESOURCE_PATH = "META-INF/saddle-bag/saddle-bag.json";
 
@@ -350,7 +352,12 @@ public class LHSaddleBagProcessor {
 
     private byte[] serialize(Map<String, Object> data, Format format) {
         try {
-            ObjectMapper mapper = format == Format.JSON ? JSON_MAPPER : YAML_MAPPER;
+            ObjectMapper mapper =
+                    switch (format) {
+                        case JSON -> JSON_MAPPER;
+                        case YAML -> YAML_MAPPER;
+                        case PROPERTIES -> PROPS_MAPPER;
+                    };
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(data);
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(new IOException("Failed to serialize saddlebag", e));
