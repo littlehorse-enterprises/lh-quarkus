@@ -45,7 +45,8 @@ public interface LHSaddleBagBuildtimeConfig {
 
                 enum Format {
                     JSON,
-                    YAML
+                    YAML,
+                    PROPERTIES
                 }
             }
 
