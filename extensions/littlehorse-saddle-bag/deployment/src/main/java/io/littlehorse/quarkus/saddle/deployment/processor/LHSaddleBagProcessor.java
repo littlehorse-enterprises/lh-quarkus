@@ -167,7 +167,7 @@ public class LHSaddleBagProcessor {
             ResolvedConfig resolved =
                     resolveConfigExpression(configEvaluator, item.toRecordable().getName());
             Map<String, Object> task = buildSaddleBagTask(item, typeAdapterMap);
-            task.put("configName", resolved.configKey());
+            task.put("config-name", resolved.configKey());
             task.put("description", item.toRecordable().getDescription());
 
             List<Map<String, Object>> requiredConfigs =
@@ -191,7 +191,7 @@ public class LHSaddleBagProcessor {
             config.put("description", annotation.description());
             config.put("sensitive", annotation.sensitive());
             if (!annotation.defaultValue().isEmpty()) {
-                config.put("defaultValue", annotation.defaultValue());
+                config.put("default-value", annotation.defaultValue());
             }
             configs.add(config);
         }
@@ -256,7 +256,7 @@ public class LHSaddleBagProcessor {
             Map<String, Object> internalStruct = new LinkedHashMap<>();
 
             structs.put(resolved.name(), internalStruct);
-            internalStruct.put("configName", resolved.configKey());
+            internalStruct.put("config-name", resolved.configKey());
             internalStruct.put("description", item.toRecordable().getDescription());
             internalStruct.put("properties", buildStruct(item));
         }
