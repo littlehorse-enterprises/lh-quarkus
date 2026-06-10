@@ -1,6 +1,7 @@
 package io.littlehorse.quarkus.saddle.deployment.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -350,7 +351,7 @@ public class LHSaddleBagProcessor {
         return parameters;
     }
 
-    private byte[] serialize(Map<String, Object> data, Format format) {
+    byte[] serialize(Map<String, Object> data, Format format) {
         try {
             ObjectMapper mapper =
                     switch (format) {
@@ -361,6 +362,20 @@ public class LHSaddleBagProcessor {
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(data);
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(new IOException("Failed to serialize saddlebag", e));
+        }
+    }
+
+    Map<String, Object> deserialize(byte[] content, Format format) {
+        try {
+            ObjectMapper mapper =
+                    switch (format) {
+                        case JSON -> JSON_MAPPER;
+                        case YAML -> YAML_MAPPER;
+                        case PROPERTIES -> PROPS_MAPPER;
+                    };
+            return mapper.readValue(content, new TypeReference<LinkedHashMap<String, Object>>() {});
+        } catch (IOException e) {
+            throw new UncheckedIOException(new IOException("Failed to deserialize saddlebag", e));
         }
     }
 }
