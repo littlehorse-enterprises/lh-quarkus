@@ -32,6 +32,7 @@ class LHSaddleBagProcessorTest {
 
     private Map<String, Object> roundTrip(Map<String, Object> saddlebag, Format format) {
         byte[] serialized = processor.serialize(saddlebag, format);
+        System.out.println("Serialized " + format + ":\n" + new String(serialized) + "\n");
         return processor.deserialize(serialized, format);
     }
 
