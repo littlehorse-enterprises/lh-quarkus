@@ -1,5 +1,35 @@
 package io.littlehorse.quarkus.saddle.deployment.processor;
 
+/*
+ * Standalone helper to read the generated properties file and print it as JSON:
+ *
+ * package io.littlehorse.quarkus.saddle.deployment;
+ *
+ * import com.fasterxml.jackson.databind.ObjectMapper;
+ * import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+ *
+ * import java.nio.file.Files;
+ * import java.nio.file.Path;
+ * import java.util.Map;
+ *
+ * public class PropertiesToJsonConverter {
+ *
+ *     public static void main(String[] args) throws Exception {
+ *         Path propertiesFile =
+ *                 Path.of("examples/saddle-bag/build/saddle-bag/saddle-bag.properties");
+ *
+ *         JavaPropsMapper propsMapper = new JavaPropsMapper();
+ *         String propertiesContent = Files.readString(propertiesFile);
+ *         Map<?, ?> data = propsMapper.readValue(propertiesContent, Map.class);
+ *
+ *         ObjectMapper jsonMapper = new ObjectMapper();
+ *         String json = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+ *
+ *         System.out.println(json);
+ *     }
+ * }
+ */
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
