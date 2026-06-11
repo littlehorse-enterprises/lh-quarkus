@@ -1,10 +1,5 @@
 package io.littlehorse.quarkus.reactive;
 
-import java.time.Duration;
-import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-
 import io.grpc.CallCredentials;
 import io.grpc.CallOptions;
 import io.grpc.ClientInterceptor;
@@ -14,7 +9,13 @@ import io.littlehorse.sdk.common.auth.TenantMetadataProvider;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseFutureStub;
 import io.quarkus.arc.DefaultBean;
 import io.quarkus.arc.Unremovable;
+
 import jakarta.enterprise.context.ApplicationScoped;
+
+import java.time.Duration;
+import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Reactive wrapper around {@link LittleHorseFutureStub} that exposes every gRPC
@@ -55,8 +56,8 @@ public class LittleHorseReactiveStub extends AbstractLittleHorseReactiveStub {
         CallCredentials newTenantCredentials = new TenantMetadataProvider(tenant);
         CallCredentials credentials = Optional.ofNullable(futureStub.getCallOptions())
                 .map(CallOptions::getCredentials)
-                .map(previousCredentials -> (CallCredentials) new CompositeCallCredentials(previousCredentials,
-                        newTenantCredentials))
+                .map(previousCredentials -> (CallCredentials)
+                        new CompositeCallCredentials(previousCredentials, newTenantCredentials))
                 .orElse(newTenantCredentials);
         return withCallCredentials(credentials);
     }
