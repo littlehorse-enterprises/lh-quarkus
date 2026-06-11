@@ -57,6 +57,12 @@ allprojects {
             palantirJavaFormat().style("AOSP")
         }
     }
+    configurations.all {
+        // This is to ensure we always get the latest version of the LH client,
+        // since it is published as a snapshot and we want to avoid caching issues during development.
+        // This should not have any effect on release builds, since they will be using a fixed version.
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
 }
 
 configure(extensionProjects.split(',').collectMany { ["littlehorse-$it", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
