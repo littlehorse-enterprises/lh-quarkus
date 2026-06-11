@@ -76,6 +76,25 @@ services:
       retries: 5
       start_period: 10s
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6
+    restart: on-failure
+    ports:
+      - "8888:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: 'true'
+    command: start-dev --import-realm
+    volumes:
+      - ./local-dev/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/live HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; grep 'HTTP/1.1 200 OK' <&3"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
 volumes:
   kafka_data:
   lh_data:

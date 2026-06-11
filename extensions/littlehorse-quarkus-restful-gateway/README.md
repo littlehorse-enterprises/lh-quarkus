@@ -12,6 +12,13 @@ A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
 * [Configurations](#configurations)
   * [Passing Configurations](#passing-configurations)
   * [LittleHorse Client Configurations](#littlehorse-client-configurations)
+  * [OAuth 2 Configuration](#oauth-2-configuration)
+    * [None Mode (Default)](#none-mode-default)
+    * [Token Forward Mode](#token-forward-mode)
+    * [RBAC Mode](#rbac-mode)
+    * [OAuth 2 Gateway Configurations](#oauth-2-gateway-configurations)
+    * [OIDC Configurations (RBAC Mode)](#oidc-configurations-rbac-mode)
+    * [Role Permissions](#role-permissions)
 * [Endpoints](#endpoints)
   * [ExternalEvent](#externalevent)
     * [Send Event](#send-event)
@@ -230,6 +237,130 @@ Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Autho
 * Type: password
 * Default: null
 * Importance: low
+
+## OAuth 2 Configuration
+
+The gateway supports three OAuth 2 modes for handling authentication and authorization.
+
+### None Mode (Default)
+
+OAuth is fully disabled. No token is forwarded to the LH gRPC server and no security annotations are
+enforced. Use this mode when the LH server requires no authentication (e.g., local development).
+
+```properties
+quarkus.littlehorse.gateway.oauth2.mode=NONE
+quarkus.oidc.enabled=false
+quarkus.http.auth.proactive=false
+quarkus.http.auth.permission."permit-all".paths=/*
+quarkus.http.auth.permission."permit-all".policy=permit
+```
+
+### Token Forward Mode
+
+In this mode, the HTTP request carries the Bearer token in the `Authorization` header and it is passed directly
+to the LH gRPC server. This mode depends on LH for validating and authorizing the token.
+
+```properties
+quarkus.littlehorse.gateway.oauth2.mode=TOKEN_FORWARD
+quarkus.oidc.enabled=false
+quarkus.http.auth.proactive=false
+quarkus.http.auth.permission."permit-all".paths=/*
+quarkus.http.auth.permission."permit-all".policy=permit
+```
+
+### RBAC Mode
+
+In this mode, the HTTP request carries the Bearer token in the `Authorization` header and it is validated at
+the gateway layer. The token is **not** passed to the LH gRPC server. This mode depends on the gateway
+configurations and the roles configured on the IdP server.
+
+```properties
+quarkus.littlehorse.gateway.oauth2.mode=RBAC
+quarkus.oidc.enabled=true
+quarkus.oidc.auth-server-url=http://localhost:8888/realms/lh-gateway
+quarkus.oidc.client-id=lh-gateway
+quarkus.oidc.credentials.secret=lh-gateway-secret
+quarkus.http.auth.proactive=true
+quarkus.littlehorse.gateway.oauth2.rbac.admin-role=gateway-admin
+quarkus.littlehorse.gateway.oauth2.rbac.reader-role=gateway-reader
+```
+
+### OAuth 2 Gateway Configurations
+
+``quarkus.littlehorse.gateway.oauth2.mode``
+The OAuth 2 mode to use.
+
+* Type: string
+* Default: NONE
+* Valid Values: [NONE, TOKEN_FORWARD, RBAC]
+* Importance: high
+
+``quarkus.littlehorse.gateway.oauth2.rbac.admin-role``
+The role name that grants full access (read + write) to the gateway endpoints. Only used when mode is RBAC.
+
+* Type: string
+* Default: gateway-admin
+* Importance: high
+
+``quarkus.littlehorse.gateway.oauth2.rbac.reader-role``
+The role name that grants read-only access (GET endpoints) to the gateway endpoints. Only used when mode is RBAC.
+
+* Type: string
+* Default: gateway-reader
+* Importance: high
+
+### OIDC Configurations (RBAC Mode)
+
+When using RBAC mode, you need to configure Quarkus OIDC to validate tokens against your Identity Provider.
+
+``quarkus.oidc.enabled``
+Enable or disable OIDC token validation.
+
+* Type: boolean
+* Default: false
+* Importance: high
+
+``quarkus.oidc.auth-server-url``
+The base URL of the OIDC server (e.g., Keycloak realm URL).
+
+* Type: string
+* Importance: high
+
+``quarkus.oidc.client-id``
+The OIDC client ID.
+
+* Type: string
+* Importance: high
+
+``quarkus.oidc.credentials.secret``
+The OIDC client secret.
+
+* Type: password
+* Importance: high
+
+More about Quarkus OIDC configurations at: [Quarkus OIDC Configuration](https://quarkus.io/guides/security-oidc-configuration-properties-reference).
+
+### Role Permissions
+
+When RBAC mode is enabled, the gateway enforces role-based access on all endpoints:
+
+| Endpoint                                              | Method | Required Role      |
+|-------------------------------------------------------|--------|--------------------|
+| `GET /gateway/version`                                | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-specs`              | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-specs/{name}`       | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-specs/{name}/versions/{version}` | GET | admin or reader |
+| `GET /gateway/tenants/{tenant}/task-defs`             | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/task-defs/{name}`      | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/task-defs/{name}/workers` | GET | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-runs/{id}`          | GET    | admin or reader    |
+| `GET /gateway/tenants/{tenant}/wf-runs/{id}/variables`| GET    | admin or reader    |
+| `POST /gateway/tenants/{tenant}/wf-runs`              | POST   | admin              |
+| `POST /gateway/tenants/{tenant}/external-events`      | POST   | admin              |
+
+The role names are configurable via `quarkus.littlehorse.gateway.oauth2.rbac.admin-role` and
+`quarkus.littlehorse.gateway.oauth2.rbac.reader-role`. Role checks are enforced by a JAX-RS
+request filter that is only active in RBAC mode, allowing you to match the role names configured in your IdP.
 
 # Endpoints
 
