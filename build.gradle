@@ -128,5 +128,7 @@ tasks.register("dockerComposeUp", Exec) {
 
 tasks.register("dockerComposeDown", Exec) {
     description = "Stops docker-compose"
-    commandLine "docker", "compose", "down"
+    commandLine "docker", "compose", "down", "-v"
+    environment "LH_VERSION", version
+    environment "KAFKA_VERSION", kafkaVersion
 }

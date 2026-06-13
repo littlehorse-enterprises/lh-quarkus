@@ -131,7 +131,8 @@ public class LHRecorder {
 
         if (!registerUserTask) return;
 
-        UserTaskSchema schema = new UserTaskSchema(recordable.getBeanClass(), expandedName);
+        UserTaskSchema schema =
+                new UserTaskSchema(getBean(recordable.getBeanClass()), expandedName);
         PutUserTaskDefRequest request = schema.compile();
 
         logEvent("Registering", LHUserTaskForm.class, expandedName);
