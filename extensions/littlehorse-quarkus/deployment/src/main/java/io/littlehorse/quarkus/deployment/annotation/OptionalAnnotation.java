@@ -20,7 +20,7 @@ public final class OptionalAnnotation {
                 .orElse(null));
     }
 
-    public String getValue(String name) {
+    public String getStringValue(String name) {
         return Optional.ofNullable(annotationInstance)
                 .map(annotationInstance -> annotationInstance.value(name))
                 .map(AnnotationValue::asString)
@@ -28,7 +28,22 @@ public final class OptionalAnnotation {
     }
 
     public String getValue() {
-        return this.getValue("value");
+        return this.getStringValue("value");
+    }
+
+    public String getClassValue(String name) {
+        return Optional.ofNullable(annotationInstance)
+                .map(annotationInstance -> annotationInstance.value(name))
+                .map(AnnotationValue::asClass)
+                .map(Object::toString)
+                .orElse(null);
+    }
+
+    public String getEnumValue(String name) {
+        return Optional.ofNullable(annotationInstance)
+                .map(annotationInstance -> annotationInstance.value(name))
+                .map(AnnotationValue::asEnum)
+                .orElse(null);
     }
 
     public boolean isPreset() {

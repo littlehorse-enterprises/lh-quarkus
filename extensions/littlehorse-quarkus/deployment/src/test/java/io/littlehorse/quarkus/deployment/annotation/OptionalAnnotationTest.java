@@ -12,7 +12,7 @@ class OptionalAnnotationTest {
     void shouldReturnNullIfReceivesNull() {
         OptionalAnnotation annotationHelper = new OptionalAnnotation((AnnotationInstance) null);
 
-        String myValue = assertDoesNotThrow(() -> annotationHelper.getValue("myValue"));
+        String myValue = assertDoesNotThrow(() -> annotationHelper.getStringValue("myValue"));
 
         assertThat(myValue).isNull();
     }

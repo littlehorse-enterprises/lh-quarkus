@@ -15,6 +15,6 @@ public final class LHTaskMethodDescriptor {
     }
 
     public String getDescription() {
-        return annotation.getValue("description");
+        return annotation.getStringValue("description");
     }
 }

@@ -131,7 +131,8 @@ public class LHRecorder {
 
         if (!registerUserTask) return;
 
-        UserTaskSchema schema = new UserTaskSchema(recordable.getBeanClass(), expandedName);
+        UserTaskSchema schema =
+                new UserTaskSchema(getBean(recordable.getBeanClass()), expandedName);
         PutUserTaskDefRequest request = schema.compile();
 
         logEvent("Registering", LHUserTaskForm.class, expandedName);
@@ -158,12 +159,13 @@ public class LHRecorder {
 
         if (!registerStruct) return;
 
-        LHStructDefType structDefType = new LHStructDefType(recordable.getBeanClass());
+        LHConfig config = getBean(LHConfig.class);
+        LHStructDefType structDefType =
+                new LHStructDefType(recordable.getBeanClass(), config.getTypeAdapterRegistry());
         StructDefCompatibilityType compatibilityType = structConfig
                 .map(LHRuntimeConfig.StructConfig::compatibility)
                 .orElse(StructDefCompatibilityType.NO_SCHEMA_UPDATES);
-        PutStructDefRequest.Builder builder = PutStructDefRequest.newBuilder()
-                .setStructDef(structDefType.getInlineStructDef())
+        PutStructDefRequest.Builder builder = structDefType.toPutStructDefRequest().toBuilder()
                 .setName(expandedName)
                 .setAllowedUpdates(compatibilityType);
 

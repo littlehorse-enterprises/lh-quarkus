@@ -2,6 +2,7 @@ package io.littlehorse.quarkus.runtime.recordable;
 
 import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
+import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.AllowedUpdateType;
 import io.littlehorse.sdk.common.proto.ExponentialBackoffRetryPolicy;
 import io.littlehorse.sdk.common.proto.ThreadRetentionPolicy;
@@ -9,8 +10,6 @@ import io.littlehorse.sdk.common.proto.WorkflowRetentionPolicy;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.quarkus.runtime.annotations.RecordableConstructor;
-
-import jakarta.enterprise.inject.spi.CDI;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -95,21 +94,21 @@ public class LHWorkflowRecordable extends LHRecordable {
     }
 
     public Workflow toWorkflow() {
-        ConfigEvaluator configEvaluator =
-                CDI.current().select(ConfigEvaluator.class).get();
+        LHConfig config = getBean(LHConfig.class);
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(getName()).asString();
 
         Workflow workflow = Workflow.newWorkflow(expandedName, thread -> {
             if (getBeanMethodName() == null) {
-                LHWorkflowDefinition workflowDefinitionBean = (LHWorkflowDefinition)
-                        CDI.current().select(getBeanClass()).get();
+                LHWorkflowDefinition workflowDefinitionBean =
+                        (LHWorkflowDefinition) getBean(getBeanClass());
                 workflowDefinitionBean.define(thread);
                 return;
             }
 
             try {
                 Method method = getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
-                method.invoke(CDI.current().select(getBeanClass()).get(), thread);
+                method.invoke(getBean(getBeanClass()), thread);
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -177,6 +176,8 @@ public class LHWorkflowRecordable extends LHRecordable {
 
             workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
         }
+
+        workflow.compileWorkflow(config);
 
         return workflow;
     }

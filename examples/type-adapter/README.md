@@ -2,10 +2,10 @@
 
 This example shows you how to use type adapters.
 
-You have to add a `LHTypeAdapter` class with a `@Singleton` annotation.
+Annotate your type adapter class with `@LHTypeAdapter`, specifying the target `VariableType` and the adapted Java class.
 
 ```java
-@Singleton
+@LHTypeAdapter(variableType = VariableType.STR, adaptedType = UUID.class)
 public class UUIDTypeAdapter implements LHStringAdapter<UUID> {
 
     @Override

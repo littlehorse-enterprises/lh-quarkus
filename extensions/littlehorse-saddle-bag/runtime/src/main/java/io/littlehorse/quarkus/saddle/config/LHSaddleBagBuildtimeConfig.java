@@ -22,6 +22,8 @@ public interface LHSaddleBagBuildtimeConfig {
 
             String title();
 
+            String author();
+
             String description();
 
             MetadataConfig metadata();
@@ -43,7 +45,8 @@ public interface LHSaddleBagBuildtimeConfig {
 
                 enum Format {
                     JSON,
-                    YAML
+                    YAML,
+                    PROPERTIES
                 }
             }
 

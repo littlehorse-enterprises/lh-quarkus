@@ -3,7 +3,7 @@
 The standard extension for packaging [LittleHorse](https://littlehorse.io/) task workers as distributable Docker images with Quarkus.
 
 The Saddle Bag extension scans your `@LHTask` classes and `@LHStructDef` structs at build time and produces a
-manifest (JSON/YAML) describing all tasks, their inputs/outputs, struct definitions, and required configurations.
+manifest (JSON/YAML/PROPERTIES) describing all tasks, their inputs/outputs, struct definitions, and required configurations.
 It also establishes the standard structure for building saddle bag Docker images — self-contained, ready-to-deploy
 task worker containers that include the manifest alongside the application.
 
@@ -19,7 +19,6 @@ what a task worker image provides.
 * [Usage](#usage)
   * [Basic Setup](#basic-setup)
   * [Declaring Required Configurations](#declaring-required-configurations)
-* [Docker Image](#docker-image)
 * [Generated Output](#generated-output)
 * [Configurations](#configurations)
   * [Bag Configurations](#bag-configurations)
@@ -61,6 +60,7 @@ Add the required configuration to your `application.properties`:
 # Bag metadata
 quarkus.littlehorse.saddle.bag.name=my-service
 quarkus.littlehorse.saddle.bag.title=My Service
+quarkus.littlehorse.saddle.bag.author=Example Team
 quarkus.littlehorse.saddle.bag.description=A task worker service for order processing
 quarkus.littlehorse.saddle.bag.metadata.tags=orders,processing
 quarkus.littlehorse.saddle.bag.metadata.licence=Apache-2.0
@@ -124,54 +124,6 @@ public class EmailNotificationTask {
 
 The declared configurations appear in the generated manifest under the `configs` field for each task.
 
-# Docker Image
-
-The Saddle Bag extension is the standard for building LittleHorse task worker Docker images with Quarkus.
-A saddle bag image is a self-contained container that includes the task worker application and its manifest,
-making it ready to deploy in any environment that runs LittleHorse.
-
-To build a saddle bag Docker image, add the Quarkus container image extension to your project:
-
-```groovy
-implementation "io.quarkus:quarkus-container-image-docker"
-```
-
-Then configure the image in your `application.properties`:
-
-```properties
-quarkus.container-image.build=true
-quarkus.container-image.group=my-org
-quarkus.container-image.name=my-saddle-bag
-quarkus.container-image.tag=1.0.0
-```
-
-Build the image:
-
-```shell
-./gradlew build -Dquarkus.container-image.build=true
-```
-
-The resulting Docker image contains:
-
-- The Quarkus application with all task workers
-- The saddle bag manifest at `META-INF/saddle-bag/saddle-bag.json`
-- All required dependencies
-
-This standard ensures that any saddle bag image is:
-
-1. **Self-describing** — the embedded manifest documents what tasks, structs, and configurations the image provides
-2. **Ready to deploy** — consumers only need to provide the required configurations (declared via `@LHTaskConfig`)
-3. **Portable** — works with any container orchestrator (Kubernetes, Docker Compose, ECS, etc.)
-
-For native images:
-
-```shell
-./gradlew build \
-  -Dquarkus.native.enabled=true \
-  -Dquarkus.package.jar.enabled=false \
-  -Dquarkus.container-image.build=true
-```
-
 # Generated Output
 
 The extension generates:
@@ -184,6 +136,7 @@ Example output (`saddle-bag.yaml`):
 ```yaml
 name: "my-service"
 title: "My Service"
+author: "Example Team"
 description: "A task worker service for order processing"
 version: "1.0.0"
 metadata:
@@ -231,6 +184,12 @@ The name of the saddle bag (identifies the service/package).
 
 ``quarkus.littlehorse.saddle.bag.title``
 A human-readable title for the saddle bag.
+
+* Type: string
+* Importance: high
+
+``quarkus.littlehorse.saddle.bag.author``
+The author or owning team for the saddle bag.
 
 * Type: string
 * Importance: high
@@ -301,5 +260,5 @@ Output format for the generated file.
 
 * Type: string
 * Default: `yaml`
-* Valid values: `json`, `yaml`
+* Valid values: `json`, `yaml`, `properties`
 * Importance: low

@@ -14,6 +14,7 @@ dependencies {
     implementation "io.quarkiverse.jgrapht:quarkus-jgrapht:${jgraphtVersion}"
     compileOnly "io.quarkus:quarkus-smallrye-health"
     api("io.littlehorse:littlehorse-client:${version}") {
+        changing = true
         exclude group: "io.grpc", module: "grpc-netty-shaded"
         exclude group: "io.grpc", module: "grpc-services"
     }
@@ -22,6 +23,27 @@ dependencies {
     testImplementation "io.rest-assured:rest-assured"
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
+}
+
+// Generates io.littlehorse.quarkus.reactive.LittleHorseReactiveStub at build time by
+// reflecting over LittleHorseFutureStub, exposing every gRPC call as a Mutiny Uni.
+// This replaces the previously hand-maintained class (and its main() generator).
+// The generator lives in buildSrc (GenerateReactiveStubTask) so more generators
+// can be added there in the future.
+def generateReactiveStub = tasks.register("generateReactiveStub", io.littlehorse.quarkus.gradle.GenerateReactiveStubTask) {
+    stubClasspath.from(configurations.compileClasspath)
+    outputDir.set(layout.buildDirectory.dir("generated/sources/reactiveStub/java"))
+}
+
+sourceSets.main.java.srcDir(generateReactiveStub.flatMap { it.outputDir })
+tasks.named("compileJava").configure { dependsOn generateReactiveStub }
+tasks.matching { it.name == "sourcesJar" }.configureEach { dependsOn generateReactiveStub }
+
+// The generated source is verified by the compiler; exclude it from Spotless.
+spotless {
+    java {
+        targetExclude "build/generated/**"
+    }
 }
 
 publishing {
