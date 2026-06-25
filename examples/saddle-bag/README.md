@@ -6,15 +6,20 @@ The Saddle Bag extension scans `@LHTask` classes at build time and produces a ma
 
 ```java
 @LHTask
-@LHTaskConfig(value = "notification.service.url", description = "Notification service base URL")
+@LHTaskConfig(
+        value = "notification.service.url",
+        description = "Notification service base URL",
+        type = LHTaskConfigType.STR)
 @LHTaskConfig(
         value = "notification.service.api-key",
         description = "API key for the notification service",
-        sensitive = true)
+        sensitive = true,
+        type = LHTaskConfigType.STR)
 @LHTaskConfig(
         value = "notification.service.timeout-ms",
         description = "Timeout in milliseconds for notification service requests",
-        defaultValue = "5000")
+        defaultValue = "5000",
+        type = LHTaskConfigType.INT)
 public class NotificationTask {
 
     public static final String SEND_NOTIFICATION = "${task.send-notification.name}";

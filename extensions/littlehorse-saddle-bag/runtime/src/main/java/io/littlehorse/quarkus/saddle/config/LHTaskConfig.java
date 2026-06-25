@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
  * <p>Example:
  * <pre>{@code
  * @LHTask
- * @LHTaskConfig(value = "smtp.host", description = "SMTP server hostname")
- * @LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true)
+ * @LHTaskConfig(value = "smtp.host", description = "SMTP server hostname", type = LHTaskConfigType.STR)
+ * @LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true, type = LHTaskConfigType.STR)
  * public class EmailTask {
  *     // ...
  * }
@@ -48,4 +48,19 @@ public @interface LHTaskConfig {
      * Default value for this configuration property. Empty string means no default (mandatory).
      */
     String defaultValue() default "";
+
+    /**
+     * Variable type of the config property. Used for validation.
+     */
+    LHTaskConfigType type();
+
+    /**
+     * Variable type of the config property. Required for validation.
+     */
+    enum LHTaskConfigType {
+        STR,
+        INT,
+        FLOAT,
+        BOOL
+    }
 }

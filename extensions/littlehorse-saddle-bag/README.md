@@ -101,9 +101,9 @@ of the saddle bag need to know which configurations to provide.
 
 ```java
 @LHTask
-@LHTaskConfig(value = "smtp.host", description = "SMTP server hostname")
-@LHTaskConfig(value = "smtp.port", description = "SMTP server port", defaultValue = "587")
-@LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true)
+@LHTaskConfig(value = "smtp.host", description = "SMTP server hostname", type = LHTaskConfigType.STR)
+@LHTaskConfig(value = "smtp.port", description = "SMTP server port", defaultValue = "587", type = LHTaskConfigType.INT)
+@LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true, type = LHTaskConfigType.STR)
 public class EmailNotificationTask {
 
     @LHTaskMethod(value = "${task.send-email.name}", description = "Sends an email notification")
@@ -117,10 +117,11 @@ public class EmailNotificationTask {
 
 | Attribute      | Type      | Default | Description                                                        |
 |----------------|-----------|---------|--------------------------------------------------------------------|
-| `value`        | `String`  | —       | The configuration property key (required)                          |
-| `description`  | `String`  | `""`    | Human-readable description of the property                         |
-| `sensitive`    | `boolean` | `false` | Whether the value is sensitive (passwords, API keys, etc.)         |
-| `defaultValue` | `String`  | `""`    | Default value; empty means the property is mandatory               |
+| `value`        | `String`     | —       | The configuration property key (required)                          |
+| `description`  | `String`     | `""`    | Human-readable description of the property                         |
+| `sensitive`    | `boolean`    | `false` | Whether the value is sensitive (passwords, API keys, etc.)         |
+| `defaultValue` | `String`     | `""`    | Default value; empty means the property is mandatory               |
+| `type`         | `LHTaskConfigType` | —       | Value type for validation: `STR`, `INT`, `FLOAT`, or `BOOL` (required) |
 
 The declared configurations appear in the generated manifest under the `configs` field for each task.
 
