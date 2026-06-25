@@ -33,6 +33,7 @@ package io.littlehorse.quarkus.saddle.deployment.processor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
+import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
 
 import org.junit.jupiter.api.Test;
 
@@ -101,12 +102,14 @@ class LHSaddleBagProcessorTest {
         urlConfig.put("key", "notification.service.url");
         urlConfig.put("description", "Notification service base URL");
         urlConfig.put("sensitive", false);
+        urlConfig.put("type", LHTaskConfigType.STR);
         configs.add(urlConfig);
         Map<String, Object> apiKeyConfig = new LinkedHashMap<>();
         apiKeyConfig.put("key", "notification.service.api-key");
         apiKeyConfig.put("description", "API key for the notification service");
         apiKeyConfig.put("sensitive", true);
         apiKeyConfig.put("default-value", "5000");
+        apiKeyConfig.put("type", LHTaskConfigType.STR);
         configs.add(apiKeyConfig);
         notification.put("configs", configs);
         tasks.put("send-notification", notification);

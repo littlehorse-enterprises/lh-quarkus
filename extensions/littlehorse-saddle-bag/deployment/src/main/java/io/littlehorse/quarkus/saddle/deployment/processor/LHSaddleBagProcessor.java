@@ -191,6 +191,7 @@ public class LHSaddleBagProcessor {
             config.put("key", annotation.value());
             config.put("description", annotation.description());
             config.put("sensitive", annotation.sensitive());
+            config.put("type", annotation.type().name());
             if (!annotation.defaultValue().isEmpty()) {
                 config.put("default-value", annotation.defaultValue());
             }
