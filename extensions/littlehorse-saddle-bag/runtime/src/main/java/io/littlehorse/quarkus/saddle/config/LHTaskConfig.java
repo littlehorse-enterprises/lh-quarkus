@@ -60,7 +60,7 @@ public @interface LHTaskConfig {
     enum LHTaskConfigType {
         STR,
         INT,
-        FLOAT,
+        DOUBLE,
         BOOL
     }
 }

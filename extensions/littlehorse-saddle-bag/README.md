@@ -121,7 +121,7 @@ public class EmailNotificationTask {
 | `description`  | `String`     | `""`    | Human-readable description of the property                         |
 | `sensitive`    | `boolean`    | `false` | Whether the value is sensitive (passwords, API keys, etc.)         |
 | `defaultValue` | `String`     | `""`    | Default value; empty means the property is mandatory               |
-| `type`         | `LHTaskConfigType` | —       | Value type for validation: `STR`, `INT`, `FLOAT`, or `BOOL` (required) |
+| `type`         | `LHTaskConfigType` | —       | Value type for validation: `STR`, `INT`, `DOUBLE`, or `BOOL` (required) |
 
 The declared configurations appear in the generated manifest under the `configs` field for each task.
 
