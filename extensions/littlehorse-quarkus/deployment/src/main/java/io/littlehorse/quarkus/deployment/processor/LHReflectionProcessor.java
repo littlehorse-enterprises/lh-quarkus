@@ -35,6 +35,15 @@ public class LHReflectionProcessor {
     private static final DotName JAVA_UTIL_LIST = DotName.createSimple(List.class);
 
     @BuildStep
+    void registerJgraphtEdge(BuildProducer<ReflectiveClassBuildItem> producer) {
+        // LHRecordableDependenciesGraph builds a DefaultDirectedGraph whose edge supplier
+        // instantiates DefaultEdge reflectively, so its constructor must be registered for native.
+        producer.produce(ReflectiveClassBuildItem.builder("org.jgrapht.graph.DefaultEdge")
+                .constructors()
+                .build());
+    }
+
+    @BuildStep
     void registerLHWorkflow(
             BuildProducer<ReflectiveClassBuildItem> producer,
             CombinedIndexBuildItem indexContainer) {
