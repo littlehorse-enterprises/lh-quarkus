@@ -20,6 +20,8 @@ what a task worker image provides.
   * [Basic Setup](#basic-setup)
   * [Declaring Required Configurations](#declaring-required-configurations)
 * [Generated Output](#generated-output)
+* [Building a Docker Image](#building-a-docker-image)
+  * [Action Inputs](#action-inputs)
 * [Configurations](#configurations)
   * [Bag Configurations](#bag-configurations)
   * [Metadata Configurations](#metadata-configurations)
@@ -172,6 +174,66 @@ tasks:
       sensitive: true
 structs: {}
 ```
+
+# Building a Docker Image
+
+Saddle bag Docker images are built and published with the
+[`publish-saddle-bag`](https://github.com/littlehorse-enterprises/publish-saddle-bag) GitHub Action.
+It builds the Quarkus application with Gradle, reads the OCI annotations from the generated
+`properties` manifest, and publishes the resulting image to a container registry.
+
+> **Note:** Only JVM-based Quarkus Docker images are supported. Native images are not supported yet.
+
+Add a workflow to your repository:
+
+```yaml
+name: Deploy My Saddle Bag
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Publish Saddle Bag
+        uses: littlehorse-enterprises/publish-saddle-bag@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          images: ghcr.io/${{ github.repository }}/my-saddle-bag
+```
+
+## Action Inputs
+
+| Input                | Required | Default                   | Description                                                                 |
+|----------------------|----------|---------------------------|-----------------------------------------------------------------------------|
+| `registry`           | ✅        | —                         | Container registry URL (e.g. `ghcr.io`)                                     |
+| `username`           | ✅        | —                         | Registry username                                                           |
+| `password`           | ✅        | —                         | Registry password or token                                                  |
+| `images`             | ✅        | —                         | Image name(s) passed to `docker/metadata-action` (one per line)             |
+| `working-directory`  | ❌        | `.`                       | Directory where the Gradle build is executed                                |
+| `context`            | ❌        | `working-directory`       | Docker build context path                                                   |
+| `dockerfile`         | ❌        | `''`                      | Path to the Dockerfile (defaults to `working-directory/Dockerfile`)         |
+| `tags`               | ❌        | `''`                      | Tag patterns passed to `docker/metadata-action` (one per line)              |
+| `labels`             | ❌        | `''`                      | Extra labels passed to `docker/metadata-action` (`KEY=VALUE`, one per line) |
+| `annotations`        | ❌        | `''`                      | Extra annotations passed to `docker/metadata-action` (`[TYPE:]KEY=VALUE`)   |
+| `docker-build-args`  | ❌        | `''`                      | Docker build arguments (`NAME=VALUE`, one per line)                         |
+| `quarkus-build-args` | ❌        | `''`                      | Quarkus build arguments (space-separated, e.g. `-Dkey=value`)               |
+| `platforms`          | ❌        | `linux/amd64,linux/arm64` | Architecture platforms                                                      |
+
+See the [`publish-saddle-bag`](https://github.com/littlehorse-enterprises/publish-saddle-bag)
+documentation for the full list of inputs, outputs, and an extended example.
 
 # Configurations
 

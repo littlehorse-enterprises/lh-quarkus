@@ -70,6 +70,25 @@ Execute native tests:
 ./gradlew spotlessApply
 ```
 
+## Saddle Bag
+
+Run the example:
+
+```shell
+./gradlew example-saddle-bag:quarkusDev
+```
+
+Generate the saddle bag manifest:
+
+```shell
+./gradlew example-saddle-bag:build
+```
+
+> The manifest is generated under the example's `build/saddle-bag/` directory.
+
+Saddle bag Docker images are built and published with the
+[publish-saddle-bag](https://github.com/littlehorse-enterprises/publish-saddle-bag) GitHub Action.
+
 ## RESTful Gateway
 
 Execute it:

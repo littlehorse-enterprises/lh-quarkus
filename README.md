@@ -52,6 +52,7 @@ These extensions follow the same versioning conventions as [LittleHorse](https:/
 |-------------------------------|-----------------|
 | `1.0.*`                       | `3.32.*`        |
 | `1.1.*`                       | `3.35.*`        |
+| `1.2.*`                       | `3.37.*`        |
 
 ## Development
 

@@ -46,7 +46,7 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 
 ## Conventions
 
-- Quarkus version: `3.35.1`, LittleHorse SDK: `1.2-SNAPSHOT`
+- Quarkus version: `3.37.0`, LittleHorse SDK: `1.2-SNAPSHOT`
 - Dependency versions are centralized in `gradle.properties`
 - Extension projects: `quarkus`, `quarkus-restful-gateway`, `saddle-bag`
 - Example projects: `user-tasks`, `reactive`, `rest`, `basic`, `child-workflow`, `structs`, `type-adapter`, `saddle-bag`
