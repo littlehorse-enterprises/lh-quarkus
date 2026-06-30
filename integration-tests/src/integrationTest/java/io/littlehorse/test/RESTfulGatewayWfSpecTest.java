@@ -2,6 +2,7 @@ package io.littlehorse.test;
 
 import static io.restassured.RestAssured.given;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -13,6 +14,8 @@ import io.quarkus.test.junit.QuarkusIntegrationTest;
 import io.restassured.response.Response;
 
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
 
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
@@ -64,55 +67,55 @@ class RESTfulGatewayWfSpecTest {
 
     @Test
     void shouldSearchAllWfSpec() {
-        given().pathParam("tenant", "default")
-                .when()
-                .get("/gateway/tenants/{tenant}/wf-specs")
-                .then()
-                .statusCode(200)
-                .body("results", hasSize(7))
-                .body("bookmark", is(nullValue()))
-                .body("results[0].name", is("example-type-adapter"))
-                .body("results[1].name", is("greetings"))
-                .body("results[2].name", is("json"))
-                .body("results[3].name", is("nested-child-wf"))
-                .body("results[4].name", is("nested-grandparent-wf"))
-                .body("results[5].name", is("nested-parent-wf"))
-                .body("results[6].name", is("workflow-in-a-bean"))
-                .log()
-                .all();
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> given().pathParam("tenant", "default")
+                        .when()
+                        .get("/gateway/tenants/{tenant}/wf-specs")
+                        .then()
+                        .statusCode(200)
+                        .body("results", hasSize(7))
+                        .body("bookmark", is(nullValue()))
+                        .body("results[0].name", is("example-type-adapter"))
+                        .body("results[1].name", is("greetings"))
+                        .body("results[2].name", is("json"))
+                        .body("results[3].name", is("nested-child-wf"))
+                        .body("results[4].name", is("nested-grandparent-wf"))
+                        .body("results[5].name", is("nested-parent-wf"))
+                        .body("results[6].name", is("workflow-in-a-bean")));
     }
 
     @Test
     void shouldSearchWfSpecWithBookmark() {
         int limit = 4;
-        Response getFirstObject = given().pathParam("tenant", "default")
-                .queryParam("limit", limit)
-                .when()
-                .get("/gateway/tenants/{tenant}/wf-specs");
-        String bookmark = getFirstObject.jsonPath().getString("bookmark");
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> {
+                    Response getFirstObject = given().pathParam("tenant", "default")
+                            .queryParam("limit", limit)
+                            .when()
+                            .get("/gateway/tenants/{tenant}/wf-specs");
+                    String bookmark = getFirstObject.jsonPath().getString("bookmark");
 
-        getFirstObject
-                .then()
-                .statusCode(200)
-                .body("results", hasSize(limit))
-                .body("results[0].name", is("example-type-adapter"))
-                .body("bookmark", is(notNullValue()))
-                .log()
-                .all();
+                    getFirstObject
+                            .then()
+                            .statusCode(200)
+                            .body("results", hasSize(limit))
+                            .body("results[0].name", is("example-type-adapter"))
+                            .body("bookmark", is(notNullValue()));
 
-        given().pathParam("tenant", "default")
-                .queryParam("limit", limit)
-                .queryParam("bookmark", bookmark)
-                .when()
-                .get("/gateway/tenants/{tenant}/wf-specs")
-                .then()
-                .statusCode(200)
-                .body("results", hasSize(3))
-                .body("bookmark", is(nullValue()))
-                .body("results[0].name", is("nested-grandparent-wf"))
-                .body("results[1].name", is("nested-parent-wf"))
-                .body("results[2].name", is("workflow-in-a-bean"))
-                .log()
-                .all();
+                    given().pathParam("tenant", "default")
+                            .queryParam("limit", limit)
+                            .queryParam("bookmark", bookmark)
+                            .when()
+                            .get("/gateway/tenants/{tenant}/wf-specs")
+                            .then()
+                            .statusCode(200)
+                            .body("results", hasSize(3))
+                            .body("bookmark", is(nullValue()))
+                            .body("results[0].name", is("nested-grandparent-wf"))
+                            .body("results[1].name", is("nested-parent-wf"))
+                            .body("results[2].name", is("workflow-in-a-bean"));
+                });
     }
 }

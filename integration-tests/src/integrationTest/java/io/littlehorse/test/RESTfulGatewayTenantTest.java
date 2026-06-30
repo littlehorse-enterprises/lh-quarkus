@@ -55,21 +55,21 @@ class RESTfulGatewayTenantTest {
     @Test
     void shouldSearchAllWfSpecFromTenant() {
         // create tenant
-        String tenant = faker.internet().domainWord();
-        String wfName = faker.internet().domainWord();
+        String tenant = faker.internet().domainWord() + UUID.randomUUID();
+        String wfName = faker.internet().domainWord() + UUID.randomUUID();
         registerTenantAndWf(tenant, wfName);
 
         // test
-        given().pathParam("tenant", tenant)
-                .when()
-                .get("/gateway/tenants/{tenant}/wf-specs")
-                .then()
-                .statusCode(200)
-                .body("results", hasSize(1))
-                .body("bookmark", is(nullValue()))
-                .body("results[0].name", is(wfName))
-                .log()
-                .all();
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> given().pathParam("tenant", tenant)
+                        .when()
+                        .get("/gateway/tenants/{tenant}/wf-specs")
+                        .then()
+                        .statusCode(200)
+                        .body("results", hasSize(1))
+                        .body("bookmark", is(nullValue()))
+                        .body("results[0].name", is(wfName)));
     }
 
     private void registerTenantAndWf(String tenant, String wfName) {
