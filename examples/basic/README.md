@@ -38,7 +38,7 @@ public class GreetingsTask {
 Setup:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
 Execute it:

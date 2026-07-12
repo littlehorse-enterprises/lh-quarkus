@@ -39,7 +39,7 @@ public class NotificationTask {
 Setup:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
 Execute it:

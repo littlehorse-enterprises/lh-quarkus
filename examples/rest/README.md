@@ -37,7 +37,7 @@ public String runWf(String id, String name) {
 Setup:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
 Execute it:

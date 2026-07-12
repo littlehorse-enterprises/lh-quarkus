@@ -43,8 +43,8 @@ jobs:
         uses: littlehorse-enterprises/publish-image@v1
         with:
           image-name: lh-restful-gateway
-          dockerfile: ./restful-gateway/Dockerfile
-          context: ./restful-gateway
+          dockerfile: ./extras/restful-gateway/Dockerfile
+          context: ./extras/restful-gateway
           github-token: ${{ secrets.GITHUB_TOKEN }}
           ghcr-root: true
           tags: |
