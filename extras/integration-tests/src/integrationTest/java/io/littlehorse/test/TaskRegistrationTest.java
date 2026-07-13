@@ -36,6 +36,8 @@ class TaskRegistrationTest {
                             .addResults(TaskDefId.newBuilder()
                                     .setName("build-person")
                                     .build())
+                            .addResults(
+                                    TaskDefId.newBuilder().setName("count-map").build())
                             .addResults(TaskDefId.newBuilder()
                                     .setName("describe-person")
                                     .build())
@@ -55,9 +57,11 @@ class TaskRegistrationTest {
                             .addResults(TaskDefId.newBuilder()
                                     .setName("return-json-object")
                                     .build())
+                            .addResults(
+                                    TaskDefId.newBuilder().setName("sum-array").build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(9);
+                    assertThat(results.getResultsCount()).isEqualTo(11);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

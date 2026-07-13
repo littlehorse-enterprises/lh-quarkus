@@ -74,16 +74,17 @@ class RESTfulGatewayWfSpecTest {
                         .get("/gateway/tenants/{tenant}/wf-specs")
                         .then()
                         .statusCode(200)
-                        .body("results", hasSize(8))
+                        .body("results", hasSize(9))
                         .body("bookmark", is(nullValue()))
-                        .body("results[0].name", is("example-type-adapter"))
-                        .body("results[1].name", is("greetings"))
-                        .body("results[2].name", is("json"))
-                        .body("results[3].name", is("nested-child-wf"))
-                        .body("results[4].name", is("nested-grandparent-wf"))
-                        .body("results[5].name", is("nested-parent-wf"))
-                        .body("results[6].name", is("person-wf"))
-                        .body("results[7].name", is("workflow-in-a-bean")));
+                        .body("results[0].name", is("arrays-maps"))
+                        .body("results[1].name", is("example-type-adapter"))
+                        .body("results[2].name", is("greetings"))
+                        .body("results[3].name", is("json"))
+                        .body("results[4].name", is("nested-child-wf"))
+                        .body("results[5].name", is("nested-grandparent-wf"))
+                        .body("results[6].name", is("nested-parent-wf"))
+                        .body("results[7].name", is("person-wf"))
+                        .body("results[8].name", is("workflow-in-a-bean")));
     }
 
     @Test
@@ -102,7 +103,7 @@ class RESTfulGatewayWfSpecTest {
                             .then()
                             .statusCode(200)
                             .body("results", hasSize(limit))
-                            .body("results[0].name", is("example-type-adapter"))
+                            .body("results[0].name", is("arrays-maps"))
                             .body("bookmark", is(notNullValue()));
 
                     given().pathParam("tenant", "default")
@@ -112,11 +113,12 @@ class RESTfulGatewayWfSpecTest {
                             .get("/gateway/tenants/{tenant}/wf-specs")
                             .then()
                             .statusCode(200)
-                            .body("results", hasSize(3))
+                            .body("results", hasSize(4))
                             .body("bookmark", is(nullValue()))
-                            .body("results[0].name", is("nested-parent-wf"))
-                            .body("results[1].name", is("person-wf"))
-                            .body("results[2].name", is("workflow-in-a-bean"));
+                            .body("results[0].name", is("nested-grandparent-wf"))
+                            .body("results[1].name", is("nested-parent-wf"))
+                            .body("results[2].name", is("person-wf"))
+                            .body("results[3].name", is("workflow-in-a-bean"));
                 });
     }
 }

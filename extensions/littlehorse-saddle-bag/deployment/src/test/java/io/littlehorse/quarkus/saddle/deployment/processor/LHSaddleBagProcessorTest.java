@@ -31,12 +31,28 @@ package io.littlehorse.quarkus.saddle.deployment.processor;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
+import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
+import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
+import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
+import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
+import io.littlehorse.sdk.common.proto.InlineArrayDef;
+import io.littlehorse.sdk.common.proto.InlineMapDef;
+import io.littlehorse.sdk.common.proto.StructDefId;
+import io.littlehorse.sdk.common.proto.TypeDefinition;
+import io.littlehorse.sdk.common.proto.VariableType;
+import io.littlehorse.sdk.wfsdk.internal.taskdefutil.LHTaskSignature;
+import io.littlehorse.sdk.worker.LHStructDef;
+import io.littlehorse.sdk.worker.LHTaskMethod;
+import io.littlehorse.sdk.worker.LHTaskMethodHandle;
+import io.littlehorse.sdk.worker.LHType;
 
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,6 +75,208 @@ class LHSaddleBagProcessorTest {
                 .isEqualTo(normalize(fromYaml))
                 .isEqualTo(normalize(fromProperties))
                 .isEqualTo(normalize(saddlebag));
+    }
+
+    @Test
+    void putTypeInfoEmitsPrimitiveType() {
+        Map<String, Object> target = new LinkedHashMap<>();
+
+        processor.putTypeInfo(
+                target,
+                TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR).build());
+
+        assertThat(target).containsExactly(entry("type", "STR"));
+    }
+
+    @Test
+    void putTypeInfoEmitsStructType() {
+        Map<String, Object> target = new LinkedHashMap<>();
+
+        processor.putTypeInfo(
+                target,
+                TypeDefinition.newBuilder()
+                        .setStructDefId(StructDefId.newBuilder().setName("test-order"))
+                        .build());
+
+        assertThat(target).containsExactly(entry("type", "STRUCT"), entry("struct", "test-order"));
+    }
+
+    @Test
+    void handleTaskParametersDistinguishesStructsFromPrimitives() throws Exception {
+        Method method =
+                TestOrderTask.class.getMethod("createOrder", String.class, TestAddress.class);
+
+        List<Map<String, Object>> params =
+                processor.handleTaskParameters(method, Map.of(), Map.of());
+
+        assertThat(params).hasSize(2);
+        assertThat(params.get(0)).containsEntry("type", "STR").doesNotContainKey("struct");
+        assertThat(params.get(1))
+                .containsEntry("type", "STRUCT")
+                .containsEntry("struct", "test-address");
+    }
+
+    @Test
+    void detectsStructReturnType() throws Exception {
+        Method method =
+                TestOrderTask.class.getMethod("createOrder", String.class, TestAddress.class);
+        LHTaskSignature signature = new LHTaskSignature(
+                LHTaskMethodHandle.from("create-order", "", method),
+                LHTypeAdapterRegistry.empty(),
+                Map.of());
+
+        Map<String, Object> output = new LinkedHashMap<>();
+        processor.putTypeInfo(output, signature.getReturnType().getReturnType());
+
+        assertThat(output).containsExactly(entry("type", "STRUCT"), entry("struct", "test-order"));
+    }
+
+    @Test
+    void detectsPrimitiveReturnType() throws Exception {
+        Method method = TestOrderTask.class.getMethod("addNumbers", int.class, int.class);
+        LHTaskSignature signature = new LHTaskSignature(
+                LHTaskMethodHandle.from("add-numbers", "", method),
+                LHTypeAdapterRegistry.empty(),
+                Map.of());
+
+        Map<String, Object> output = new LinkedHashMap<>();
+        processor.putTypeInfo(output, signature.getReturnType().getReturnType());
+
+        assertThat(output).containsExactly(entry("type", "INT"));
+    }
+
+    @Test
+    void buildStructEmitsNestedStructAndPrimitiveProperties() throws Exception {
+        LHStructDefBuildItem item = new LHStructDefBuildItem(
+                TestOrder.class, new LHStructDefDescriptor(new OptionalAnnotation(null)));
+
+        List<Map<String, Object>> properties = processor.buildStruct(item, Map.of());
+
+        assertThat(findProperty(properties, "productName")).containsEntry("type", "STR");
+        assertThat(findProperty(properties, "shippingAddress"))
+                .containsEntry("type", "STRUCT")
+                .containsEntry("struct", "test-address");
+    }
+
+    @Test
+    void resolvesStructNamePlaceholdersInTaskParameters() throws Exception {
+        Method method = TestPlaceholderTask.class.getMethod("handle", TestPlaceholderAddress.class);
+
+        List<Map<String, Object>> params = processor.handleTaskParameters(
+                method, Map.of(), Map.of("struct.ph-address.name", "resolved-address"));
+
+        assertThat(params).hasSize(1);
+        assertThat(params.get(0))
+                .containsEntry("type", "STRUCT")
+                .containsEntry("struct", "resolved-address");
+    }
+
+    @Test
+    void putTypeInfoEmitsArrayType() {
+        Map<String, Object> target = new LinkedHashMap<>();
+
+        processor.putTypeInfo(
+                target,
+                TypeDefinition.newBuilder()
+                        .setInlineArrayDef(InlineArrayDef.newBuilder()
+                                .setArrayType(TypeDefinition.newBuilder()
+                                        .setPrimitiveType(VariableType.STR)))
+                        .build());
+
+        assertThat(target)
+                .containsExactly(entry("type", "ARRAY"), entry("element", Map.of("type", "STR")));
+    }
+
+    @Test
+    void putTypeInfoEmitsMapType() {
+        Map<String, Object> target = new LinkedHashMap<>();
+
+        processor.putTypeInfo(
+                target,
+                TypeDefinition.newBuilder()
+                        .setInlineMapDef(InlineMapDef.newBuilder()
+                                .setKeyType(TypeDefinition.newBuilder()
+                                        .setPrimitiveType(VariableType.STR))
+                                .setValueType(TypeDefinition.newBuilder()
+                                        .setPrimitiveType(VariableType.INT)))
+                        .build());
+
+        assertThat(target)
+                .containsExactly(
+                        entry("type", "MAP"),
+                        entry("key", Map.of("type", "STR")),
+                        entry("value", Map.of("type", "INT")));
+    }
+
+    @Test
+    void handleTaskParametersEmitsArrayOfPrimitives() throws Exception {
+        Method method = TestCollectionTask.class.getMethod("consumeArray", Long[].class);
+
+        List<Map<String, Object>> params =
+                processor.handleTaskParameters(method, Map.of(), Map.of());
+
+        assertThat(params).hasSize(1);
+        assertThat(params.get(0))
+                .containsEntry("type", "ARRAY")
+                .containsEntry("element", Map.of("type", "INT"));
+    }
+
+    @Test
+    void handleTaskParametersEmitsArrayOfStructs() throws Exception {
+        Method method = TestCollectionTask.class.getMethod("consumeAddresses", TestAddress[].class);
+
+        List<Map<String, Object>> params =
+                processor.handleTaskParameters(method, Map.of(), Map.of());
+
+        assertThat(params).hasSize(1);
+        assertThat(params.get(0))
+                .containsEntry("type", "ARRAY")
+                .containsEntry("element", Map.of("type", "STRUCT", "struct", "test-address"));
+    }
+
+    @Test
+    void handleTaskParametersEmitsMapType() throws Exception {
+        Method method = TestCollectionTask.class.getMethod("consumeMap", Map.class);
+
+        List<Map<String, Object>> params =
+                processor.handleTaskParameters(method, Map.of(), Map.of());
+
+        assertThat(params).hasSize(1);
+        assertThat(params.get(0))
+                .containsEntry("type", "MAP")
+                .containsEntry("key", Map.of("type", "STR"))
+                .containsEntry("value", Map.of("type", "INT"));
+    }
+
+    @Test
+    void detectsArrayReturnType() throws Exception {
+        Method method = TestCollectionTask.class.getMethod("produceArray");
+        LHTaskSignature signature = new LHTaskSignature(
+                LHTaskMethodHandle.from("produce-array", "", method),
+                LHTypeAdapterRegistry.empty(),
+                Map.of());
+
+        Map<String, Object> output = new LinkedHashMap<>();
+        processor.putTypeInfo(output, signature.getReturnType().getReturnType());
+
+        assertThat(output)
+                .containsExactly(entry("type", "ARRAY"), entry("element", Map.of("type", "INT")));
+    }
+
+    @Test
+    void buildStructEmitsArrayAndMapProperties() throws Exception {
+        LHStructDefBuildItem item = new LHStructDefBuildItem(
+                TestInventory.class, new LHStructDefDescriptor(new OptionalAnnotation(null)));
+
+        List<Map<String, Object>> properties = processor.buildStruct(item, Map.of());
+
+        assertThat(findProperty(properties, "tags"))
+                .containsEntry("type", "ARRAY")
+                .containsEntry("element", Map.of("type", "STR"));
+        assertThat(findProperty(properties, "counts"))
+                .containsEntry("type", "MAP")
+                .containsEntry("key", Map.of("type", "STR"))
+                .containsEntry("value", Map.of("type", "INT"));
     }
 
     private Map<String, Object> roundTrip(Map<String, Object> saddlebag, Format format) {
@@ -168,6 +386,137 @@ class LHSaddleBagProcessorTest {
             return true;
         } catch (NumberFormatException e) {
             return false;
+        }
+    }
+
+    private Map<String, Object> findProperty(List<Map<String, Object>> properties, String name) {
+        return properties.stream()
+                .filter(property -> name.equals(property.get("name")))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Property not found: " + name));
+    }
+
+    @LHStructDef("test-address")
+    public static class TestAddress {
+        private String street;
+        private int zipCode;
+
+        public TestAddress() {}
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
+
+        public int getZipCode() {
+            return zipCode;
+        }
+
+        public void setZipCode(int zipCode) {
+            this.zipCode = zipCode;
+        }
+    }
+
+    @LHStructDef("test-order")
+    public static class TestOrder {
+        private String productName;
+        private TestAddress shippingAddress;
+
+        public TestOrder() {}
+
+        public String getProductName() {
+            return productName;
+        }
+
+        public void setProductName(String productName) {
+            this.productName = productName;
+        }
+
+        public TestAddress getShippingAddress() {
+            return shippingAddress;
+        }
+
+        public void setShippingAddress(TestAddress shippingAddress) {
+            this.shippingAddress = shippingAddress;
+        }
+    }
+
+    public static class TestOrderTask {
+
+        @LHTaskMethod("create-order")
+        public TestOrder createOrder(String productName, TestAddress address) {
+            return new TestOrder();
+        }
+
+        @LHTaskMethod("add-numbers")
+        public int addNumbers(int a, int b) {
+            return a + b;
+        }
+    }
+
+    @LHStructDef("${struct.ph-address.name}")
+    public static class TestPlaceholderAddress {
+        private String street;
+
+        public TestPlaceholderAddress() {}
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
+    }
+
+    public static class TestPlaceholderTask {
+
+        @LHTaskMethod("ph-task")
+        public void handle(TestPlaceholderAddress address) {}
+    }
+
+    public static class TestCollectionTask {
+
+        @LHTaskMethod("consume-array")
+        public void consumeArray(@LHType(isLHArray = true) Long[] numbers) {}
+
+        @LHTaskMethod("consume-addresses")
+        public void consumeAddresses(@LHType(isLHArray = true) TestAddress[] addresses) {}
+
+        @LHTaskMethod("consume-map")
+        public void consumeMap(@LHType(isLHMap = true) Map<String, Long> counts) {}
+
+        @LHTaskMethod("produce-array")
+        @LHType(isLHArray = true)
+        public Long[] produceArray() {
+            return new Long[0];
+        }
+    }
+
+    @LHStructDef("test-inventory")
+    public static class TestInventory {
+        private String[] tags;
+        private Map<String, Long> counts;
+
+        public TestInventory() {}
+
+        public String[] getTags() {
+            return tags;
+        }
+
+        public void setTags(String[] tags) {
+            this.tags = tags;
+        }
+
+        public Map<String, Long> getCounts() {
+            return counts;
+        }
+
+        public void setCounts(Map<String, Long> counts) {
+            this.counts = counts;
         }
     }
 }

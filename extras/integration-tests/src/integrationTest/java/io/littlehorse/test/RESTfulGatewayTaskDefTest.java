@@ -67,21 +67,24 @@ class RESTfulGatewayTaskDefTest {
         await().atMost(Duration.ofSeconds(30))
                 .pollInterval(Duration.ofMillis(500))
                 .untilAsserted(() -> given().pathParam("tenant", "default")
+                        .queryParam("limit", 50)
                         .when()
                         .get("/gateway/tenants/{tenant}/task-defs")
                         .then()
                         .statusCode(200)
-                        .body("results", hasSize(9))
+                        .body("results", hasSize(11))
                         .body("bookmark", is(nullValue()))
                         .body("results[0].name", is("build-person"))
-                        .body("results[1].name", is("describe-person"))
-                        .body("results[2].name", is("echo-uuid"))
-                        .body("results[3].name", is("get-uuid"))
-                        .body("results[4].name", is("greetings"))
-                        .body("results[5].name", is("print"))
-                        .body("results[6].name", is("return-json-array"))
-                        .body("results[7].name", is("return-json-list"))
-                        .body("results[8].name", is("return-json-object")));
+                        .body("results[1].name", is("count-map"))
+                        .body("results[2].name", is("describe-person"))
+                        .body("results[3].name", is("echo-uuid"))
+                        .body("results[4].name", is("get-uuid"))
+                        .body("results[5].name", is("greetings"))
+                        .body("results[6].name", is("print"))
+                        .body("results[7].name", is("return-json-array"))
+                        .body("results[8].name", is("return-json-list"))
+                        .body("results[9].name", is("return-json-object"))
+                        .body("results[10].name", is("sum-array")));
     }
 
     @Test
@@ -111,7 +114,7 @@ class RESTfulGatewayTaskDefTest {
                             .statusCode(200)
                             .body("results", hasSize(1))
                             .body("bookmark", is(notNullValue()))
-                            .body("results[0].name", is("describe-person"));
+                            .body("results[0].name", is("count-map"));
                 });
     }
 }

@@ -175,6 +175,73 @@ tasks:
 structs: {}
 ```
 
+## Struct Types in Task Inputs/Outputs
+
+When a task parameter, return type, or struct property is itself a `@LHStructDef` struct, the manifest
+represents it with `type: "STRUCT"` and a `struct` field holding the referenced struct's resolved name
+(matching a key under the top-level `structs` section). Primitive types keep their `VariableType` name
+(`STR`, `INT`, `DOUBLE`, `BOOL`, `JSON_OBJ`, etc.).
+
+```yaml
+tasks:
+  create-order:
+    output:
+      type: "STRUCT"
+      struct: "order"
+    inputs:
+    - name: "productName"
+      type: "STR"
+    - name: "address"
+      type: "STRUCT"
+      struct: "shipping-address"
+    configName: "task.create-order.name"
+    description: "Creates an order shipped to the given address"
+structs:
+  order:
+    config-name: "struct.order.name"
+    description: "A customer order"
+    properties:
+    - name: "productName"
+      type: "STR"
+    - name: "shippingAddress"
+      type: "STRUCT"
+      struct: "shipping-address"
+```
+
+## Array and Map Types in Task Inputs/Outputs
+
+Native LittleHorse `Array` and `Map` types (declared with `@LHType(isLHArray = true)` /
+`@LHType(isLHMap = true)`, or array/`Map` struct properties) are represented recursively. An array uses
+`type: "ARRAY"` with an `element` type, and a map uses `type: "MAP"` with `key` and `value` types. The
+nested `element`/`key`/`value` are themselves full type descriptors, so arrays of structs, maps of
+structs, and nested arrays/maps are all supported.
+
+```yaml
+tasks:
+  sum-numbers:
+    output:
+      type: "INT"
+    inputs:
+    - name: "numbers"
+      type: "ARRAY"
+      element:
+        type: "INT"
+    configName: "task.sum-numbers.name"
+    description: "Sums a native Array of integers"
+  count-items:
+    output:
+      type: "INT"
+    inputs:
+    - name: "items"
+      type: "MAP"
+      key:
+        type: "STR"
+      value:
+        type: "INT"
+    configName: "task.count-items.name"
+    description: "Counts the entries in a native Map"
+```
+
 # Building a Docker Image
 
 Saddle bag Docker images are built and published with the

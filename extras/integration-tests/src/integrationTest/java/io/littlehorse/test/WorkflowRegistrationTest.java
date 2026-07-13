@@ -39,6 +39,8 @@ class WorkflowRegistrationTest {
                     WfSpecId typeAdapter = WfSpecId.newBuilder()
                             .setName("example-type-adapter")
                             .build();
+                    WfSpecId arraysMaps =
+                            WfSpecId.newBuilder().setName("arrays-maps").build();
                     WfSpecId greetings =
                             WfSpecId.newBuilder().setName("greetings").build();
                     WfSpecId json = WfSpecId.newBuilder().setName("json").build();
@@ -54,6 +56,7 @@ class WorkflowRegistrationTest {
                     WfSpecId beanWorkflow =
                             WfSpecId.newBuilder().setName("workflow-in-a-bean").build();
                     WfSpecIdList expectedResult = WfSpecIdList.newBuilder()
+                            .addResults(arraysMaps)
                             .addResults(typeAdapter)
                             .addResults(greetings)
                             .addResults(json)
@@ -63,7 +66,7 @@ class WorkflowRegistrationTest {
                             .addResults(personWf)
                             .addResults(beanWorkflow)
                             .build();
-                    assertThat(results.getResultsCount()).isEqualTo(8);
+                    assertThat(results.getResultsCount()).isEqualTo(9);
                     assertThat(results).isEqualTo(expectedResult);
 
                     Stream.of(
