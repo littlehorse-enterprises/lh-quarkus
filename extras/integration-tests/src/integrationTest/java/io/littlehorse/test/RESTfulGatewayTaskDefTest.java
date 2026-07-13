@@ -71,15 +71,17 @@ class RESTfulGatewayTaskDefTest {
                         .get("/gateway/tenants/{tenant}/task-defs")
                         .then()
                         .statusCode(200)
-                        .body("results", hasSize(7))
+                        .body("results", hasSize(9))
                         .body("bookmark", is(nullValue()))
-                        .body("results[0].name", is("echo-uuid"))
-                        .body("results[1].name", is("get-uuid"))
-                        .body("results[2].name", is("greetings"))
-                        .body("results[3].name", is("print"))
-                        .body("results[4].name", is("return-json-array"))
-                        .body("results[5].name", is("return-json-list"))
-                        .body("results[6].name", is("return-json-object")));
+                        .body("results[0].name", is("build-person"))
+                        .body("results[1].name", is("describe-person"))
+                        .body("results[2].name", is("echo-uuid"))
+                        .body("results[3].name", is("get-uuid"))
+                        .body("results[4].name", is("greetings"))
+                        .body("results[5].name", is("print"))
+                        .body("results[6].name", is("return-json-array"))
+                        .body("results[7].name", is("return-json-list"))
+                        .body("results[8].name", is("return-json-object")));
     }
 
     @Test
@@ -97,7 +99,7 @@ class RESTfulGatewayTaskDefTest {
                             .then()
                             .statusCode(200)
                             .body("results", hasSize(1))
-                            .body("results[0].name", is("echo-uuid"))
+                            .body("results[0].name", is("build-person"))
                             .body("bookmark", is(notNullValue()));
 
                     given().pathParam("tenant", "default")
@@ -109,7 +111,7 @@ class RESTfulGatewayTaskDefTest {
                             .statusCode(200)
                             .body("results", hasSize(1))
                             .body("bookmark", is(notNullValue()))
-                            .body("results[0].name", is("get-uuid"));
+                            .body("results[0].name", is("describe-person"));
                 });
     }
 }

@@ -14,6 +14,7 @@ import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
 import io.littlehorse.sdk.common.proto.WfRun;
+import io.littlehorse.workflows.PersonWorkflow;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
@@ -60,6 +61,29 @@ class RunWorkflowTest {
         blockingStub.runWf(RunWfRequest.newBuilder()
                 .setId(expectedId)
                 .setWfSpecName(EXAMPLE_TYPE_ADAPTER)
+                .build());
+
+        with().pollInterval(Duration.ofSeconds(1))
+                .ignoreExceptions()
+                .await()
+                .atMost(Duration.ofSeconds(30))
+                .untilAsserted(() -> {
+                    WfRun result = blockingStub.getWfRun(LHLibUtil.wfRunIdFromString(expectedId));
+
+                    assertThat(result.getId().getId()).isEqualTo(expectedId);
+                    assertThat(result.getStatus()).isEqualTo(LHStatus.COMPLETED);
+                });
+    }
+
+    @Test
+    void testRunPersonWfWithNestedStructs() {
+        String expectedId = UUID.randomUUID().toString();
+
+        blockingStub.runWf(RunWfRequest.newBuilder()
+                .setId(expectedId)
+                .setWfSpecName(PersonWorkflow.PERSON_WORKFLOW)
+                .putVariables(PersonWorkflow.FIRST_NAME_VARIABLE, LHLibUtil.objToVarVal("Obi-Wan"))
+                .putVariables(PersonWorkflow.LAST_NAME_VARIABLE, LHLibUtil.objToVarVal("Kenobi"))
                 .build());
 
         with().pollInterval(Duration.ofSeconds(1))

@@ -33,6 +33,12 @@ class TaskRegistrationTest {
                     TaskDefIdList results = blockingStub.searchTaskDef(
                             SearchTaskDefRequest.newBuilder().build());
                     TaskDefIdList expectedResult = TaskDefIdList.newBuilder()
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("build-person")
+                                    .build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("describe-person")
+                                    .build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("echo-uuid").build())
                             .addResults(
@@ -51,7 +57,7 @@ class TaskRegistrationTest {
                                     .build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(7);
+                    assertThat(results.getResultsCount()).isEqualTo(9);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

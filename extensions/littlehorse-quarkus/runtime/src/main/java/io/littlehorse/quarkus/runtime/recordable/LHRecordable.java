@@ -4,12 +4,14 @@ import io.littlehorse.quarkus.config.ConfigEvaluator;
 
 import jakarta.enterprise.inject.spi.CDI;
 
+import java.util.Map;
 import java.util.Set;
 
 public abstract class LHRecordable {
 
     private final Class<?> beanClass;
     private final String name;
+    private Map<String, String> placeholderValues = Map.of();
 
     public LHRecordable(Class<?> beanClass, String name) {
         this.beanClass = beanClass;
@@ -22,6 +24,28 @@ public abstract class LHRecordable {
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the placeholder values used to resolve {@code ${...}} placeholders in the
+     * {@code @LHStructDef} names referenced by this recordable (including nested StructDefs).
+     *
+     * @return the placeholder values (never null)
+     */
+    public Map<String, String> getPlaceholderValues() {
+        return placeholderValues;
+    }
+
+    /**
+     * Sets the placeholder values used to resolve {@code ${...}} placeholders in the
+     * {@code @LHStructDef} names referenced by this recordable (including nested StructDefs). This
+     * must be set before {@link #dependencies()} is invoked. This method must be executed inside a
+     * recorder to avoid build time errors.
+     *
+     * @param placeholderValues the placeholder values to use during resolution
+     */
+    public void setPlaceholderValues(Map<String, String> placeholderValues) {
+        this.placeholderValues = placeholderValues;
     }
 
     /**

@@ -2,7 +2,7 @@ package io.littlehorse.structs;
 
 import io.littlehorse.sdk.worker.LHStructDef;
 
-@LHStructDef("address")
+@LHStructDef("${struct.address.name}")
 public class Address {
     private int houseNumber;
     private String street;
