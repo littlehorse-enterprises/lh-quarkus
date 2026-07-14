@@ -61,14 +61,14 @@ jobs:
       - name: Jar Tests
         run: >-
           ./gradlew
-          integration-tests-core:quarkusIntTest
-          integration-tests-restful-gateway:quarkusIntTest
-          integration-tests-saddle-bag:quarkusIntTest
+          integration-tests-littlehorse-quarkus:quarkusIntTest
+          integration-tests-littlehorse-quarkus-restful-gateway:quarkusIntTest
+          integration-tests-littlehorse-saddle-bag:quarkusIntTest
       - name: Native Tests
         run: >-
           ./gradlew
-          integration-tests-core:quarkusIntTest
-          integration-tests-restful-gateway:quarkusIntTest
-          integration-tests-saddle-bag:quarkusIntTest
+          integration-tests-littlehorse-quarkus:quarkusIntTest
+          integration-tests-littlehorse-quarkus-restful-gateway:quarkusIntTest
+          integration-tests-littlehorse-saddle-bag:quarkusIntTest
           -Dquarkus.native.enabled=true
           -Dquarkus.package.jar.enabled=false

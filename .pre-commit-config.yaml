@@ -54,4 +54,4 @@ repos:
         language: system
         always_run: true
         pass_filenames: false
-        entry: ./gradlew integration-tests-core:quarkusIntTest integration-tests-restful-gateway:quarkusIntTest integration-tests-saddle-bag:quarkusIntTest
+        entry: ./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-quarkus-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest

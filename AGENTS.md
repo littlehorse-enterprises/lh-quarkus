@@ -11,7 +11,7 @@ Quarkus extensions for the [LittleHorse](https://littlehorse.io/) workflow engin
 - `extensions/littlehorse-saddle-bag/` — Saddle Bag extension for self-describing task worker Docker images (runtime + deployment)
 - `extras/restful-gateway/` — Standalone Quarkus app using the gateway extension
 - `examples/` — Usage examples (arrays-maps, basic, child-workflow, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
-- `integration-tests/` — End-to-end tests against a running LittleHorse instance, split per concern into subprojects: `core/` (base extension, project `integration-tests-core`), `restful-gateway/` (gateway extension, project `integration-tests-restful-gateway`), `saddle-bag/` (Saddle Bag extension, project `integration-tests-saddle-bag`)
+- `integration-tests/` — End-to-end tests against a running LittleHorse instance, split per concern into subprojects named after the extension they cover: `littlehorse-quarkus/` (project `integration-tests-littlehorse-quarkus`), `littlehorse-quarkus-restful-gateway/` (project `integration-tests-littlehorse-quarkus-restful-gateway`), `littlehorse-saddle-bag/` (project `integration-tests-littlehorse-saddle-bag`)
 
 Each extension follows the Quarkus extension structure: `deployment/` for build-time processors, `runtime/` for CDI beans and recorders.
 
@@ -25,10 +25,10 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 ./gradlew test
 
 # Integration tests (requires ./gradlew dockerComposeUp)
-./gradlew integration-tests-core:quarkusIntTest integration-tests-restful-gateway:quarkusIntTest integration-tests-saddle-bag:quarkusIntTest
+./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-quarkus-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest
 
 # Native integration tests
-./gradlew integration-tests-core:quarkusIntTest integration-tests-restful-gateway:quarkusIntTest integration-tests-saddle-bag:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
+./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-quarkus-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
 
 # Publish locally (version=dev)
 ./gradlew publishToMavenLocal
