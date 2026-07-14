@@ -183,50 +183,60 @@ metadata:
   icon-url: "https://example.com/icon.png"
   support-email: "support@example.com"
 tasks:
-  send-email:
+  process-order:
+    output:
+      type:
+        primitive: "STR"
     inputs:
-    - name: "recipient"
+    - name: "order"
       type:
-        primitive: "STR"
-    - name: "subject"
-      type:
-        primitive: "STR"
-    - name: "body"
-      type:
-        primitive: "STR"
-    config-name: "task.send-email.name"
-    description: "Sends an email notification"
+        struct: "order"
+    config-name: "task.process-order.name"
+    description: "Processes an incoming order and returns a confirmation"
     configs:
-    - key: "smtp.host"
-      description: "SMTP server hostname"
+    - key: "orders.service.url"
+      description: "Orders service base URL"
       sensitive: false
-      type: "STR"
-    - key: "smtp.port"
-      description: "SMTP server port"
+      type:
+        primitive: "STR"
+    - key: "orders.service.timeout-ms"
+      description: "Orders service request timeout"
       sensitive: false
-      type: "INT"
-      default-value: "587"
-    - key: "smtp.password"
-      description: "SMTP password"
+      type:
+        primitive: "INT"
+      default-value: "5000"
+    - key: "orders.service.api-key"
+      description: "Orders service API key"
       sensitive: true
-      type: "STR"
-structs: {}
+      type:
+        primitive: "STR"
+structs:
+  order:
+    config-name: "struct.order.name"
+    description: "A customer order"
+    properties:
+    - name: "productName"
+      type:
+        primitive: "STR"
+    - name: "quantity"
+      type:
+        primitive: "INT"
 ```
 
 ## Type Representation
 
-Every task input, task output, and struct property has a `type` field whose value is a **type
-descriptor object**. Exactly one of the following keys is present, and its presence identifies the
-kind of type (a `oneof`, mirroring the LittleHorse `TypeDefinition`):
+Every task input, task output, struct property, and task config has a `type` field whose value is a
+**type descriptor object**. Exactly one of the following keys is present, and its presence identifies
+the kind of type (a `oneof`, mirroring the LittleHorse `TypeDefinition`):
 
 | Key         | Meaning                                                                                  |
 |-------------|------------------------------------------------------------------------------------------|
 | `primitive` | A primitive `VariableType` name: `STR`, `INT`, `DOUBLE`, `BOOL`, `BYTES`, `TIMESTAMP`, `WF_RUN_ID`, `JSON_OBJ`, `JSON_ARR`. |
 | `struct`    | The referenced `@LHStructDef` struct's resolved name (a key under the top-level `structs` section). |
-| `array`     | An object with an `element` type descriptor.                                             |
+| `array`     | An object with an `elements` type descriptor.                                            |
 | `map`       | An object with `key` and `value` type descriptors.                                       |
 
-The `element`, `key`, and `value` values are themselves type descriptors, so arrays of structs, maps
+The `elements`, `key`, and `value` values are themselves type descriptors, so arrays of structs, maps
 of structs, and nested arrays/maps are all supported. Native `Array`/`Map` types come from
 `@LHType(isLHArray = true)` / `@LHType(isLHMap = true)` on task parameters/returns, or from array/`Map`
 struct properties.
@@ -241,7 +251,7 @@ tasks:
     - name: "numbers"
       type:
         array:
-          element:
+          elements:
             primitive: "INT"
     config-name: "task.sum-numbers.name"
     description: "Sums a native Array of integers"

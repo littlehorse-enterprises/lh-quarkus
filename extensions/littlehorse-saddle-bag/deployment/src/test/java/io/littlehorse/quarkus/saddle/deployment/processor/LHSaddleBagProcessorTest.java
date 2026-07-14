@@ -31,14 +31,21 @@ package io.littlehorse.quarkus.saddle.deployment.processor;
  */
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
 import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
-import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
-import io.littlehorse.quarkus.saddle.config.LHTaskMethodException;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Config;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Input;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Metadata;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Output;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Property;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Struct;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Task;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Type;
+import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
 import io.littlehorse.sdk.common.proto.InlineArrayDef;
 import io.littlehorse.sdk.common.proto.InlineMapDef;
@@ -54,11 +61,9 @@ import io.littlehorse.sdk.worker.LHType;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 class LHSaddleBagProcessorTest {
 
@@ -66,33 +71,32 @@ class LHSaddleBagProcessorTest {
 
     @Test
     void shouldProduceSameContentAcrossAllFormats() {
-        Map<String, Object> saddlebag = sampleSaddlebag();
+        SaddleBag saddlebag = sampleSaddlebag();
 
-        Map<String, Object> fromJson = roundTrip(saddlebag, Format.JSON);
-        Map<String, Object> fromYaml = roundTrip(saddlebag, Format.YAML);
-        Map<String, Object> fromProperties = roundTrip(saddlebag, Format.PROPERTIES);
+        SaddleBag fromJson = roundTrip(saddlebag, Format.JSON);
+        SaddleBag fromYaml = roundTrip(saddlebag, Format.YAML);
+        SaddleBag fromProperties = roundTrip(saddlebag, Format.PROPERTIES);
 
-        assertThat(normalize(fromJson))
-                .isEqualTo(normalize(fromYaml))
-                .isEqualTo(normalize(fromProperties))
-                .isEqualTo(normalize(saddlebag));
+        assertThat(fromJson).isEqualTo(saddlebag);
+        assertThat(fromYaml).isEqualTo(saddlebag);
+        assertThat(fromProperties).isEqualTo(saddlebag);
     }
 
     @Test
     void buildTypeEmitsPrimitiveType() {
-        Map<String, Object> type = processor.buildType(
+        Type type = processor.buildType(
                 TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR).build());
 
-        assertThat(type).containsExactly(entry("primitive", "STR"));
+        assertThat(type).isEqualTo(Type.primitive("STR"));
     }
 
     @Test
     void buildTypeEmitsStructType() {
-        Map<String, Object> type = processor.buildType(TypeDefinition.newBuilder()
+        Type type = processor.buildType(TypeDefinition.newBuilder()
                 .setStructDefId(StructDefId.newBuilder().setName("test-order"))
                 .build());
 
-        assertThat(type).containsExactly(entry("struct", "test-order"));
+        assertThat(type).isEqualTo(Type.struct("test-order"));
     }
 
     @Test
@@ -100,12 +104,11 @@ class LHSaddleBagProcessorTest {
         Method method =
                 TestOrderTask.class.getMethod("createOrder", String.class, TestAddress.class);
 
-        List<Map<String, Object>> params =
-                processor.handleTaskParameters(method, Map.of(), Map.of());
+        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
 
         assertThat(params).hasSize(2);
-        assertThat(params.get(0)).containsEntry("type", Map.of("primitive", "STR"));
-        assertThat(params.get(1)).containsEntry("type", Map.of("struct", "test-address"));
+        assertThat(params.get(0).type()).isEqualTo(Type.primitive("STR"));
+        assertThat(params.get(1).type()).isEqualTo(Type.struct("test-address"));
     }
 
     @Test
@@ -117,9 +120,9 @@ class LHSaddleBagProcessorTest {
                 LHTypeAdapterRegistry.empty(),
                 Map.of());
 
-        Map<String, Object> type = processor.buildType(signature.getReturnType().getReturnType());
+        Type type = processor.buildType(signature.getReturnType().getReturnType());
 
-        assertThat(type).containsExactly(entry("struct", "test-order"));
+        assertThat(type).isEqualTo(Type.struct("test-order"));
     }
 
     @Test
@@ -130,9 +133,9 @@ class LHSaddleBagProcessorTest {
                 LHTypeAdapterRegistry.empty(),
                 Map.of());
 
-        Map<String, Object> type = processor.buildType(signature.getReturnType().getReturnType());
+        Type type = processor.buildType(signature.getReturnType().getReturnType());
 
-        assertThat(type).containsExactly(entry("primitive", "INT"));
+        assertThat(type).isEqualTo(Type.primitive("INT"));
     }
 
     @Test
@@ -140,97 +143,76 @@ class LHSaddleBagProcessorTest {
         LHStructDefBuildItem item = new LHStructDefBuildItem(
                 TestOrder.class, new LHStructDefDescriptor(new OptionalAnnotation(null)));
 
-        List<Map<String, Object>> properties = processor.buildStruct(item, Map.of());
+        List<Property> properties = processor.buildStruct(item, Map.of());
 
-        assertThat(findProperty(properties, "productName"))
-                .containsEntry("type", Map.of("primitive", "STR"));
-        assertThat(findProperty(properties, "shippingAddress"))
-                .containsEntry("type", Map.of("struct", "test-address"));
+        assertThat(findProperty(properties, "productName").type()).isEqualTo(Type.primitive("STR"));
+        assertThat(findProperty(properties, "shippingAddress").type())
+                .isEqualTo(Type.struct("test-address"));
     }
 
     @Test
     void resolvesStructNamePlaceholdersInTaskParameters() throws Exception {
         Method method = TestPlaceholderTask.class.getMethod("handle", TestPlaceholderAddress.class);
 
-        List<Map<String, Object>> params = processor.handleTaskParameters(
+        List<Input> params = processor.handleTaskParameters(
                 method, Map.of(), Map.of("struct.ph-address.name", "resolved-address"));
 
         assertThat(params).hasSize(1);
-        assertThat(params.get(0)).containsEntry("type", Map.of("struct", "resolved-address"));
+        assertThat(params.get(0).type()).isEqualTo(Type.struct("resolved-address"));
     }
 
     @Test
     void buildTypeEmitsArrayType() {
-        Map<String, Object> type = processor.buildType(TypeDefinition.newBuilder()
+        Type type = processor.buildType(TypeDefinition.newBuilder()
                 .setInlineArrayDef(InlineArrayDef.newBuilder()
                         .setArrayType(
                                 TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR)))
                 .build());
 
-        assertThat(type)
-                .containsExactly(entry("array", Map.of("element", Map.of("primitive", "STR"))));
+        assertThat(type).isEqualTo(Type.array(Type.primitive("STR")));
     }
 
     @Test
     void buildTypeEmitsMapType() {
-        Map<String, Object> type = processor.buildType(TypeDefinition.newBuilder()
+        Type type = processor.buildType(TypeDefinition.newBuilder()
                 .setInlineMapDef(InlineMapDef.newBuilder()
                         .setKeyType(TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR))
                         .setValueType(
                                 TypeDefinition.newBuilder().setPrimitiveType(VariableType.INT)))
                 .build());
 
-        assertThat(type)
-                .containsExactly(entry(
-                        "map",
-                        Map.of(
-                                "key", Map.of("primitive", "STR"),
-                                "value", Map.of("primitive", "INT"))));
+        assertThat(type).isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
     }
 
     @Test
     void handleTaskParametersEmitsArrayOfPrimitives() throws Exception {
         Method method = TestCollectionTask.class.getMethod("consumeArray", Long[].class);
 
-        List<Map<String, Object>> params =
-                processor.handleTaskParameters(method, Map.of(), Map.of());
+        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
 
         assertThat(params).hasSize(1);
-        assertThat(params.get(0))
-                .containsEntry(
-                        "type", Map.of("array", Map.of("element", Map.of("primitive", "INT"))));
+        assertThat(params.get(0).type()).isEqualTo(Type.array(Type.primitive("INT")));
     }
 
     @Test
     void handleTaskParametersEmitsArrayOfStructs() throws Exception {
         Method method = TestCollectionTask.class.getMethod("consumeAddresses", TestAddress[].class);
 
-        List<Map<String, Object>> params =
-                processor.handleTaskParameters(method, Map.of(), Map.of());
+        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
 
         assertThat(params).hasSize(1);
-        assertThat(params.get(0))
-                .containsEntry(
-                        "type",
-                        Map.of("array", Map.of("element", Map.of("struct", "test-address"))));
+        assertThat(params.get(0).type()).isEqualTo(Type.array(Type.struct("test-address")));
     }
 
     @Test
     void handleTaskParametersEmitsMapType() throws Exception {
         Method method = TestCollectionTask.class.getMethod("consumeMap", Map.class);
 
-        List<Map<String, Object>> params =
-                processor.handleTaskParameters(method, Map.of(), Map.of());
+        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
 
         assertThat(params).hasSize(1);
-        assertThat(params.get(0))
-                .containsEntry(
-                        "type",
-                        Map.of(
-                                "map",
-                                Map.of(
-                                        "key", Map.of("primitive", "STR"),
-                                        "value", Map.of("primitive", "INT"))));
+        assertThat(params.get(0).type())
+                .isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
     }
 
     @Test
@@ -241,25 +223,22 @@ class LHSaddleBagProcessorTest {
                 LHTypeAdapterRegistry.empty(),
                 Map.of());
 
-        Map<String, Object> type = processor.buildType(signature.getReturnType().getReturnType());
+        Type type = processor.buildType(signature.getReturnType().getReturnType());
 
-        assertThat(type)
-                .containsExactly(entry("array", Map.of("element", Map.of("primitive", "INT"))));
+        assertThat(type).isEqualTo(Type.array(Type.primitive("INT")));
     }
 
     @Test
     void buildTaskExceptionsEmitsAnnotatedBusinessExceptions() throws Exception {
         Method method = TestExceptionTask.class.getMethod("charge", double.class);
 
-        List<Map<String, Object>> exceptions = processor.buildTaskExceptions(method);
+        List<SaddleBag.TaskException> exceptions = processor.buildTaskExceptions(method);
 
         assertThat(exceptions).hasSize(2);
-        assertThat(exceptions.get(0))
-                .containsEntry("name", "insufficient-funds")
-                .containsEntry("description", "Card balance too low");
-        assertThat(exceptions.get(1))
-                .containsEntry("name", "amount-too-large")
-                .containsEntry("description", "");
+        assertThat(exceptions.get(0).name()).isEqualTo("insufficient-funds");
+        assertThat(exceptions.get(0).description()).isEqualTo("Card balance too low");
+        assertThat(exceptions.get(1).name()).isEqualTo("amount-too-large");
+        assertThat(exceptions.get(1).description()).isEqualTo("");
     }
 
     @Test
@@ -274,134 +253,82 @@ class LHSaddleBagProcessorTest {
         LHStructDefBuildItem item = new LHStructDefBuildItem(
                 TestInventory.class, new LHStructDefDescriptor(new OptionalAnnotation(null)));
 
-        List<Map<String, Object>> properties = processor.buildStruct(item, Map.of());
+        List<Property> properties = processor.buildStruct(item, Map.of());
 
-        assertThat(findProperty(properties, "tags"))
-                .containsEntry(
-                        "type", Map.of("array", Map.of("element", Map.of("primitive", "STR"))));
-        assertThat(findProperty(properties, "counts"))
-                .containsEntry(
-                        "type",
-                        Map.of(
-                                "map",
-                                Map.of(
-                                        "key", Map.of("primitive", "STR"),
-                                        "value", Map.of("primitive", "INT"))));
+        assertThat(findProperty(properties, "tags").type())
+                .isEqualTo(Type.array(Type.primitive("STR")));
+        assertThat(findProperty(properties, "counts").type())
+                .isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
     }
 
-    private Map<String, Object> roundTrip(Map<String, Object> saddlebag, Format format) {
+    private SaddleBag roundTrip(SaddleBag saddlebag, Format format) {
         byte[] serialized = processor.serialize(saddlebag, format);
         System.out.println("Serialized " + format + ":\n" + new String(serialized) + "\n");
         return processor.deserialize(serialized, format);
     }
 
-    private Map<String, Object> sampleSaddlebag() {
-        Map<String, Object> root = new LinkedHashMap<>();
-        root.put("name", "example-saddle-bag");
-        root.put("title", "Example Saddle Bag");
-        root.put("author", "LittleHorse");
-        root.put("description", "An example saddle bag");
-        root.put("version", "1.2-SNAPSHOT");
+    private SaddleBag sampleSaddlebag() {
+        Metadata metadata = new Metadata(
+                List.of("test", "example"), "MIT", "https://example.com/docs", null, null);
 
-        Map<String, Object> metadata = new LinkedHashMap<>();
-        metadata.put("tags", List.of("test", "example"));
-        metadata.put("licence", "MIT");
-        metadata.put("documentation-url", "https://example.com/docs");
-        root.put("metadata", metadata);
+        Task addNumbers = new Task(
+                new Output(Type.primitive("INT")),
+                List.of(
+                        new Input("a", Type.primitive("INT")),
+                        new Input("b", Type.primitive("INT"))),
+                null,
+                "task.add-numbers.name",
+                "Adds two integers and returns their sum",
+                null);
 
-        Map<String, Object> tasks = new LinkedHashMap<>();
+        Task notification = new Task(
+                new Output(Type.primitive("STR")),
+                null,
+                null,
+                "task.send-notification.name",
+                "Sends a notification",
+                List.of(
+                        new Config(
+                                "notification.service.url",
+                                "Notification service base URL",
+                                false,
+                                Type.primitive("STR"),
+                                null),
+                        new Config(
+                                "notification.service.api-key",
+                                "API key for the notification service",
+                                true,
+                                Type.primitive("STR"),
+                                "5000")));
 
-        Map<String, Object> addNumbers = new LinkedHashMap<>();
-        addNumbers.put("output", Map.of("type", "INT"));
-        addNumbers.put(
-                "inputs",
-                List.of(Map.of("name", "a", "type", "INT"), Map.of("name", "b", "type", "INT")));
-        addNumbers.put("config-name", "task.add-numbers.name");
-        addNumbers.put("description", "Adds two integers and returns their sum");
+        Map<String, Task> tasks = new LinkedHashMap<>();
         tasks.put("add-numbers", addNumbers);
-
-        Map<String, Object> notification = new LinkedHashMap<>();
-        notification.put("output", Map.of("type", "STR"));
-        notification.put("config-name", "task.send-notification.name");
-        notification.put("description", "Sends a notification");
-
-        List<Map<String, Object>> configs = new ArrayList<>();
-        Map<String, Object> urlConfig = new LinkedHashMap<>();
-        urlConfig.put("key", "notification.service.url");
-        urlConfig.put("description", "Notification service base URL");
-        urlConfig.put("sensitive", false);
-        urlConfig.put("type", LHTaskConfigType.STR);
-        configs.add(urlConfig);
-        Map<String, Object> apiKeyConfig = new LinkedHashMap<>();
-        apiKeyConfig.put("key", "notification.service.api-key");
-        apiKeyConfig.put("description", "API key for the notification service");
-        apiKeyConfig.put("sensitive", true);
-        apiKeyConfig.put("default-value", "5000");
-        apiKeyConfig.put("type", LHTaskConfigType.STR);
-        configs.add(apiKeyConfig);
-        notification.put("configs", configs);
         tasks.put("send-notification", notification);
 
-        root.put("tasks", tasks);
-
-        Map<String, Object> structs = new LinkedHashMap<>();
-        Map<String, Object> order = new LinkedHashMap<>();
-        order.put("config-name", "struct.order.name");
-        order.put("description", "Represents a customer order");
-        order.put(
-                "properties",
+        Struct order = new Struct(
+                "struct.order.name",
+                "Represents a customer order",
                 List.of(
-                        Map.of("name", "price", "type", "DOUBLE"),
-                        Map.of("name", "quantity", "type", "INT")));
+                        new Property("price", Type.primitive("DOUBLE")),
+                        new Property("quantity", Type.primitive("INT"))));
+
+        Map<String, Struct> structs = new LinkedHashMap<>();
         structs.put("order", order);
-        root.put("structs", structs);
 
-        return root;
+        return new SaddleBag(
+                "example-saddle-bag",
+                "Example Saddle Bag",
+                "LittleHorse",
+                "An example saddle bag",
+                "1.2-SNAPSHOT",
+                metadata,
+                tasks,
+                structs);
     }
 
-    /**
-     * Normalizes a deserialized structure so the contents can be compared across formats. The
-     * properties format is untyped (booleans and numbers become strings) and represents lists as
-     * index-keyed maps, so scalars are coerced to strings and numeric-keyed maps are turned into
-     * lists.
-     */
-    private Object normalize(Object value) {
-        if (value instanceof Map<?, ?> map) {
-            if (!map.isEmpty() && map.keySet().stream().allMatch(this::isInteger)) {
-                List<Object> list = new ArrayList<>();
-                Map<Integer, Object> byIndex = new TreeMap<>();
-                map.forEach((key, element) ->
-                        byIndex.put(Integer.parseInt(String.valueOf(key)), element));
-                byIndex.values().forEach(element -> list.add(normalize(element)));
-                return list;
-            }
-            Map<String, Object> normalized = new LinkedHashMap<>();
-            map.forEach((key, element) -> normalized.put(String.valueOf(key), normalize(element)));
-            return normalized;
-        }
-        if (value instanceof List<?> list) {
-            List<Object> normalized = new ArrayList<>();
-            list.forEach(element -> normalized.add(normalize(element)));
-            return normalized;
-        }
-        return String.valueOf(value);
-    }
-
-    private boolean isInteger(Object key) {
-        if (!(key instanceof String string)) {
-            return false;
-        }
-        try {
-            Integer.parseInt(string);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private Map<String, Object> findProperty(List<Map<String, Object>> properties, String name) {
+    private Property findProperty(List<Property> properties, String name) {
         return properties.stream()
-                .filter(property -> name.equals(property.get("name")))
+                .filter(property -> name.equals(property.name()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Property not found: " + name));
     }

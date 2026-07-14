@@ -2,7 +2,7 @@ package io.littlehorse.tasks;
 
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
-import io.littlehorse.quarkus.saddle.config.LHTaskMethodException;
+import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.WorkerContext;
