@@ -10,7 +10,7 @@ Quarkus extensions for the [LittleHorse](https://littlehorse.io/) workflow engin
 - `extensions/littlehorse-quarkus-restful-gateway/` — RESTful gateway extension (runtime + deployment)
 - `extensions/littlehorse-saddle-bag/` — Saddle Bag extension for self-describing task worker Docker images (runtime + deployment)
 - `extras/restful-gateway/` — Standalone Quarkus app using the gateway extension
-- `examples/` — Usage examples (basic, child-workflow, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
+- `examples/` — Usage examples (arrays-maps, basic, child-workflow, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
 - `integration-tests/` — End-to-end tests against a running LittleHorse instance, split per concern into subprojects: `core/` (base extension, project `integration-tests-core`), `restful-gateway/` (gateway extension, project `integration-tests-restful-gateway`), `saddle-bag/` (Saddle Bag extension, project `integration-tests-saddle-bag`)
 
 Each extension follows the Quarkus extension structure: `deployment/` for build-time processors, `runtime/` for CDI beans and recorders.
@@ -49,7 +49,7 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 - Quarkus version: `3.37.0`, LittleHorse SDK: `1.2-SNAPSHOT`
 - Dependency versions are centralized in `gradle.properties`
 - Extension projects: `quarkus`, `quarkus-restful-gateway`, `saddle-bag`
-- Example projects: `user-tasks`, `reactive`, `rest`, `basic`, `child-workflow`, `structs`, `type-adapter`, `saddle-bag`
+- Example projects: `user-tasks`, `reactive`, `rest`, `basic`, `child-workflow`, `structs`, `type-adapter`, `saddle-bag`, `arrays-maps`
 - Use `@LHTaskMethod` and related annotations for task/workflow registration
 - Use `@LHTaskConfig` to declare required external configurations for Saddle Bag manifests
 - Deployment processors scan annotations at build time — runtime beans are produced via recorders

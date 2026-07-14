@@ -28,6 +28,7 @@
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
 - [Structs](examples/structs): How to use and register structs.
 - [Type Adapters](examples/type-adapter): How to use and register type adapters.
+- [Arrays & Maps](examples/arrays-maps): How to use native `Array` and `Map` types.
 
 You can find additional rich documentation [here](https://littlehorse.io/docs/integrations/lh-quarkus/concepts).
 
