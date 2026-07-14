@@ -33,16 +33,20 @@ jobs:
               exit 1
           fi
 
+  format:
+    uses: ./.github/workflows/reusable-format.yml
+
   tests:
     needs:
       - prepare
+      - format
     strategy:
       matrix:
         project:
           - littlehorse-quarkus
           - littlehorse-quarkus-restful-gateway
           - littlehorse-saddle-bag
-    uses: ./.github/workflows/tests.yml
+    uses: ./.github/workflows/reusable-tests.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
       project: ${{ matrix.project }}
@@ -76,6 +80,6 @@ jobs:
       - prepare
       - tests
       - publish
-    uses: ./.github/workflows/restful-gateway.yml
+    uses: ./.github/workflows/reusable-docker-build-restful-gateway.yml
     with:
       version: ${{ needs.prepare.outputs.version }}

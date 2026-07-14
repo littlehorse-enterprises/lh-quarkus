@@ -1,4 +1,4 @@
-name: restful-gateway
+name: reusable-docker-build-restful-gateway
 run-name: Publishing RESTful Gateway for "${{ github.head_ref }}"
 on:
   workflow_call:
