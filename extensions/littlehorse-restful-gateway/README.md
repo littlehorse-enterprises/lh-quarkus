@@ -82,14 +82,14 @@ A RESTful Gateway for [LittleHorse](https://littlehorse.io/).
 
 # Installation
 
-<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus-restful-gateway"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-quarkus-restful-gateway?label=latest"></a>
+<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-restful-gateway"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-restful-gateway?label=latest"></a>
 
 This extension is available at [Maven Central](https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus).
 
 Gradle:
 
 ```groovy
-implementation "io.littlehorse:littlehorse-quarkus-restful-gateway:${lhVersion}"
+implementation "io.littlehorse:littlehorse-restful-gateway:${lhVersion}"
 ```
 
 Maven:
@@ -97,7 +97,7 @@ Maven:
 ```xml
 <dependency>
     <groupId>io.littlehorse</groupId>
-    <artifactId>littlehorse-quarkus-restful-gateway</artifactId>
+    <artifactId>littlehorse-restful-gateway</artifactId>
     <version>${lhVersion}</version>
 </dependency>
 ```

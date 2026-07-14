@@ -1,24 +1,13 @@
-plugins {
-    id "io.quarkus.extension"
-}
-
-quarkusExtension {
-    deploymentModule = "littlehorse-quarkus-restful-gateway-deployment"
-}
-
 dependencies {
     implementation platform("io.quarkus:quarkus-bom:${quarkusVersion}")
-    implementation "io.quarkus:quarkus-core"
-    implementation "io.quarkus:quarkus-arc"
-    implementation "io.quarkus:quarkus-rest"
-    implementation "io.quarkus:quarkus-rest-jackson"
-    implementation "io.quarkus:quarkus-hibernate-validator"
-    implementation "org.apache.commons:commons-lang3"
-    compileOnly "io.quarkus:quarkus-smallrye-openapi"
-    implementation project(":littlehorse-quarkus")
-    testImplementation "io.quarkus:quarkus-junit5"
-    testImplementation "io.quarkus:quarkus-junit5-mockito"
-    testImplementation "io.rest-assured:rest-assured"
+    implementation "io.quarkus:quarkus-core-deployment"
+    implementation "io.quarkus:quarkus-arc-deployment"
+    implementation "io.quarkus:quarkus-rest-deployment"
+    implementation "io.quarkus:quarkus-rest-jackson-deployment"
+    implementation "io.quarkus:quarkus-hibernate-validator-deployment"
+    implementation "io.quarkus:quarkus-smallrye-openapi-spi"
+    implementation project(":littlehorse-restful-gateway")
+    implementation project(":littlehorse-quarkus-deployment")
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "net.datafaker:datafaker:${datafakerVersion}"
 }
@@ -27,7 +16,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = group
-            artifactId = "littlehorse-quarkus-restful-gateway"
+            artifactId = "littlehorse-restful-gateway-deployment"
             version = version
             from components.java
             artifact sourcesJar

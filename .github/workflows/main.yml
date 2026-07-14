@@ -44,7 +44,7 @@ jobs:
       matrix:
         project:
           - littlehorse-quarkus
-          - littlehorse-quarkus-restful-gateway
+          - littlehorse-restful-gateway
           - littlehorse-saddle-bag
     uses: ./.github/workflows/reusable-tests.yml
     with:

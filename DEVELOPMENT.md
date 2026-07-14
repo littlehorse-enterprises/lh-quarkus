@@ -47,13 +47,13 @@ Stop LH:
 Execute tests:
 
 ```shell
-./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-quarkus-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest
+./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest
 ```
 
 Execute native tests:
 
 ```shell
-./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-quarkus-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
+./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
 ```
 
 ## Publish Locally

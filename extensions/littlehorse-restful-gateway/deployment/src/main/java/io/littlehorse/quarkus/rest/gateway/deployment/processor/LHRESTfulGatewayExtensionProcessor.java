@@ -22,7 +22,7 @@ public class LHRESTfulGatewayExtensionProcessor {
 
     @BuildStep
     FeatureBuildItem setFeatureName() {
-        return new FeatureBuildItem("littlehorse-quarkus-restful-gateway");
+        return new FeatureBuildItem("littlehorse-restful-gateway");
     }
 
     @BuildStep
