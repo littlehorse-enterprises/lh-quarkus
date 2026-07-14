@@ -214,7 +214,8 @@ public class LHSaddleBagProcessor {
                 metadataConfig.licence(),
                 metadataConfig.documentationUrl(),
                 metadataConfig.iconUrl(),
-                metadataConfig.supportEmail());
+                metadataConfig.supportEmail(),
+                metadataConfig.dockerImage());
     }
 
     private Map<String, Task> buildSaddleBagTasks(

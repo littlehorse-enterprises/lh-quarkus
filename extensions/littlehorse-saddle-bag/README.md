@@ -69,6 +69,7 @@ quarkus.littlehorse.saddle.bag.metadata.licence=Apache-2.0
 quarkus.littlehorse.saddle.bag.metadata.documentation-url=https://example.com/docs
 quarkus.littlehorse.saddle.bag.metadata.icon-url=https://example.com/icon.png
 quarkus.littlehorse.saddle.bag.metadata.support-email=support@example.com
+quarkus.littlehorse.saddle.bag.metadata.docker-image=ghcr.io/example-org/order-service
 ```
 
 The extension automatically scans all `@LHTask` classes and `@LHStructDef` structs, generating a manifest during the Quarkus build augmentation phase.
@@ -201,6 +202,7 @@ metadata:
   documentation-url: "https://example.com/docs"
   icon-url: "https://example.com/icon.png"
   support-email: "support@example.com"
+  docker-image: "ghcr.io/example-org/order-service"
 tasks:
   process-order:
     output:
@@ -450,6 +452,12 @@ Support contact email.
 
 * Type: string
 * Importance: low
+
+``quarkus.littlehorse.saddle.bag.metadata.docker-image``
+The Docker image that packages this saddle bag task worker.
+
+* Type: string
+* Importance: high
 
 ## Output Configurations
 

@@ -327,6 +327,9 @@ class LHSaddleBagProcessorTest {
                 "quarkus.littlehorse.saddle.bag.metadata.icon-url", "https://example.com/icon.png");
         properties.put(
                 "quarkus.littlehorse.saddle.bag.metadata.support-email", "support@example.com");
+        properties.put(
+                "quarkus.littlehorse.saddle.bag.metadata.docker-image",
+                "ghcr.io/example-org/order-service");
         properties.put("quarkus.littlehorse.saddle.bag.output.enable", "true");
         properties.put("quarkus.littlehorse.saddle.bag.output.format", "json");
         properties.put("quarkus.littlehorse.saddle.bag.output.path", "saddle-bag/");
@@ -388,7 +391,12 @@ class LHSaddleBagProcessorTest {
 
     private SaddleBag sampleSaddlebag() {
         Metadata metadata = new Metadata(
-                List.of("test", "example"), "MIT", "https://example.com/docs", null, null);
+                List.of("test", "example"),
+                "MIT",
+                "https://example.com/docs",
+                null,
+                null,
+                "ghcr.io/example-org/order-service");
 
         Task addNumbers = new Task(
                 new Output(Type.primitive("INT")),

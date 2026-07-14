@@ -28,7 +28,8 @@ public record SaddleBag(
             String licence,
             @JsonProperty("documentation-url") String documentationUrl,
             @JsonProperty("icon-url") String iconUrl,
-            @JsonProperty("support-email") String supportEmail) {}
+            @JsonProperty("support-email") String supportEmail,
+            @JsonProperty("docker-image") String dockerImage) {}
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Task(

@@ -32,6 +32,8 @@ class SaddleBagManifestTest {
         JsonNode metadata = SaddleBagManifest.read().path("metadata");
 
         assertThat(metadata.path("licence").asText()).isEqualTo("Apache-2.0");
+        assertThat(metadata.path("docker-image").asText())
+                .isEqualTo("ghcr.io/littlehorse/integration-tests-saddle-bag");
         assertThat(SaddleBagManifest.texts(metadata.path("tags"))).contains("test", "integration");
     }
 }
