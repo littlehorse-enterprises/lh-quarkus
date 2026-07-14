@@ -127,6 +127,38 @@ public class EmailNotificationTask {
 
 The declared configurations appear in the generated manifest under the `configs` field for each task.
 
+## Declaring Business Exceptions
+
+Use the `@LHTaskMethodException` annotation on an `@LHTaskMethod` to declare the business `EXCEPTION`s that the
+task may throw. Business exceptions are thrown from your task code via `LHTaskException` (or a subclass) and can be
+caught by a `WfSpec`. Declaring them lets consumers of the saddle bag know which exceptions to handle. See the
+[exception handling docs](https://littlehorse.io/docs/server/concepts/exception-handling) for more details.
+
+```java
+@LHTask
+public class PaymentTask {
+
+    @LHTaskMethod(value = "${task.charge-credit-card.name}", description = "Charges a credit card")
+    @LHTaskMethodException(name = "insufficient-funds", description = "Card balance is too low")
+    @LHTaskMethodException(name = "amount-too-large", description = "Charge exceeds $10,000")
+    public void chargeCreditCard(String userId, double amount) {
+        if (amount > 10000) {
+            throw new LHTaskException("amount-too-large", "Cannot charge more than $10,000");
+        }
+        // ...
+    }
+}
+```
+
+### `@LHTaskMethodException` Attributes
+
+| Attribute     | Type     | Default | Description                                                            |
+|---------------|----------|---------|-----------------------------------------------------------------------|
+| `name`        | `String` | —       | The business exception name in kebab-case (required)                  |
+| `description` | `String` | `""`    | Human-readable description of when and why the exception is thrown     |
+
+The declared exceptions appear in the generated manifest under the `exceptions` field for each task.
+
 # Generated Output
 
 The extension generates:

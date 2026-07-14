@@ -38,6 +38,7 @@ import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
+import io.littlehorse.quarkus.saddle.config.LHTaskMethodException;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
 import io.littlehorse.sdk.common.proto.InlineArrayDef;
 import io.littlehorse.sdk.common.proto.InlineMapDef;
@@ -247,6 +248,28 @@ class LHSaddleBagProcessorTest {
     }
 
     @Test
+    void buildTaskExceptionsEmitsAnnotatedBusinessExceptions() throws Exception {
+        Method method = TestExceptionTask.class.getMethod("charge", double.class);
+
+        List<Map<String, Object>> exceptions = processor.buildTaskExceptions(method);
+
+        assertThat(exceptions).hasSize(2);
+        assertThat(exceptions.get(0))
+                .containsEntry("name", "insufficient-funds")
+                .containsEntry("description", "Card balance too low");
+        assertThat(exceptions.get(1))
+                .containsEntry("name", "amount-too-large")
+                .containsEntry("description", "");
+    }
+
+    @Test
+    void buildTaskExceptionsEmitsEmptyListWhenNotAnnotated() throws Exception {
+        Method method = TestOrderTask.class.getMethod("addNumbers", int.class, int.class);
+
+        assertThat(processor.buildTaskExceptions(method)).isEmpty();
+    }
+
+    @Test
     void buildStructEmitsArrayAndMapProperties() throws Exception {
         LHStructDefBuildItem item = new LHStructDefBuildItem(
                 TestInventory.class, new LHStructDefDescriptor(new OptionalAnnotation(null)));
@@ -442,6 +465,14 @@ class LHSaddleBagProcessorTest {
         public int addNumbers(int a, int b) {
             return a + b;
         }
+    }
+
+    public static class TestExceptionTask {
+
+        @LHTaskMethod("charge")
+        @LHTaskMethodException(name = "insufficient-funds", description = "Card balance too low")
+        @LHTaskMethodException(name = "amount-too-large")
+        public void charge(double amount) {}
     }
 
     @LHStructDef("${struct.ph-address.name}")

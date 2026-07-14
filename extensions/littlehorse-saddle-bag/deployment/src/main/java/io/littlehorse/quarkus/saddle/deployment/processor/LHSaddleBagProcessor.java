@@ -19,6 +19,7 @@ import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleCon
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
+import io.littlehorse.quarkus.saddle.config.LHTaskMethodException;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
 import io.littlehorse.sdk.common.proto.TypeDefinition;
 import io.littlehorse.sdk.common.proto.VariableType;
@@ -258,9 +259,29 @@ public class LHSaddleBagProcessor {
                 if (!inputs.isEmpty()) {
                     task.put("inputs", inputs);
                 }
+
+                List<Map<String, Object>> exceptions = buildTaskExceptions(method);
+                if (!exceptions.isEmpty()) {
+                    task.put("exceptions", exceptions);
+                }
             }
         }
         return task;
+    }
+
+    List<Map<String, Object>> buildTaskExceptions(Method method) {
+        List<Map<String, Object>> exceptions = new ArrayList<>();
+
+        LHTaskMethodException[] annotations =
+                method.getAnnotationsByType(LHTaskMethodException.class);
+        for (LHTaskMethodException annotation : annotations) {
+            Map<String, Object> exception = new LinkedHashMap<>();
+            exception.put("name", annotation.name());
+            exception.put("description", annotation.description());
+            exceptions.add(exception);
+        }
+
+        return exceptions;
     }
 
     private Map<String, Object> buildSaddleBagStructs(
