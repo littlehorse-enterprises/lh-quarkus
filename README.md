@@ -13,6 +13,9 @@
   * [Table of Content](#table-of-content)
   * [Examples](#examples)
   * [Extensions](#extensions)
+    * [LittleHorse Quarkus](#littlehorse-quarkus)
+    * [LittleHorse Quarkus Saddle Bag](#littlehorse-quarkus-saddle-bag)
+    * [LittleHorse Quarkus RESTful Gateway](#littlehorse-quarkus-restful-gateway)
   * [Versioning](#versioning)
   * [Development](#development)
   * [License](#license)
@@ -28,21 +31,34 @@
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
 - [Structs](examples/structs): How to use and register structs.
 - [Type Adapters](examples/type-adapter): How to use and register type adapters.
+- [Arrays & Maps](examples/arrays-maps): How to use native `Array` and `Map` types.
 
 You can find additional rich documentation [here](https://littlehorse.io/docs/integrations/lh-quarkus/concepts).
 
 ## Extensions
 
-<a href="https://central.sonatype.com/search?q=littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/badge/central-orange?logo=sonatype&logoColor=white"></a>
-<a href="https://github.com/orgs/littlehorse-enterprises/packages?repo_name=lh-quarkus"><img alt="GitHub" src="https://img.shields.io/badge/ghcr-orange?logo=docker&logoColor=white"></a>
+### LittleHorse Quarkus
 
-- [LittleHorse Quarkus](extensions/littlehorse-quarkus): It's the base extension which allows you to develop on Quarkus and LittleHorse. Check the configurations at [LittleHorse Quarkus Configurations](extensions/littlehorse-quarkus#configurations).
-- [LittleHorse Quarkus RESTful Gateway](extensions/littlehorse-quarkus-restful-gateway): RESTful gateway for LittleHorse. This gateway allows you to interact with [LittleHorse](https://littlehorse.io/) in a RESTful style.
-Check the configurations at [LittleHorse RESTful Gateway Configurations](extensions/littlehorse-quarkus-restful-gateway#configurations).
-  ```shell
-  docker pull ghcr.io/littlehorse-enterprises/lh-restful-gateway:latest
-  ```
-- [LittleHorse Quarkus Saddle Bag](extensions/littlehorse-saddle-bag): For creating saddle bags. Check the configurations at [LittleHorse Saddle Bag Configurations](extensions/littlehorse-saddle-bag#configurations).
+<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-quarkus"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-quarkus?label=central&logo=sonatype"></a>
+
+It's the base extension which allows you to develop on Quarkus and LittleHorse. Check the configurations at [LittleHorse Quarkus Configurations](extensions/littlehorse-quarkus#configurations).
+
+### LittleHorse Quarkus Saddle Bag
+
+<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-saddle-bag"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-saddle-bag?label=central&logo=sonatype"></a>
+
+For creating saddle bags. Check the configurations at [LittleHorse Saddle Bag Configurations](extensions/littlehorse-saddle-bag#configurations).
+
+### LittleHorse Quarkus RESTful Gateway
+
+<a href="https://central.sonatype.com/artifact/io.littlehorse/littlehorse-restful-gateway"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.littlehorse/littlehorse-restful-gateway?label=central&logo=sonatype"></a>
+<a href="https://github.com/littlehorse-enterprises/lh-quarkus/pkgs/container/lh-restful-gateway"><img alt="GitHub Container Registry" src="https://img.shields.io/badge/ghcr-lh--restful--gateway-blue?logo=docker&logoColor=white"></a>
+
+RESTful gateway for LittleHorse. This gateway allows you to interact with [LittleHorse](https://littlehorse.io/) in a RESTful style. Check the configurations at [LittleHorse RESTful Gateway Configurations](extensions/littlehorse-restful-gateway#configurations).
+
+```shell
+docker pull ghcr.io/littlehorse-enterprises/lh-restful-gateway:latest
+```
 
 ## Versioning
 
@@ -52,6 +68,7 @@ These extensions follow the same versioning conventions as [LittleHorse](https:/
 |-------------------------------|-----------------|
 | `1.0.*`                       | `3.32.*`        |
 | `1.1.*`                       | `3.35.*`        |
+| `1.2.*`                       | `3.37.*`        |
 
 ## Development
 

@@ -63,6 +63,9 @@ public interface LHSaddleBagBuildtimeConfig {
 
                 @WithName("support-email")
                 String supportEmail();
+
+                @WithName("docker-image")
+                String dockerImage();
             }
         }
     }

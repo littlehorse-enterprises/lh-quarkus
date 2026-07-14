@@ -11,7 +11,7 @@ dependencies {
     implementation "io.quarkus:quarkus-grpc-common"
     implementation "io.quarkus:quarkus-core"
     implementation "io.quarkus:quarkus-arc"
-    implementation "io.quarkiverse.jgrapht:quarkus-jgrapht:${jgraphtVersion}"
+    implementation "org.jgrapht:jgrapht-core:${jgraphtVersion}"
     compileOnly "io.quarkus:quarkus-smallrye-health"
     api("io.littlehorse:littlehorse-client:${version}") {
         changing = true

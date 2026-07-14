@@ -47,13 +47,13 @@ Stop LH:
 Execute tests:
 
 ```shell
-./gradlew integration-tests:quarkusIntTest
+./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest
 ```
 
 Execute native tests:
 
 ```shell
-./gradlew integration-tests:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
+./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
 ```
 
 ## Publish Locally
@@ -69,6 +69,25 @@ Execute native tests:
 ```shell
 ./gradlew spotlessApply
 ```
+
+## Saddle Bag
+
+Run the example:
+
+```shell
+./gradlew example-saddle-bag:quarkusDev
+```
+
+Generate the saddle bag manifest:
+
+```shell
+./gradlew example-saddle-bag:build
+```
+
+> The manifest is generated under the example's `build/saddle-bag/` directory.
+
+Saddle bag Docker images are built and published with the
+[publish-saddle-bag](https://github.com/littlehorse-enterprises/publish-saddle-bag) GitHub Action.
 
 ## RESTful Gateway
 

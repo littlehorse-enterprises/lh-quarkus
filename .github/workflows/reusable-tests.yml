@@ -1,0 +1,53 @@
+name: reusable-tests
+run-name: Test "${{ inputs.project }}" on branch "${{ github.head_ref }}"
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      project:
+        required: true
+        type: string
+
+env:
+  ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "corretto"
+          java-version: "25"
+      - name: Unit Tests
+        run: >-
+          ./gradlew -x spotlessJavaCheck
+          :${{ inputs.project }}:test
+          :${{ inputs.project }}-deployment:test
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs:
+      - tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "graalvm"
+          java-version: "25"
+      - name: Jar Tests
+        run: ./gradlew integration-tests-${{ inputs.project }}:quarkusIntTest
+      - name: Native Tests
+        run: >-
+          ./gradlew
+          integration-tests-${{ inputs.project }}:quarkusIntTest
+          -Dquarkus.native.enabled=true
+          -Dquarkus.package.jar.enabled=false
+          -Dquarkus.native.container-build=false

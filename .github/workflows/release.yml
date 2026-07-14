@@ -19,12 +19,23 @@ jobs:
         id: set_tag
         run: echo "tag=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v//p')" >> $GITHUB_OUTPUT
 
+  format:
+    uses: ./.github/workflows/reusable-format.yml
+
   tests:
     needs:
       - prepare
-    uses: ./.github/workflows/tests.yml
+      - format
+    strategy:
+      matrix:
+        project:
+          - littlehorse-quarkus
+          - littlehorse-restful-gateway
+          - littlehorse-saddle-bag
+    uses: ./.github/workflows/reusable-tests.yml
     with:
       version: ${{ needs.prepare.outputs.tag }}
+      project: ${{ matrix.project }}
 
   publish:
     runs-on: ubuntu-latest
@@ -72,10 +83,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -F CHANGELOG.md
 
-  restful-gateway:
+  docker-build-restful-gateway:
     needs:
       - prepare
       - publish
-    uses: ./.github/workflows/restful-gateway.yml
+    uses: ./.github/workflows/reusable-docker-build-restful-gateway.yml
     with:
       version: ${{ needs.prepare.outputs.tag }}

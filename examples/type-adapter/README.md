@@ -30,7 +30,7 @@ public class UUIDTypeAdapter implements LHStringAdapter<UUID> {
 Setup:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
 Execute it:

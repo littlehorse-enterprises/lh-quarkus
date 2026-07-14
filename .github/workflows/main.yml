@@ -33,12 +33,23 @@ jobs:
               exit 1
           fi
 
+  format:
+    uses: ./.github/workflows/reusable-format.yml
+
   tests:
     needs:
       - prepare
-    uses: ./.github/workflows/tests.yml
+      - format
+    strategy:
+      matrix:
+        project:
+          - littlehorse-quarkus
+          - littlehorse-restful-gateway
+          - littlehorse-saddle-bag
+    uses: ./.github/workflows/reusable-tests.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
+      project: ${{ matrix.project }}
 
   publish:
     needs:
@@ -64,43 +75,11 @@ jobs:
           ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
         run: ./gradlew publishToSonatype
 
-  restful-gateway:
+  docker-build-restful-gateway:
     needs:
       - prepare
       - tests
-    env:
-      ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.version }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: "graalvm"
-          java-version: "25"
-
-      - name: Build Jar
-        run: ./gradlew restful-gateway:build
-
-      - name: Build Native
-        run: >
-          ./gradlew restful-gateway:build
-          -Dquarkus.native.enabled=true
-          -Dquarkus.package.runner-suffix=-run
-          -Dquarkus.package.output-name=quarkus
-          -Dquarkus.package.jar.enabled=false
-          -Dquarkus.native.container-build=false
-
-      - name: Build and Publish
-        uses: littlehorse-enterprises/publish-image@v1
-        with:
-          image-name: lh-restful-gateway
-          dockerfile: ./restful-gateway/Dockerfile
-          context: ./restful-gateway
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          ghcr-root: true
-          tags: |
-            type=raw,value=latest,enable=false
-            type=raw,value=${{ needs.prepare.outputs.version }},enable=true
+      - publish
+    uses: ./.github/workflows/reusable-docker-build-restful-gateway.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}

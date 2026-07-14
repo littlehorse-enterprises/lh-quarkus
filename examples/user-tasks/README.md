@@ -22,7 +22,7 @@ public class ApproveForm {
 Setup:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
 Execute it:

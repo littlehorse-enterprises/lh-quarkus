@@ -58,7 +58,7 @@ public void myTask(Person person) {
 Setup:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
 Execute it:

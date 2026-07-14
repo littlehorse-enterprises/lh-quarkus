@@ -1,0 +1,120 @@
+package io.littlehorse.test;
+
+import static io.restassured.RestAssured.given;
+
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+
+import io.littlehorse.common.ContainersTestResource;
+import io.quarkus.test.common.QuarkusTestResource;
+import io.quarkus.test.junit.QuarkusIntegrationTest;
+import io.restassured.response.Response;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+
+@QuarkusIntegrationTest
+@QuarkusTestResource(ContainersTestResource.class)
+class RESTfulGatewayTaskDefTest {
+
+    @Test
+    void shouldGetTaskDefFromTaskDefName() {
+        String name = "greetings";
+        given().pathParam("tenant", "default")
+                .pathParam("name", name)
+                .when()
+                .get("/gateway/tenants/{tenant}/task-defs/{name}")
+                .then()
+                .statusCode(200)
+                .body("id.name", is(name))
+                .log()
+                .all();
+    }
+
+    @Test
+    void shouldGetTaskDefWorkersFromTaskDefName() {
+        String name = "greetings";
+        given().pathParam("tenant", "default")
+                .pathParam("name", name)
+                .when()
+                .get("/gateway/tenants/{tenant}/task-defs/{name}/workers")
+                .then()
+                .statusCode(200)
+                .body("id.taskDefId.name", is(name))
+                .body("taskWorkers.size()", is(1))
+                .log()
+                .all();
+    }
+
+    @Test
+    void shouldNotFoundTaskDef() {
+        given().pathParam("tenant", "default")
+                .pathParam("name", "not-a-task")
+                .when()
+                .get("/gateway/tenants/{tenant}/task-defs/{name}")
+                .then()
+                .statusCode(404)
+                .log()
+                .all();
+    }
+
+    @Test
+    void shouldSearchAllTaskDef() {
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> given().pathParam("tenant", "default")
+                        .queryParam("limit", 50)
+                        .when()
+                        .get("/gateway/tenants/{tenant}/task-defs")
+                        .then()
+                        .statusCode(200)
+                        .body("results", hasSize(11))
+                        .body("bookmark", is(nullValue()))
+                        .body("results[0].name", is("build-person"))
+                        .body("results[1].name", is("count-map"))
+                        .body("results[2].name", is("describe-person"))
+                        .body("results[3].name", is("echo-uuid"))
+                        .body("results[4].name", is("get-uuid"))
+                        .body("results[5].name", is("greetings"))
+                        .body("results[6].name", is("print"))
+                        .body("results[7].name", is("return-json-array"))
+                        .body("results[8].name", is("return-json-list"))
+                        .body("results[9].name", is("return-json-object"))
+                        .body("results[10].name", is("sum-array")));
+    }
+
+    @Test
+    void shouldSearchTaskDefWithBookmark() {
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> {
+                    Response getFirstObject = given().pathParam("tenant", "default")
+                            .queryParam("limit", 1)
+                            .when()
+                            .get("/gateway/tenants/{tenant}/task-defs");
+                    String bookmark = getFirstObject.jsonPath().getString("bookmark");
+
+                    getFirstObject
+                            .then()
+                            .statusCode(200)
+                            .body("results", hasSize(1))
+                            .body("results[0].name", is("build-person"))
+                            .body("bookmark", is(notNullValue()));
+
+                    given().pathParam("tenant", "default")
+                            .queryParam("limit", 1)
+                            .queryParam("bookmark", bookmark)
+                            .when()
+                            .get("/gateway/tenants/{tenant}/task-defs")
+                            .then()
+                            .statusCode(200)
+                            .body("results", hasSize(1))
+                            .body("bookmark", is(notNullValue()))
+                            .body("results[0].name", is("count-map"));
+                });
+    }
+}

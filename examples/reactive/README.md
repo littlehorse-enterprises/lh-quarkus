@@ -46,7 +46,7 @@ public class ReactiveService {
 Setup:
 
 ```shell
-docker compose up -d
+./gradlew dockerComposeUp
 ```
 
 Execute it:

@@ -159,7 +159,8 @@ class LHServiceProcessor {
         List<LHTaskMethodRecordable> taskMethodRecordables = taskMethodBuildItems.stream()
                 .map(LHTaskMethodBuildItem::toRecordable)
                 .toList();
-        recorder.registerAndStartTasks(taskMethodRecordables, shutdownContext);
+        recorder.registerAndStartTasks(
+                taskMethodRecordables, structDefRecordables, shutdownContext);
 
         List<LHUserTaskFormRecordable> userTaskFormRecordables = userTaskFromBuildItems.stream()
                 .map(LHUserTaskFormBuildItem::toRecordable)
@@ -169,7 +170,7 @@ class LHServiceProcessor {
         List<LHWorkflowRecordable> workflowRecordables = workflowBuildItems.stream()
                 .map(LHWorkflowBuildItem::toRecordable)
                 .toList();
-        recorder.registerLHWorkflows(workflowRecordables);
+        recorder.registerLHWorkflows(workflowRecordables, structDefRecordables);
 
         return new ServiceStartBuildItem("LittleHorse");
     }

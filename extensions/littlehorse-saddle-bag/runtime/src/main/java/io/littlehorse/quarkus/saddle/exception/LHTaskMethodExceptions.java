@@ -1,0 +1,15 @@
+package io.littlehorse.quarkus.saddle.exception;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Container annotation for repeatable {@link LHTaskMethodException} annotations.
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LHTaskMethodExceptions {
+    LHTaskMethodException[] value();
+}

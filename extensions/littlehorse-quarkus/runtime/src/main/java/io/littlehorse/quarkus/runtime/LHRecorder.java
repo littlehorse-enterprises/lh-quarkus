@@ -30,7 +30,9 @@ import jakarta.enterprise.inject.spi.CDI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Recorder
@@ -43,10 +45,24 @@ public class LHRecorder {
     }
 
     public void registerAndStartTasks(
-            List<LHTaskMethodRecordable> taskMethodRecordables, ShutdownContext shutdownContext) {
+            List<LHTaskMethodRecordable> taskMethodRecordables,
+            List<LHStructDefRecordable> structDefRecordables,
+            ShutdownContext shutdownContext) {
+        // Tasks may accept or return StructDef types whose names contain `${...}` placeholders, so
+        // the StructDef placeholder values must be available when resolving task parameter/return
+        // types.
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
+        Map<String, String> structPlaceholderValues =
+                computeStructPlaceholderValues(structDefRecordables);
         taskMethodRecordables.stream()
                 .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
-                .forEach(recordable -> registerAndStartTask(recordable, shutdownContext));
+                .forEach(recordable -> {
+                    Map<String, String> placeholderValues = new HashMap<>(structPlaceholderValues);
+                    placeholderValues.putAll(
+                            configEvaluator.expand(recordable.getName()).getMembers());
+                    recordable.setPlaceholderValues(placeholderValues);
+                    registerAndStartTask(recordable, shutdownContext);
+                });
     }
 
     private void registerAndStartTask(
@@ -70,7 +86,7 @@ public class LHRecorder {
                 getBean(recordable.getBeanClass()),
                 recordable.getName(),
                 config,
-                configEvaluator.expand(recordable.getName()).getMembers());
+                recordable.getPlaceholderValues());
         shutdownContext.addShutdownTask(new ShutdownContext.CloseRunnable(worker));
 
         if (registerTask) {
@@ -85,11 +101,22 @@ public class LHRecorder {
         }
     }
 
-    public void registerLHWorkflows(List<LHWorkflowRecordable> workflowRecordables) {
+    public void registerLHWorkflows(
+            List<LHWorkflowRecordable> workflowRecordables,
+            List<LHStructDefRecordable> structDefRecordables) {
+        // Workflows may reference StructDefs (e.g. via declareStruct) whose names contain `${...}`
+        // placeholders, so they must be resolved with the same placeholder values as the
+        // StructDefs.
+        Map<String, String> placeholderValues =
+                computeStructPlaceholderValues(structDefRecordables);
+        List<LHWorkflowRecordable> existingRecordables = workflowRecordables.stream()
+                .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                .toList();
+        existingRecordables.forEach(
+                recordable -> recordable.setPlaceholderValues(placeholderValues));
+
         LHRecordableDependenciesGraph<LHWorkflowRecordable> workflowRecordableGraph =
-                new LHRecordableDependenciesGraph<>(workflowRecordables.stream()
-                        .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
-                        .toList());
+                new LHRecordableDependenciesGraph<>(existingRecordables);
         workflowRecordableGraph.toOrderedList().forEach(this::registerLHWorkflow);
     }
 
@@ -140,14 +167,36 @@ public class LHRecorder {
     }
 
     public void registerLHStructDefs(List<LHStructDefRecordable> structDefRecordables) {
+        List<LHStructDefRecordable> existingRecordables = structDefRecordables.stream()
+                .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                .toList();
+
+        // Combine the placeholder values of every StructDef so that placeholders in nested
+        // StructDef names (e.g. a parent referencing a nested StructDef by its `${...}` name) can
+        // be
+        // resolved.
+        Map<String, String> placeholderValues = computeStructPlaceholderValues(existingRecordables);
+        existingRecordables.forEach(
+                recordable -> recordable.setPlaceholderValues(placeholderValues));
+
         LHRecordableDependenciesGraph<LHStructDefRecordable> structDefRecordableGraph =
-                new LHRecordableDependenciesGraph<>(structDefRecordables.stream()
-                        .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
-                        .toList());
-        structDefRecordableGraph.toOrderedList().forEach(this::registerLHStructDef);
+                new LHRecordableDependenciesGraph<>(existingRecordables);
+        structDefRecordableGraph
+                .toOrderedList()
+                .forEach(recordable -> registerLHStructDef(recordable, placeholderValues));
     }
 
-    private void registerLHStructDef(LHStructDefRecordable recordable) {
+    private Map<String, String> computeStructPlaceholderValues(
+            List<LHStructDefRecordable> structDefRecordables) {
+        ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
+        Map<String, String> placeholderValues = new HashMap<>();
+        structDefRecordables.forEach(recordable -> placeholderValues.putAll(
+                configEvaluator.expand(recordable.getName()).getMembers()));
+        return placeholderValues;
+    }
+
+    private void registerLHStructDef(
+            LHStructDefRecordable recordable, Map<String, String> placeholderValues) {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.StructConfig> structConfig =
@@ -160,8 +209,8 @@ public class LHRecorder {
         if (!registerStruct) return;
 
         LHConfig config = getBean(LHConfig.class);
-        LHStructDefType structDefType =
-                new LHStructDefType(recordable.getBeanClass(), config.getTypeAdapterRegistry());
+        LHStructDefType structDefType = new LHStructDefType(
+                recordable.getBeanClass(), config.getTypeAdapterRegistry(), placeholderValues);
         StructDefCompatibilityType compatibilityType = structConfig
                 .map(LHRuntimeConfig.StructConfig::compatibility)
                 .orElse(StructDefCompatibilityType.NO_SCHEMA_UPDATES);

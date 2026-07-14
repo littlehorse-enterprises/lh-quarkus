@@ -13,20 +13,25 @@ pluginManagement {
 }
 rootProject.name = "littlehorse-quarkus-extensions"
 
-extensionProjects.split(',').each {
-    include("littlehorse-$it")
-    project(":littlehorse-$it").projectDir = file("extensions/littlehorse-$it/runtime")
+file("extensions").listFiles().findAll { it.isDirectory() }.sort { it.name }.each { dir ->
+    include(dir.name)
+    project(":${dir.name}").projectDir = new File(dir, "runtime")
 
-    include("littlehorse-$it-deployment")
-    project(":littlehorse-$it-deployment").projectDir = file("extensions/littlehorse-$it/deployment")
+    include("${dir.name}-deployment")
+    project(":${dir.name}-deployment").projectDir = new File(dir, "deployment")
 }
 
-exampleProjects.split(',').each {
-    include "example-$it"
-    project(":example-$it").projectDir = file("examples/$it")
+file("examples").listFiles().findAll { it.isDirectory() }.sort { it.name }.each { dir ->
+    include("example-${dir.name}")
+    project(":example-${dir.name}").projectDir = dir
 }
 
-otherProjects.split(',').each {
-    include "$it"
-    project(":$it").projectDir = file("$it")
+file("extras").listFiles().findAll { it.isDirectory() }.sort { it.name }.each { dir ->
+    include(dir.name)
+    project(":${dir.name}").projectDir = dir
+}
+
+file("integration-tests").listFiles().findAll { it.isDirectory() }.sort { it.name }.each { dir ->
+    include("integration-tests-${dir.name}")
+    project(":integration-tests-${dir.name}").projectDir = dir
 }

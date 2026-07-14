@@ -19,7 +19,14 @@ what a task worker image provides.
 * [Usage](#usage)
   * [Basic Setup](#basic-setup)
   * [Declaring Required Configurations](#declaring-required-configurations)
+    * [Deduplication and Validation](#deduplication-and-validation)
+    * [`@LHTaskConfig` / `@LHTaskMethodConfig` Attributes](#lhtaskconfig--lhtaskmethodconfig-attributes)
+  * [Declaring Business Exceptions](#declaring-business-exceptions)
+    * [`@LHTaskMethodException` Attributes](#lhtaskmethodexception-attributes)
 * [Generated Output](#generated-output)
+  * [Type Representation](#type-representation)
+* [Building a Docker Image](#building-a-docker-image)
+  * [Action Inputs](#action-inputs)
 * [Configurations](#configurations)
   * [Bag Configurations](#bag-configurations)
   * [Metadata Configurations](#metadata-configurations)
@@ -67,6 +74,7 @@ quarkus.littlehorse.saddle.bag.metadata.licence=Apache-2.0
 quarkus.littlehorse.saddle.bag.metadata.documentation-url=https://example.com/docs
 quarkus.littlehorse.saddle.bag.metadata.icon-url=https://example.com/icon.png
 quarkus.littlehorse.saddle.bag.metadata.support-email=support@example.com
+quarkus.littlehorse.saddle.bag.metadata.docker-image=ghcr.io/example-org/order-service
 ```
 
 The extension automatically scans all `@LHTask` classes and `@LHStructDef` structs, generating a manifest during the Quarkus build augmentation phase.
@@ -95,9 +103,13 @@ task.process-order.name=process-order
 
 ## Declaring Required Configurations
 
-Use the `@LHTaskConfig` annotation to declare external configuration properties that your task worker requires at runtime.
-This is useful when your task depends on external services (APIs, databases, message brokers, etc.) and consumers
-of the saddle bag need to know which configurations to provide.
+Configurations describe external properties (API URLs, credentials, service endpoints, etc.) that a
+task worker requires at runtime. There are two annotations, depending on the scope of the config:
+
+- `@LHTaskConfig` — declared on an `@LHTask` **class**. Emitted as a **global** saddle-bag config
+  under the top-level `configs` field (same level as `tasks`).
+- `@LHTaskMethodConfig` — declared on an `@LHTaskMethod` **method**. Emitted under the `configs`
+  field of that specific task.
 
 ```java
 @LHTask
@@ -107,13 +119,26 @@ of the saddle bag need to know which configurations to provide.
 public class EmailNotificationTask {
 
     @LHTaskMethod(value = "${task.send-email.name}", description = "Sends an email notification")
+    @LHTaskMethodConfig(value = "email.send.max-retries", description = "Max delivery attempts", defaultValue = "3", type = LHTaskConfigType.INT)
     public void sendEmail(String recipient, String subject, String body) {
         // ...
     }
 }
 ```
 
-### `@LHTaskConfig` Attributes
+### Deduplication and Validation
+
+- If two `@LHTask` classes declare the same `@LHTaskConfig` key, it is emitted **once** in the global
+  `configs` (duplicates are collapsed).
+- If a single `@LHTaskMethod` declares the same `@LHTaskMethodConfig` key more than once, it is emitted
+  **once** for that task.
+- If two **different** `@LHTaskMethod`s declare the same `@LHTaskMethodConfig` key, the build **fails**.
+  Shared configuration must instead be declared once at the class level with `@LHTaskConfig` so it
+  becomes a global saddle-bag config.
+
+### `@LHTaskConfig` / `@LHTaskMethodConfig` Attributes
+
+Both annotations share the same attributes:
 
 | Attribute      | Type      | Default | Description                                                        |
 |----------------|-----------|---------|--------------------------------------------------------------------|
@@ -123,7 +148,41 @@ public class EmailNotificationTask {
 | `defaultValue` | `String`     | `""`    | Default value; empty means the property is mandatory               |
 | `type`         | `LHTaskConfigType` | —       | Value type for validation: `STR`, `INT`, `DOUBLE`, or `BOOL` (required) |
 
-The declared configurations appear in the generated manifest under the `configs` field for each task.
+Global configs appear under the top-level `configs` field; method-level configs appear under the
+`configs` field of the owning task.
+
+
+## Declaring Business Exceptions
+
+Use the `@LHTaskMethodException` annotation on an `@LHTaskMethod` to declare the business `EXCEPTION`s that the
+task may throw. Business exceptions are thrown from your task code via `LHTaskException` (or a subclass) and can be
+caught by a `WfSpec`. Declaring them lets consumers of the saddle bag know which exceptions to handle. See the
+[exception handling docs](https://littlehorse.io/docs/server/concepts/exception-handling) for more details.
+
+```java
+@LHTask
+public class PaymentTask {
+
+    @LHTaskMethod(value = "${task.charge-credit-card.name}", description = "Charges a credit card")
+    @LHTaskMethodException(name = "insufficient-funds", description = "Card balance is too low")
+    @LHTaskMethodException(name = "amount-too-large", description = "Charge exceeds $10,000")
+    public void chargeCreditCard(String userId, double amount) {
+        if (amount > 10000) {
+            throw new LHTaskException("amount-too-large", "Cannot charge more than $10,000");
+        }
+        // ...
+    }
+}
+```
+
+### `@LHTaskMethodException` Attributes
+
+| Attribute     | Type     | Default | Description                                                            |
+|---------------|----------|---------|-----------------------------------------------------------------------|
+| `name`        | `String` | —       | The business exception name in kebab-case (required)                  |
+| `description` | `String` | `""`    | Human-readable description of when and why the exception is thrown     |
+
+The declared exceptions appear in the generated manifest under the `exceptions` field for each task.
 
 # Generated Output
 
@@ -148,30 +207,196 @@ metadata:
   documentation-url: "https://example.com/docs"
   icon-url: "https://example.com/icon.png"
   support-email: "support@example.com"
+  docker-image: "ghcr.io/example-org/order-service"
 tasks:
-  send-email:
+  process-order:
+    output:
+      type:
+        primitive: "STR"
     inputs:
-    - name: "recipient"
-      type: "STR"
-    - name: "subject"
-      type: "STR"
-    - name: "body"
-      type: "STR"
-    configName: "task.send-email.name"
-    description: "Sends an email notification"
+    - name: "order"
+      type:
+        struct: "order"
+    config-name: "task.process-order.name"
+    description: "Processes an incoming order and returns a confirmation"
     configs:
-    - key: "smtp.host"
-      description: "SMTP server hostname"
+    - key: "orders.process.max-retries"
+      description: "Max processing attempts"
       sensitive: false
-    - key: "smtp.port"
-      description: "SMTP server port"
-      sensitive: false
-      defaultValue: "587"
-    - key: "smtp.password"
-      description: "SMTP password"
-      sensitive: true
-structs: {}
+      type:
+        primitive: "INT"
+      default-value: "3"
+structs:
+  order:
+    config-name: "struct.order.name"
+    description: "A customer order"
+    properties:
+    - name: "productName"
+      type:
+        primitive: "STR"
+    - name: "quantity"
+      type:
+        primitive: "INT"
+configs:
+- key: "orders.service.url"
+  description: "Orders service base URL"
+  sensitive: false
+  type:
+    primitive: "STR"
+- key: "orders.service.timeout-ms"
+  description: "Orders service request timeout"
+  sensitive: false
+  type:
+    primitive: "INT"
+  default-value: "5000"
+- key: "orders.service.api-key"
+  description: "Orders service API key"
+  sensitive: true
+  type:
+    primitive: "STR"
 ```
+
+## Type Representation
+
+Every task input, task output, struct property, and task config has a `type` field whose value is a
+**type descriptor object**. Exactly one of the following keys is present, and its presence identifies
+the kind of type (a `oneof`, mirroring the LittleHorse `TypeDefinition`):
+
+| Key         | Meaning                                                                                  |
+|-------------|------------------------------------------------------------------------------------------|
+| `primitive` | A primitive `VariableType` name: `STR`, `INT`, `DOUBLE`, `BOOL`, `BYTES`, `TIMESTAMP`, `WF_RUN_ID`, `JSON_OBJ`, `JSON_ARR`. |
+| `struct`    | The referenced `@LHStructDef` struct's resolved name (a key under the top-level `structs` section). |
+| `array`     | An object with an `elements` field holding a `type` descriptor.                          |
+| `map`       | An object with `key` and `value` fields, each holding a `type` descriptor.               |
+
+The `elements`, `key`, and `value` fields each hold a nested `type` descriptor, so arrays of structs,
+maps of structs, and nested arrays/maps are all supported. Native `Array`/`Map` types come from
+`@LHType(isLHArray = true)` / `@LHType(isLHMap = true)` on task parameters/returns, or from array/`Map`
+struct properties.
+
+```yaml
+tasks:
+  sum-numbers:
+    output:
+      type:
+        primitive: "INT"
+    inputs:
+    - name: "numbers"
+      type:
+        array:
+          elements:
+            type:
+              primitive: "INT"
+    config-name: "task.sum-numbers.name"
+    description: "Sums a native Array of integers"
+  count-items:
+    output:
+      type:
+        primitive: "INT"
+    inputs:
+    - name: "items"
+      type:
+        map:
+          key:
+            type:
+              primitive: "STR"
+          value:
+            type:
+              primitive: "INT"
+    config-name: "task.count-items.name"
+    description: "Counts the entries in a native Map"
+  create-order:
+    output:
+      type:
+        struct: "order"
+    inputs:
+    - name: "address"
+      type:
+        struct: "shipping-address"
+    config-name: "task.create-order.name"
+    description: "Creates an order shipped to the given address"
+structs:
+  order:
+    config-name: "struct.order.name"
+    description: "A customer order"
+    properties:
+    - name: "productName"
+      type:
+        primitive: "STR"
+    - name: "shippingAddress"
+      type:
+        struct: "shipping-address"
+  shipping-address:
+    config-name: "struct.shipping-address.name"
+    description: "A shipping destination address"
+    properties:
+    - name: "street"
+      type:
+        primitive: "STR"
+    - name: "zipCode"
+      type:
+        primitive: "INT"
+```
+
+# Building a Docker Image
+
+Saddle bag Docker images are built and published with the
+[`publish-saddle-bag`](https://github.com/littlehorse-enterprises/publish-saddle-bag) GitHub Action.
+It builds the Quarkus application with Gradle, reads the OCI annotations from the generated
+`properties` manifest, and publishes the resulting image to a container registry.
+
+> **Note:** Only JVM-based Quarkus Docker images are supported. Native images are not supported yet.
+
+Add a workflow to your repository:
+
+```yaml
+name: Deploy My Saddle Bag
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Publish Saddle Bag
+        uses: littlehorse-enterprises/publish-saddle-bag@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          images: ghcr.io/${{ github.repository }}/my-saddle-bag
+```
+
+## Action Inputs
+
+| Input                | Required | Default                   | Description                                                                 |
+|----------------------|----------|---------------------------|-----------------------------------------------------------------------------|
+| `registry`           | ✅        | —                         | Container registry URL (e.g. `ghcr.io`)                                     |
+| `username`           | ✅        | —                         | Registry username                                                           |
+| `password`           | ✅        | —                         | Registry password or token                                                  |
+| `images`             | ✅        | —                         | Image name(s) passed to `docker/metadata-action` (one per line)             |
+| `working-directory`  | ❌        | `.`                       | Directory where the Gradle build is executed                                |
+| `context`            | ❌        | `working-directory`       | Docker build context path                                                   |
+| `dockerfile`         | ❌        | `''`                      | Path to the Dockerfile (defaults to `working-directory/Dockerfile`)         |
+| `tags`               | ❌        | `''`                      | Tag patterns passed to `docker/metadata-action` (one per line)              |
+| `labels`             | ❌        | `''`                      | Extra labels passed to `docker/metadata-action` (`KEY=VALUE`, one per line) |
+| `annotations`        | ❌        | `''`                      | Extra annotations passed to `docker/metadata-action` (`[TYPE:]KEY=VALUE`)   |
+| `docker-build-args`  | ❌        | `''`                      | Docker build arguments (`NAME=VALUE`, one per line)                         |
+| `quarkus-build-args` | ❌        | `''`                      | Quarkus build arguments (space-separated, e.g. `-Dkey=value`)               |
+| `platforms`          | ❌        | `linux/amd64,linux/arm64` | Architecture platforms                                                      |
+
+See the [`publish-saddle-bag`](https://github.com/littlehorse-enterprises/publish-saddle-bag)
+documentation for the full list of inputs, outputs, and an extended example.
 
 # Configurations
 
@@ -232,6 +457,12 @@ Support contact email.
 
 * Type: string
 * Importance: low
+
+``quarkus.littlehorse.saddle.bag.metadata.docker-image``
+The Docker image that packages this saddle bag task worker.
+
+* Type: string
+* Importance: high
 
 ## Output Configurations
 

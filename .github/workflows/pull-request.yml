@@ -16,9 +16,21 @@ jobs:
       - name: Get version
         id: get_version
         run: echo "version=$(sed -n 's/^version=//p' gradle.properties)" >> $GITHUB_OUTPUT
+
+  format:
+    uses: ./.github/workflows/reusable-format.yml
+
   tests:
     needs:
       - prepare
-    uses: ./.github/workflows/tests.yml
+      - format
+    strategy:
+      matrix:
+        project:
+          - littlehorse-quarkus
+          - littlehorse-restful-gateway
+          - littlehorse-saddle-bag
+    uses: ./.github/workflows/reusable-tests.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
+      project: ${{ matrix.project }}

@@ -29,8 +29,8 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
     }
 
     compileJava {
@@ -65,7 +65,7 @@ allprojects {
     }
 }
 
-configure(extensionProjects.split(',').collectMany { ["littlehorse-$it", "littlehorse-$it-deployment"] }.collect { project(":$it") }) {
+configure(file("extensions").listFiles().findAll { it.isDirectory() }.collectMany { dir -> [dir.name, "${dir.name}-deployment"] }.collect { project(":$it") }) {
     apply plugin: "signing"
     apply plugin: "maven-publish"
     apply plugin: "java-library"
@@ -86,11 +86,15 @@ configure(extensionProjects.split(',').collectMany { ["littlehorse-$it", "little
     }
 }
 
-configure(exampleProjects.split(',').collect { project(":example-$it") }) {
+configure(file("examples").listFiles().findAll { it.isDirectory() }.collect { project(":example-${it.name}") }) {
     apply plugin: "io.quarkus"
 }
 
-configure(otherProjects.split(',').collect { project(":$it") }) {
+configure(file("extras").listFiles().findAll { it.isDirectory() }.collect { project(":${it.name}") }) {
+    apply plugin: "io.quarkus"
+}
+
+configure(file("integration-tests").listFiles().findAll { it.isDirectory() }.collect { project(":integration-tests-${it.name}") }) {
     apply plugin: "io.quarkus"
 
     quarkusIntTest {

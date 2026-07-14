@@ -98,21 +98,27 @@ public class LHWorkflowRecordable extends LHRecordable {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(getName()).asString();
 
-        Workflow workflow = Workflow.newWorkflow(expandedName, thread -> {
-            if (getBeanMethodName() == null) {
-                LHWorkflowDefinition workflowDefinitionBean =
-                        (LHWorkflowDefinition) getBean(getBeanClass());
-                workflowDefinitionBean.define(thread);
-                return;
-            }
+        Workflow workflow = Workflow.newWorkflow(
+                expandedName,
+                thread -> {
+                    if (getBeanMethodName() == null) {
+                        LHWorkflowDefinition workflowDefinitionBean =
+                                (LHWorkflowDefinition) getBean(getBeanClass());
+                        workflowDefinitionBean.define(thread);
+                        return;
+                    }
 
-            try {
-                Method method = getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
-                method.invoke(getBean(getBeanClass()), thread);
-            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        });
+                    try {
+                        Method method =
+                                getBeanClass().getMethod(getBeanMethodName(), WorkflowThread.class);
+                        method.invoke(getBean(getBeanClass()), thread);
+                    } catch (InvocationTargetException
+                            | NoSuchMethodException
+                            | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                getPlaceholderValues());
 
         String parent = getParent();
         if (parent != null) {
