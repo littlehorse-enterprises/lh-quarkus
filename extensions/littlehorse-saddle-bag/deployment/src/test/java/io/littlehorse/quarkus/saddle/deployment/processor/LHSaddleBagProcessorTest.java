@@ -78,27 +78,20 @@ class LHSaddleBagProcessorTest {
     }
 
     @Test
-    void putTypeInfoEmitsPrimitiveType() {
-        Map<String, Object> target = new LinkedHashMap<>();
-
-        processor.putTypeInfo(
-                target,
+    void buildTypeEmitsPrimitiveType() {
+        Map<String, Object> type = processor.buildType(
                 TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR).build());
 
-        assertThat(target).containsExactly(entry("type", "STR"));
+        assertThat(type).containsExactly(entry("primitive", "STR"));
     }
 
     @Test
-    void putTypeInfoEmitsStructType() {
-        Map<String, Object> target = new LinkedHashMap<>();
+    void buildTypeEmitsStructType() {
+        Map<String, Object> type = processor.buildType(TypeDefinition.newBuilder()
+                .setStructDefId(StructDefId.newBuilder().setName("test-order"))
+                .build());
 
-        processor.putTypeInfo(
-                target,
-                TypeDefinition.newBuilder()
-                        .setStructDefId(StructDefId.newBuilder().setName("test-order"))
-                        .build());
-
-        assertThat(target).containsExactly(entry("type", "STRUCT"), entry("struct", "test-order"));
+        assertThat(type).containsExactly(entry("struct", "test-order"));
     }
 
     @Test
@@ -110,10 +103,8 @@ class LHSaddleBagProcessorTest {
                 processor.handleTaskParameters(method, Map.of(), Map.of());
 
         assertThat(params).hasSize(2);
-        assertThat(params.get(0)).containsEntry("type", "STR").doesNotContainKey("struct");
-        assertThat(params.get(1))
-                .containsEntry("type", "STRUCT")
-                .containsEntry("struct", "test-address");
+        assertThat(params.get(0)).containsEntry("type", Map.of("primitive", "STR"));
+        assertThat(params.get(1)).containsEntry("type", Map.of("struct", "test-address"));
     }
 
     @Test
@@ -125,10 +116,9 @@ class LHSaddleBagProcessorTest {
                 LHTypeAdapterRegistry.empty(),
                 Map.of());
 
-        Map<String, Object> output = new LinkedHashMap<>();
-        processor.putTypeInfo(output, signature.getReturnType().getReturnType());
+        Map<String, Object> type = processor.buildType(signature.getReturnType().getReturnType());
 
-        assertThat(output).containsExactly(entry("type", "STRUCT"), entry("struct", "test-order"));
+        assertThat(type).containsExactly(entry("struct", "test-order"));
     }
 
     @Test
@@ -139,10 +129,9 @@ class LHSaddleBagProcessorTest {
                 LHTypeAdapterRegistry.empty(),
                 Map.of());
 
-        Map<String, Object> output = new LinkedHashMap<>();
-        processor.putTypeInfo(output, signature.getReturnType().getReturnType());
+        Map<String, Object> type = processor.buildType(signature.getReturnType().getReturnType());
 
-        assertThat(output).containsExactly(entry("type", "INT"));
+        assertThat(type).containsExactly(entry("primitive", "INT"));
     }
 
     @Test
@@ -152,10 +141,10 @@ class LHSaddleBagProcessorTest {
 
         List<Map<String, Object>> properties = processor.buildStruct(item, Map.of());
 
-        assertThat(findProperty(properties, "productName")).containsEntry("type", "STR");
+        assertThat(findProperty(properties, "productName"))
+                .containsEntry("type", Map.of("primitive", "STR"));
         assertThat(findProperty(properties, "shippingAddress"))
-                .containsEntry("type", "STRUCT")
-                .containsEntry("struct", "test-address");
+                .containsEntry("type", Map.of("struct", "test-address"));
     }
 
     @Test
@@ -166,46 +155,36 @@ class LHSaddleBagProcessorTest {
                 method, Map.of(), Map.of("struct.ph-address.name", "resolved-address"));
 
         assertThat(params).hasSize(1);
-        assertThat(params.get(0))
-                .containsEntry("type", "STRUCT")
-                .containsEntry("struct", "resolved-address");
+        assertThat(params.get(0)).containsEntry("type", Map.of("struct", "resolved-address"));
     }
 
     @Test
-    void putTypeInfoEmitsArrayType() {
-        Map<String, Object> target = new LinkedHashMap<>();
+    void buildTypeEmitsArrayType() {
+        Map<String, Object> type = processor.buildType(TypeDefinition.newBuilder()
+                .setInlineArrayDef(InlineArrayDef.newBuilder()
+                        .setArrayType(
+                                TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR)))
+                .build());
 
-        processor.putTypeInfo(
-                target,
-                TypeDefinition.newBuilder()
-                        .setInlineArrayDef(InlineArrayDef.newBuilder()
-                                .setArrayType(TypeDefinition.newBuilder()
-                                        .setPrimitiveType(VariableType.STR)))
-                        .build());
-
-        assertThat(target)
-                .containsExactly(entry("type", "ARRAY"), entry("element", Map.of("type", "STR")));
+        assertThat(type)
+                .containsExactly(entry("array", Map.of("element", Map.of("primitive", "STR"))));
     }
 
     @Test
-    void putTypeInfoEmitsMapType() {
-        Map<String, Object> target = new LinkedHashMap<>();
+    void buildTypeEmitsMapType() {
+        Map<String, Object> type = processor.buildType(TypeDefinition.newBuilder()
+                .setInlineMapDef(InlineMapDef.newBuilder()
+                        .setKeyType(TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR))
+                        .setValueType(
+                                TypeDefinition.newBuilder().setPrimitiveType(VariableType.INT)))
+                .build());
 
-        processor.putTypeInfo(
-                target,
-                TypeDefinition.newBuilder()
-                        .setInlineMapDef(InlineMapDef.newBuilder()
-                                .setKeyType(TypeDefinition.newBuilder()
-                                        .setPrimitiveType(VariableType.STR))
-                                .setValueType(TypeDefinition.newBuilder()
-                                        .setPrimitiveType(VariableType.INT)))
-                        .build());
-
-        assertThat(target)
-                .containsExactly(
-                        entry("type", "MAP"),
-                        entry("key", Map.of("type", "STR")),
-                        entry("value", Map.of("type", "INT")));
+        assertThat(type)
+                .containsExactly(entry(
+                        "map",
+                        Map.of(
+                                "key", Map.of("primitive", "STR"),
+                                "value", Map.of("primitive", "INT"))));
     }
 
     @Test
@@ -217,8 +196,8 @@ class LHSaddleBagProcessorTest {
 
         assertThat(params).hasSize(1);
         assertThat(params.get(0))
-                .containsEntry("type", "ARRAY")
-                .containsEntry("element", Map.of("type", "INT"));
+                .containsEntry(
+                        "type", Map.of("array", Map.of("element", Map.of("primitive", "INT"))));
     }
 
     @Test
@@ -230,8 +209,9 @@ class LHSaddleBagProcessorTest {
 
         assertThat(params).hasSize(1);
         assertThat(params.get(0))
-                .containsEntry("type", "ARRAY")
-                .containsEntry("element", Map.of("type", "STRUCT", "struct", "test-address"));
+                .containsEntry(
+                        "type",
+                        Map.of("array", Map.of("element", Map.of("struct", "test-address"))));
     }
 
     @Test
@@ -243,9 +223,13 @@ class LHSaddleBagProcessorTest {
 
         assertThat(params).hasSize(1);
         assertThat(params.get(0))
-                .containsEntry("type", "MAP")
-                .containsEntry("key", Map.of("type", "STR"))
-                .containsEntry("value", Map.of("type", "INT"));
+                .containsEntry(
+                        "type",
+                        Map.of(
+                                "map",
+                                Map.of(
+                                        "key", Map.of("primitive", "STR"),
+                                        "value", Map.of("primitive", "INT"))));
     }
 
     @Test
@@ -256,11 +240,10 @@ class LHSaddleBagProcessorTest {
                 LHTypeAdapterRegistry.empty(),
                 Map.of());
 
-        Map<String, Object> output = new LinkedHashMap<>();
-        processor.putTypeInfo(output, signature.getReturnType().getReturnType());
+        Map<String, Object> type = processor.buildType(signature.getReturnType().getReturnType());
 
-        assertThat(output)
-                .containsExactly(entry("type", "ARRAY"), entry("element", Map.of("type", "INT")));
+        assertThat(type)
+                .containsExactly(entry("array", Map.of("element", Map.of("primitive", "INT"))));
     }
 
     @Test
@@ -271,12 +254,16 @@ class LHSaddleBagProcessorTest {
         List<Map<String, Object>> properties = processor.buildStruct(item, Map.of());
 
         assertThat(findProperty(properties, "tags"))
-                .containsEntry("type", "ARRAY")
-                .containsEntry("element", Map.of("type", "STR"));
+                .containsEntry(
+                        "type", Map.of("array", Map.of("element", Map.of("primitive", "STR"))));
         assertThat(findProperty(properties, "counts"))
-                .containsEntry("type", "MAP")
-                .containsEntry("key", Map.of("type", "STR"))
-                .containsEntry("value", Map.of("type", "INT"));
+                .containsEntry(
+                        "type",
+                        Map.of(
+                                "map",
+                                Map.of(
+                                        "key", Map.of("primitive", "STR"),
+                                        "value", Map.of("primitive", "INT"))));
     }
 
     private Map<String, Object> roundTrip(Map<String, Object> saddlebag, Format format) {

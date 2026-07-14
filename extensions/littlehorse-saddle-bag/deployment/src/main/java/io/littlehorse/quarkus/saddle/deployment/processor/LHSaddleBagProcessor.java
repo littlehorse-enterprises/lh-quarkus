@@ -238,16 +238,18 @@ public class LHSaddleBagProcessor {
                 if (typeAdapterMap.containsKey(returnType)) {
                     task.put(
                             "output",
-                            Map.of("type", typeAdapterMap.get(returnType).name()));
+                            Map.of("type", primitiveType(typeAdapterMap.get(returnType))));
                 } else {
                     LHTaskMethodHandle handle = LHTaskMethodHandle.from(name, "", method);
                     LHTaskSignature signature = new LHTaskSignature(
                             handle, LHTypeAdapterRegistry.empty(), placeholderValues);
 
                     if (signature.getReturnType().hasReturnType()) {
-                        Map<String, Object> output = new LinkedHashMap<>();
-                        putTypeInfo(output, signature.getReturnType().getReturnType());
-                        task.put("output", output);
+                        task.put(
+                                "output",
+                                Map.of(
+                                        "type",
+                                        buildType(signature.getReturnType().getReturnType())));
                     }
                 }
 
@@ -323,7 +325,7 @@ public class LHSaddleBagProcessor {
             Map<String, Object> props = new LinkedHashMap<>();
 
             props.put("name", property.getFieldName());
-            putTypeInfo(props, property.getPropertyType().getTypeDefinition());
+            props.put("type", buildType(property.getPropertyType().getTypeDefinition()));
             structProperties.add(props);
         }
 
@@ -353,9 +355,9 @@ public class LHSaddleBagProcessor {
             param.put("name", lhTaskParameter.getVariableName());
 
             if (typeAdapterMap.containsKey(paramType)) {
-                param.put("type", typeAdapterMap.get(paramType).name());
+                param.put("type", primitiveType(typeAdapterMap.get(paramType)));
             } else {
-                putTypeInfo(param, lhTaskParameter.getVariableDef().getTypeDef());
+                param.put("type", buildType(lhTaskParameter.getVariableDef().getTypeDef()));
             }
 
             parameters.add(param);
@@ -363,29 +365,30 @@ public class LHSaddleBagProcessor {
         return parameters;
     }
 
-    void putTypeInfo(Map<String, Object> target, TypeDefinition typeDef) {
+    Map<String, Object> buildType(TypeDefinition typeDef) {
+        Map<String, Object> type = new LinkedHashMap<>();
         switch (typeDef.getDefinedTypeCase()) {
-            case STRUCT_DEF_ID -> {
-                target.put("type", "STRUCT");
-                target.put("struct", typeDef.getStructDefId().getName());
-            }
+            case STRUCT_DEF_ID -> type.put("struct", typeDef.getStructDefId().getName());
             case INLINE_ARRAY_DEF -> {
-                target.put("type", "ARRAY");
-                target.put("element", buildTypeInfo(typeDef.getInlineArrayDef().getArrayType()));
+                Map<String, Object> array = new LinkedHashMap<>();
+                array.put("element", buildType(typeDef.getInlineArrayDef().getArrayType()));
+                type.put("array", array);
             }
             case INLINE_MAP_DEF -> {
-                target.put("type", "MAP");
-                target.put("key", buildTypeInfo(typeDef.getInlineMapDef().getKeyType()));
-                target.put("value", buildTypeInfo(typeDef.getInlineMapDef().getValueType()));
+                Map<String, Object> map = new LinkedHashMap<>();
+                map.put("key", buildType(typeDef.getInlineMapDef().getKeyType()));
+                map.put("value", buildType(typeDef.getInlineMapDef().getValueType()));
+                type.put("map", map);
             }
-            default -> target.put("type", typeDef.getPrimitiveType().name());
+            default -> type.put("primitive", typeDef.getPrimitiveType().name());
         }
+        return type;
     }
 
-    private Map<String, Object> buildTypeInfo(TypeDefinition typeDef) {
-        Map<String, Object> info = new LinkedHashMap<>();
-        putTypeInfo(info, typeDef);
-        return info;
+    private Map<String, Object> primitiveType(VariableType variableType) {
+        Map<String, Object> type = new LinkedHashMap<>();
+        type.put("primitive", variableType.name());
+        return type;
     }
 
     byte[] serialize(Map<String, Object> data, Format format) {
