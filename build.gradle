@@ -65,7 +65,7 @@ allprojects {
     }
 }
 
-configure(new File(rootDir, "extensions").listFiles().findAll { it.isDirectory() }.collectMany { dir -> [dir.name, "${dir.name}-deployment"] }.collect { project(":$it") }) {
+configure(file("extensions").listFiles().findAll { it.isDirectory() }.collectMany { dir -> [dir.name, "${dir.name}-deployment"] }.collect { project(":$it") }) {
     apply plugin: "signing"
     apply plugin: "maven-publish"
     apply plugin: "java-library"
