@@ -186,24 +186,30 @@ tasks:
   send-email:
     inputs:
     - name: "recipient"
-      type: "STR"
+      type:
+        primitive: "STR"
     - name: "subject"
-      type: "STR"
+      type:
+        primitive: "STR"
     - name: "body"
-      type: "STR"
-    configName: "task.send-email.name"
+      type:
+        primitive: "STR"
+    config-name: "task.send-email.name"
     description: "Sends an email notification"
     configs:
     - key: "smtp.host"
       description: "SMTP server hostname"
       sensitive: false
+      type: "STR"
     - key: "smtp.port"
       description: "SMTP server port"
       sensitive: false
-      defaultValue: "587"
+      type: "INT"
+      default-value: "587"
     - key: "smtp.password"
       description: "SMTP password"
       sensitive: true
+      type: "STR"
 structs: {}
 ```
 
@@ -237,7 +243,7 @@ tasks:
         array:
           element:
             primitive: "INT"
-    configName: "task.sum-numbers.name"
+    config-name: "task.sum-numbers.name"
     description: "Sums a native Array of integers"
   count-items:
     output:
@@ -251,7 +257,7 @@ tasks:
             primitive: "STR"
           value:
             primitive: "INT"
-    configName: "task.count-items.name"
+    config-name: "task.count-items.name"
     description: "Counts the entries in a native Map"
   create-order:
     output:
@@ -261,7 +267,7 @@ tasks:
     - name: "address"
       type:
         struct: "shipping-address"
-    configName: "task.create-order.name"
+    config-name: "task.create-order.name"
     description: "Creates an order shipped to the given address"
 structs:
   order:
