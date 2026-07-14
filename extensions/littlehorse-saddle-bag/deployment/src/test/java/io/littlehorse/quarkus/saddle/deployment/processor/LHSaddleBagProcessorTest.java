@@ -1,41 +1,18 @@
 package io.littlehorse.quarkus.saddle.deployment.processor;
 
-/*
- * Standalone helper to read the generated properties file and print it as JSON:
- *
- * package io.littlehorse.quarkus.saddle.deployment;
- *
- * import com.fasterxml.jackson.databind.ObjectMapper;
- * import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
- *
- * import java.nio.file.Files;
- * import java.nio.file.Path;
- * import java.util.Map;
- *
- * public class PropertiesToJsonConverter {
- *
- *     public static void main(String[] args) throws Exception {
- *         Path propertiesFile =
- *                 Path.of("examples/saddle-bag/build/saddle-bag/saddle-bag.properties");
- *
- *         JavaPropsMapper propsMapper = new JavaPropsMapper();
- *         String propertiesContent = Files.readString(propertiesFile);
- *         Map<?, ?> data = propsMapper.readValue(propertiesContent, Map.class);
- *
- *         ObjectMapper jsonMapper = new ObjectMapper();
- *         String json = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
- *
- *         System.out.println(json);
- *     }
- * }
- */
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
+import io.littlehorse.quarkus.deployment.descriptor.LHTaskMethodDescriptor;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
+import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
+import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
+import io.littlehorse.quarkus.saddle.config.LHTaskMethodConfig;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Config;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Input;
@@ -44,226 +21,345 @@ import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Output;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Property;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Struct;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Task;
+import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.TaskException;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Type;
 import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
-import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
-import io.littlehorse.sdk.common.proto.InlineArrayDef;
-import io.littlehorse.sdk.common.proto.InlineMapDef;
-import io.littlehorse.sdk.common.proto.StructDefId;
-import io.littlehorse.sdk.common.proto.TypeDefinition;
-import io.littlehorse.sdk.common.proto.VariableType;
-import io.littlehorse.sdk.wfsdk.internal.taskdefutil.LHTaskSignature;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
-import io.littlehorse.sdk.worker.LHTaskMethodHandle;
 import io.littlehorse.sdk.worker.LHType;
+import io.quarkus.deployment.annotations.BuildProducer;
+import io.quarkus.deployment.builditem.ApplicationInfoBuildItem;
+import io.quarkus.deployment.builditem.GeneratedResourceBuildItem;
+import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
+import io.smallrye.config.PropertiesConfigSource;
+import io.smallrye.config.SmallRyeConfig;
+import io.smallrye.config.SmallRyeConfigBuilder;
 
+import org.eclipse.microprofile.config.spi.ConfigProviderResolver;
+import org.jboss.jandex.AnnotationInstance;
+import org.jboss.jandex.AnnotationValue;
+import org.jboss.jandex.DotName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 
 class LHSaddleBagProcessorTest {
 
     private final LHSaddleBagProcessor processor = new LHSaddleBagProcessor();
 
+    // ---------------------------------------------------------------------------------------------
+    // Serialization round-trip (serialize/deserialize are the only non-private helpers besides the
+    // generateSaddlebag build step).
+    // ---------------------------------------------------------------------------------------------
+
     @Test
     void shouldProduceSameContentAcrossAllFormats() {
         SaddleBag saddlebag = sampleSaddlebag();
 
-        SaddleBag fromJson = roundTrip(saddlebag, Format.JSON);
-        SaddleBag fromYaml = roundTrip(saddlebag, Format.YAML);
-        SaddleBag fromProperties = roundTrip(saddlebag, Format.PROPERTIES);
+        assertThat(roundTrip(saddlebag, Format.JSON)).isEqualTo(saddlebag);
+        assertThat(roundTrip(saddlebag, Format.YAML)).isEqualTo(saddlebag);
+        assertThat(roundTrip(saddlebag, Format.PROPERTIES)).isEqualTo(saddlebag);
+    }
 
-        assertThat(fromJson).isEqualTo(saddlebag);
-        assertThat(fromYaml).isEqualTo(saddlebag);
-        assertThat(fromProperties).isEqualTo(saddlebag);
+    // ---------------------------------------------------------------------------------------------
+    // Type descriptors (inputs / outputs / struct properties) driven end-to-end through the build
+    // step and asserted on the generated output file.
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    void generateSaddlebagEmitsPrimitiveInputAndOutputTypes() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(PrimitivesTask.class)), Map.of("task.add.name", "add"));
+
+        Task add = saddlebag.tasks().get("add");
+        assertThat(add.output().type()).isEqualTo(Type.primitive("INT"));
+        assertThat(add.inputs())
+                .extracting(Input::type)
+                .containsExactly(Type.primitive("INT"), Type.primitive("INT"));
     }
 
     @Test
-    void buildTypeEmitsPrimitiveType() {
-        Type type = processor.buildType(
-                TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR).build());
+    void generateSaddlebagEmitsStructInputAndOutputTypes() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(StructTask.class)),
+                Map.of("task.create-address.name", "create-address"));
 
-        assertThat(type).isEqualTo(Type.primitive("STR"));
+        Task task = saddlebag.tasks().get("create-address");
+        assertThat(task.output().type()).isEqualTo(Type.struct("address"));
+        assertThat(task.inputs())
+                .extracting(Input::type)
+                .containsExactly(Type.primitive("STR"), Type.struct("address"));
     }
 
     @Test
-    void buildTypeEmitsStructType() {
-        Type type = processor.buildType(TypeDefinition.newBuilder()
-                .setStructDefId(StructDefId.newBuilder().setName("test-order"))
-                .build());
+    void generateSaddlebagEmitsArrayAndMapTypes() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(
+                        taskItem(CollectionTask.class, "consumeArray"),
+                        taskItem(CollectionTask.class, "consumeAddresses"),
+                        taskItem(CollectionTask.class, "consumeMap"),
+                        taskItem(CollectionTask.class, "produceArray")),
+                Map.of(
+                        "task.consume-array.name", "consume-array",
+                        "task.consume-addresses.name", "consume-addresses",
+                        "task.consume-map.name", "consume-map",
+                        "task.produce-array.name", "produce-array"));
 
-        assertThat(type).isEqualTo(Type.struct("test-order"));
+        assertThat(saddlebag.tasks().get("consume-array").inputs().get(0).type())
+                .isEqualTo(Type.array(Type.primitive("INT")));
+        assertThat(saddlebag.tasks().get("consume-addresses").inputs().get(0).type())
+                .isEqualTo(Type.array(Type.struct("address")));
+        assertThat(saddlebag.tasks().get("consume-map").inputs().get(0).type())
+                .isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
+        assertThat(saddlebag.tasks().get("produce-array").output().type())
+                .isEqualTo(Type.array(Type.primitive("INT")));
     }
 
     @Test
-    void handleTaskParametersDistinguishesStructsFromPrimitives() throws Exception {
-        Method method =
-                TestOrderTask.class.getMethod("createOrder", String.class, TestAddress.class);
+    void generateSaddlebagResolvesStructNamePlaceholderInTaskInput() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(PlaceholderTask.class)),
+                List.of(structItem(PlaceholderAddress.class)),
+                Map.of("task.ph.name", "ph", "struct.ph-address.name", "resolved-address"));
 
-        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
-
-        assertThat(params).hasSize(2);
-        assertThat(params.get(0).type()).isEqualTo(Type.primitive("STR"));
-        assertThat(params.get(1).type()).isEqualTo(Type.struct("test-address"));
+        assertThat(saddlebag.tasks().get("ph").inputs().get(0).type())
+                .isEqualTo(Type.struct("resolved-address"));
     }
 
     @Test
-    void detectsStructReturnType() throws Exception {
-        Method method =
-                TestOrderTask.class.getMethod("createOrder", String.class, TestAddress.class);
-        LHTaskSignature signature = new LHTaskSignature(
-                LHTaskMethodHandle.from("create-order", "", method),
-                LHTypeAdapterRegistry.empty(),
-                Map.of());
+    void generateSaddlebagEmitsStructPropertyTypes() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(),
+                List.of(structItem(OrderStruct.class), structItem(InventoryStruct.class)),
+                Map.of("struct.order.name", "order", "struct.inventory.name", "inventory"));
 
-        Type type = processor.buildType(signature.getReturnType().getReturnType());
+        Struct order = saddlebag.structs().get("order");
+        assertThat(propertyType(order, "productName")).isEqualTo(Type.primitive("STR"));
+        assertThat(propertyType(order, "quantity")).isEqualTo(Type.primitive("INT"));
+        assertThat(propertyType(order, "shippingAddress")).isEqualTo(Type.struct("address"));
 
-        assertThat(type).isEqualTo(Type.struct("test-order"));
-    }
-
-    @Test
-    void detectsPrimitiveReturnType() throws Exception {
-        Method method = TestOrderTask.class.getMethod("addNumbers", int.class, int.class);
-        LHTaskSignature signature = new LHTaskSignature(
-                LHTaskMethodHandle.from("add-numbers", "", method),
-                LHTypeAdapterRegistry.empty(),
-                Map.of());
-
-        Type type = processor.buildType(signature.getReturnType().getReturnType());
-
-        assertThat(type).isEqualTo(Type.primitive("INT"));
-    }
-
-    @Test
-    void buildStructEmitsNestedStructAndPrimitiveProperties() throws Exception {
-        LHStructDefBuildItem item = new LHStructDefBuildItem(
-                TestOrder.class, new LHStructDefDescriptor(new OptionalAnnotation(null)));
-
-        List<Property> properties = processor.buildStruct(item, Map.of());
-
-        assertThat(findProperty(properties, "productName").type()).isEqualTo(Type.primitive("STR"));
-        assertThat(findProperty(properties, "shippingAddress").type())
-                .isEqualTo(Type.struct("test-address"));
-    }
-
-    @Test
-    void resolvesStructNamePlaceholdersInTaskParameters() throws Exception {
-        Method method = TestPlaceholderTask.class.getMethod("handle", TestPlaceholderAddress.class);
-
-        List<Input> params = processor.handleTaskParameters(
-                method, Map.of(), Map.of("struct.ph-address.name", "resolved-address"));
-
-        assertThat(params).hasSize(1);
-        assertThat(params.get(0).type()).isEqualTo(Type.struct("resolved-address"));
-    }
-
-    @Test
-    void buildTypeEmitsArrayType() {
-        Type type = processor.buildType(TypeDefinition.newBuilder()
-                .setInlineArrayDef(InlineArrayDef.newBuilder()
-                        .setArrayType(
-                                TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR)))
-                .build());
-
-        assertThat(type).isEqualTo(Type.array(Type.primitive("STR")));
-    }
-
-    @Test
-    void buildTypeEmitsMapType() {
-        Type type = processor.buildType(TypeDefinition.newBuilder()
-                .setInlineMapDef(InlineMapDef.newBuilder()
-                        .setKeyType(TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR))
-                        .setValueType(
-                                TypeDefinition.newBuilder().setPrimitiveType(VariableType.INT)))
-                .build());
-
-        assertThat(type).isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
-    }
-
-    @Test
-    void handleTaskParametersEmitsArrayOfPrimitives() throws Exception {
-        Method method = TestCollectionTask.class.getMethod("consumeArray", Long[].class);
-
-        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
-
-        assertThat(params).hasSize(1);
-        assertThat(params.get(0).type()).isEqualTo(Type.array(Type.primitive("INT")));
-    }
-
-    @Test
-    void handleTaskParametersEmitsArrayOfStructs() throws Exception {
-        Method method = TestCollectionTask.class.getMethod("consumeAddresses", TestAddress[].class);
-
-        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
-
-        assertThat(params).hasSize(1);
-        assertThat(params.get(0).type()).isEqualTo(Type.array(Type.struct("test-address")));
-    }
-
-    @Test
-    void handleTaskParametersEmitsMapType() throws Exception {
-        Method method = TestCollectionTask.class.getMethod("consumeMap", Map.class);
-
-        List<Input> params = processor.handleTaskParameters(method, Map.of(), Map.of());
-
-        assertThat(params).hasSize(1);
-        assertThat(params.get(0).type())
+        Struct inventory = saddlebag.structs().get("inventory");
+        assertThat(propertyType(inventory, "tags")).isEqualTo(Type.array(Type.primitive("STR")));
+        assertThat(propertyType(inventory, "counts"))
                 .isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
     }
 
+    // ---------------------------------------------------------------------------------------------
+    // Task business exceptions.
+    // ---------------------------------------------------------------------------------------------
+
     @Test
-    void detectsArrayReturnType() throws Exception {
-        Method method = TestCollectionTask.class.getMethod("produceArray");
-        LHTaskSignature signature = new LHTaskSignature(
-                LHTaskMethodHandle.from("produce-array", "", method),
-                LHTypeAdapterRegistry.empty(),
-                Map.of());
+    void generateSaddlebagEmitsAnnotatedBusinessExceptions() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(ExceptionTask.class)), Map.of("task.charge.name", "charge"));
 
-        Type type = processor.buildType(signature.getReturnType().getReturnType());
-
-        assertThat(type).isEqualTo(Type.array(Type.primitive("INT")));
+        Task charge = saddlebag.tasks().get("charge");
+        assertThat(charge.exceptions())
+                .containsExactly(
+                        new TaskException("insufficient-funds", "Card balance too low"),
+                        new TaskException("amount-too-large", ""));
     }
 
     @Test
-    void buildTaskExceptionsEmitsAnnotatedBusinessExceptions() throws Exception {
-        Method method = TestExceptionTask.class.getMethod("charge", double.class);
+    void generateSaddlebagOmitsExceptionsWhenNoneDeclared() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(NoConfigTask.class)), Map.of("task.plain.name", "plain"));
 
-        List<SaddleBag.TaskException> exceptions = processor.buildTaskExceptions(method);
+        assertThat(saddlebag.tasks().get("plain").exceptions()).isNull();
+    }
 
-        assertThat(exceptions).hasSize(2);
-        assertThat(exceptions.get(0).name()).isEqualTo("insufficient-funds");
-        assertThat(exceptions.get(0).description()).isEqualTo("Card balance too low");
-        assertThat(exceptions.get(1).name()).isEqualTo("amount-too-large");
-        assertThat(exceptions.get(1).description()).isEqualTo("");
+    // ---------------------------------------------------------------------------------------------
+    // Global (class-level @LHTaskConfig) and method-level (@LHTaskMethodConfig) configurations.
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    void generateSaddlebagEmitsGlobalConfigsAtRootDeduplicatedAcrossClasses() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(GlobalConfigTaskA.class), taskItem(GlobalConfigTaskB.class)),
+                Map.of("task.alpha.name", "alpha", "task.beta.name", "beta"));
+
+        assertThat(saddlebag.configs())
+                .extracting(Config::key)
+                .containsExactly("shared.url", "task-a.key", "task-b.key");
+        assertThat(saddlebag.configs().get(0))
+                .isEqualTo(
+                        new Config("shared.url", "Shared URL", false, Type.primitive("STR"), null));
     }
 
     @Test
-    void buildTaskExceptionsEmitsEmptyListWhenNotAnnotated() throws Exception {
-        Method method = TestOrderTask.class.getMethod("addNumbers", int.class, int.class);
+    void generateSaddlebagEmitsMethodConfigsInsideOwningTaskDeduplicated() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(GlobalConfigTaskA.class), taskItem(GlobalConfigTaskB.class)),
+                Map.of("task.alpha.name", "alpha", "task.beta.name", "beta"));
 
-        assertThat(processor.buildTaskExceptions(method)).isEmpty();
+        assertThat(saddlebag.tasks().get("alpha").configs())
+                .containsExactly(new Config(
+                        "alpha.retries", "Alpha retries", false, Type.primitive("INT"), "3"));
+        assertThat(saddlebag.tasks().get("beta").configs())
+                .containsExactly(new Config(
+                        "beta.timeout", "Beta timeout", false, Type.primitive("INT"), null));
     }
 
     @Test
-    void buildStructEmitsArrayAndMapProperties() throws Exception {
-        LHStructDefBuildItem item = new LHStructDefBuildItem(
-                TestInventory.class, new LHStructDefDescriptor(new OptionalAnnotation(null)));
+    void generateSaddlebagOmitsConfigsWhenNoneDeclared() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(NoConfigTask.class)), Map.of("task.plain.name", "plain"));
 
-        List<Property> properties = processor.buildStruct(item, Map.of());
+        assertThat(saddlebag.configs()).isNull();
+        assertThat(saddlebag.tasks().get("plain").configs()).isNull();
+    }
 
-        assertThat(findProperty(properties, "tags").type())
-                .isEqualTo(Type.array(Type.primitive("STR")));
-        assertThat(findProperty(properties, "counts").type())
-                .isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
+    @Test
+    void generateSaddlebagFailsWhenSameMethodConfigKeyOnTwoMethods() {
+        assertThatThrownBy(() -> generateSaddlebag(
+                        List.of(taskItem(DuplicateAcrossMethodsTask.class, "first")),
+                        Map.of("task.first.name", "first", "task.second.name", "second")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("dup.key")
+                .hasMessageContaining("@LHTaskConfig");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Test harness: drives the generateSaddlebag build step and reads back the generated JSON file.
+    // ---------------------------------------------------------------------------------------------
+
+    private SaddleBag generateSaddlebag(
+            List<LHTaskMethodBuildItem> taskMethods, Map<String, String> nameProperties)
+            throws Exception {
+        return generateSaddlebag(taskMethods, List.of(), nameProperties);
+    }
+
+    private SaddleBag generateSaddlebag(
+            List<LHTaskMethodBuildItem> taskMethods,
+            List<LHStructDefBuildItem> structDefs,
+            Map<String, String> nameProperties)
+            throws Exception {
+        Path outputDir = Files.createTempDirectory("saddlebag-test");
+
+        Map<String, String> properties = new HashMap<>(bagProperties());
+        properties.putAll(nameProperties);
+
+        SmallRyeConfig config = new SmallRyeConfigBuilder()
+                .withMapping(LHSaddleBagBuildtimeConfig.class)
+                .withValidateUnknown(false)
+                .withSources(new PropertiesConfigSource(properties, "test", 250))
+                .build();
+
+        ConfigProviderResolver resolver = ConfigProviderResolver.instance();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            resolver.registerConfig(config, classLoader);
+        } catch (IllegalStateException alreadyRegistered) {
+            resolver.releaseConfig(resolver.getConfig(classLoader));
+            resolver.registerConfig(config, classLoader);
+        }
+
+        try {
+            LHSaddleBagBuildtimeConfig mapping =
+                    config.getConfigMapping(LHSaddleBagBuildtimeConfig.class);
+            ApplicationInfoBuildItem applicationInfo =
+                    new ApplicationInfoBuildItem(Optional.of("test-app"), Optional.of("1.0.0"));
+            OutputTargetBuildItem outputTarget = new OutputTargetBuildItem(
+                    outputDir, "test-app", "test-app", false, new Properties(), Optional.empty());
+            BuildProducer<GeneratedResourceBuildItem> resources =
+                    new ArrayList<GeneratedResourceBuildItem>()::add;
+
+            processor.generateSaddlebag(
+                    mapping,
+                    applicationInfo,
+                    taskMethods,
+                    structDefs,
+                    List.of(),
+                    outputTarget,
+                    resources);
+
+            Path outputFile = outputDir.resolve("saddle-bag/saddle-bag.json");
+            return processor.deserialize(Files.readAllBytes(outputFile), Format.JSON);
+        } finally {
+            resolver.releaseConfig(config);
+        }
+    }
+
+    private Map<String, String> bagProperties() {
+        Map<String, String> properties = new HashMap<>();
+        properties.put("quarkus.littlehorse.saddle.bag.name", "test-bag");
+        properties.put("quarkus.littlehorse.saddle.bag.title", "Test Bag");
+        properties.put("quarkus.littlehorse.saddle.bag.author", "tester");
+        properties.put("quarkus.littlehorse.saddle.bag.description", "A test bag");
+        properties.put("quarkus.littlehorse.saddle.bag.metadata.tags", "t1,t2");
+        properties.put("quarkus.littlehorse.saddle.bag.metadata.licence", "MIT");
+        properties.put(
+                "quarkus.littlehorse.saddle.bag.metadata.documentation-url",
+                "https://example.com/docs");
+        properties.put(
+                "quarkus.littlehorse.saddle.bag.metadata.icon-url", "https://example.com/icon.png");
+        properties.put(
+                "quarkus.littlehorse.saddle.bag.metadata.support-email", "support@example.com");
+        properties.put("quarkus.littlehorse.saddle.bag.output.enable", "true");
+        properties.put("quarkus.littlehorse.saddle.bag.output.format", "json");
+        properties.put("quarkus.littlehorse.saddle.bag.output.path", "saddle-bag/");
+        properties.put("quarkus.littlehorse.saddle.bag.output.filename", "saddle-bag");
+        return properties;
+    }
+
+    private LHTaskMethodBuildItem taskItem(Class<?> beanClass) {
+        String taskName = Arrays.stream(beanClass.getMethods())
+                .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
+                .map(method -> method.getAnnotation(LHTaskMethod.class).value())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No @LHTaskMethod on " + beanClass));
+        return taskItem(beanClass, taskName);
+    }
+
+    private LHTaskMethodBuildItem taskItem(Class<?> beanClass, String methodName) {
+        String taskName = Arrays.stream(beanClass.getMethods())
+                .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
+                .filter(method -> method.getName().equals(methodName)
+                        || method.getAnnotation(LHTaskMethod.class).value().equals(methodName))
+                .map(method -> method.getAnnotation(LHTaskMethod.class).value())
+                .findFirst()
+                .orElseThrow(() ->
+                        new AssertionError("No task method " + methodName + " on " + beanClass));
+
+        return new LHTaskMethodBuildItem(
+                beanClass,
+                new LHTaskMethodDescriptor(annotation(LHTaskMethod.class.getName(), taskName)));
+    }
+
+    private LHStructDefBuildItem structItem(Class<?> beanClass) {
+        String structName = beanClass.getAnnotation(LHStructDef.class).value();
+        return new LHStructDefBuildItem(
+                beanClass,
+                new LHStructDefDescriptor(annotation(LHStructDef.class.getName(), structName)));
+    }
+
+    private OptionalAnnotation annotation(String annotationType, String value) {
+        AnnotationInstance instance = AnnotationInstance.create(
+                DotName.createSimple(annotationType),
+                null,
+                new AnnotationValue[] {AnnotationValue.createStringValue("value", value)});
+        return new OptionalAnnotation(instance);
+    }
+
+    private Type propertyType(Struct struct, String propertyName) {
+        return struct.properties().stream()
+                .filter(property -> propertyName.equals(property.name()))
+                .map(Property::type)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Property not found: " + propertyName));
     }
 
     private SaddleBag roundTrip(SaddleBag saddlebag, Format format) {
         byte[] serialized = processor.serialize(saddlebag, format);
-        System.out.println("Serialized " + format + ":\n" + new String(serialized) + "\n");
         return processor.deserialize(serialized, format);
     }
 
@@ -334,19 +430,17 @@ class LHSaddleBagProcessorTest {
                 configs);
     }
 
-    private Property findProperty(List<Property> properties, String name) {
-        return properties.stream()
-                .filter(property -> name.equals(property.name()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Property not found: " + name));
-    }
+    // ---------------------------------------------------------------------------------------------
+    // Fixtures. Task names and top-level struct names use configuration expressions, mirroring real
+    // usage; struct types referenced as inputs/outputs/nested properties use literal names.
+    // ---------------------------------------------------------------------------------------------
 
-    @LHStructDef("test-address")
-    public static class TestAddress {
+    @LHStructDef("address")
+    public static class Address {
         private String street;
         private int zipCode;
 
-        public TestAddress() {}
+        public Address() {}
 
         public String getStreet() {
             return street;
@@ -365,12 +459,13 @@ class LHSaddleBagProcessorTest {
         }
     }
 
-    @LHStructDef("test-order")
-    public static class TestOrder {
+    @LHStructDef("${struct.order.name}")
+    public static class OrderStruct {
         private String productName;
-        private TestAddress shippingAddress;
+        private int quantity;
+        private Address shippingAddress;
 
-        public TestOrder() {}
+        public OrderStruct() {}
 
         public String getProductName() {
             return productName;
@@ -380,81 +475,29 @@ class LHSaddleBagProcessorTest {
             this.productName = productName;
         }
 
-        public TestAddress getShippingAddress() {
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public Address getShippingAddress() {
             return shippingAddress;
         }
 
-        public void setShippingAddress(TestAddress shippingAddress) {
+        public void setShippingAddress(Address shippingAddress) {
             this.shippingAddress = shippingAddress;
         }
     }
 
-    public static class TestOrderTask {
-
-        @LHTaskMethod("create-order")
-        public TestOrder createOrder(String productName, TestAddress address) {
-            return new TestOrder();
-        }
-
-        @LHTaskMethod("add-numbers")
-        public int addNumbers(int a, int b) {
-            return a + b;
-        }
-    }
-
-    public static class TestExceptionTask {
-
-        @LHTaskMethod("charge")
-        @LHTaskMethodException(name = "insufficient-funds", description = "Card balance too low")
-        @LHTaskMethodException(name = "amount-too-large")
-        public void charge(double amount) {}
-    }
-
-    @LHStructDef("${struct.ph-address.name}")
-    public static class TestPlaceholderAddress {
-        private String street;
-
-        public TestPlaceholderAddress() {}
-
-        public String getStreet() {
-            return street;
-        }
-
-        public void setStreet(String street) {
-            this.street = street;
-        }
-    }
-
-    public static class TestPlaceholderTask {
-
-        @LHTaskMethod("ph-task")
-        public void handle(TestPlaceholderAddress address) {}
-    }
-
-    public static class TestCollectionTask {
-
-        @LHTaskMethod("consume-array")
-        public void consumeArray(@LHType(isLHArray = true) Long[] numbers) {}
-
-        @LHTaskMethod("consume-addresses")
-        public void consumeAddresses(@LHType(isLHArray = true) TestAddress[] addresses) {}
-
-        @LHTaskMethod("consume-map")
-        public void consumeMap(@LHType(isLHMap = true) Map<String, Long> counts) {}
-
-        @LHTaskMethod("produce-array")
-        @LHType(isLHArray = true)
-        public Long[] produceArray() {
-            return new Long[0];
-        }
-    }
-
-    @LHStructDef("test-inventory")
-    public static class TestInventory {
+    @LHStructDef("${struct.inventory.name}")
+    public static class InventoryStruct {
         private String[] tags;
         private Map<String, Long> counts;
 
-        public TestInventory() {}
+        public InventoryStruct() {}
 
         public String[] getTags() {
             return tags;
@@ -471,5 +514,114 @@ class LHSaddleBagProcessorTest {
         public void setCounts(Map<String, Long> counts) {
             this.counts = counts;
         }
+    }
+
+    @LHStructDef("${struct.ph-address.name}")
+    public static class PlaceholderAddress {
+        private String street;
+
+        public PlaceholderAddress() {}
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
+    }
+
+    public static class PrimitivesTask {
+
+        @LHTaskMethod("${task.add.name}")
+        public int add(int a, int b) {
+            return a + b;
+        }
+    }
+
+    public static class StructTask {
+
+        @LHTaskMethod("${task.create-address.name}")
+        public Address createAddress(String label, Address existing) {
+            return existing;
+        }
+    }
+
+    public static class CollectionTask {
+
+        @LHTaskMethod("${task.consume-array.name}")
+        public void consumeArray(@LHType(isLHArray = true) Long[] numbers) {}
+
+        @LHTaskMethod("${task.consume-addresses.name}")
+        public void consumeAddresses(@LHType(isLHArray = true) Address[] addresses) {}
+
+        @LHTaskMethod("${task.consume-map.name}")
+        public void consumeMap(@LHType(isLHMap = true) Map<String, Long> counts) {}
+
+        @LHTaskMethod("${task.produce-array.name}")
+        @LHType(isLHArray = true)
+        public Long[] produceArray() {
+            return new Long[0];
+        }
+    }
+
+    public static class PlaceholderTask {
+
+        @LHTaskMethod("${task.ph.name}")
+        public void handle(PlaceholderAddress address) {}
+    }
+
+    public static class ExceptionTask {
+
+        @LHTaskMethod("${task.charge.name}")
+        @LHTaskMethodException(name = "insufficient-funds", description = "Card balance too low")
+        @LHTaskMethodException(name = "amount-too-large")
+        public void charge(double amount) {}
+    }
+
+    public static class NoConfigTask {
+
+        @LHTaskMethod("${task.plain.name}")
+        public void plain() {}
+    }
+
+    @LHTaskConfig(value = "shared.url", description = "Shared URL", type = LHTaskConfigType.STR)
+    @LHTaskConfig(value = "task-a.key", description = "Task A key", type = LHTaskConfigType.INT)
+    public static class GlobalConfigTaskA {
+
+        @LHTaskMethod("${task.alpha.name}")
+        @LHTaskMethodConfig(
+                value = "alpha.retries",
+                description = "Alpha retries",
+                defaultValue = "3",
+                type = LHTaskConfigType.INT)
+        public void alpha() {}
+    }
+
+    @LHTaskConfig(value = "shared.url", description = "Shared URL", type = LHTaskConfigType.STR)
+    @LHTaskConfig(value = "task-b.key", description = "Task B key", type = LHTaskConfigType.BOOL)
+    public static class GlobalConfigTaskB {
+
+        @LHTaskMethod("${task.beta.name}")
+        @LHTaskMethodConfig(
+                value = "beta.timeout",
+                description = "Beta timeout",
+                type = LHTaskConfigType.INT)
+        @LHTaskMethodConfig(
+                value = "beta.timeout",
+                description = "Duplicate ignored",
+                type = LHTaskConfigType.INT)
+        public void beta() {}
+    }
+
+    public static class DuplicateAcrossMethodsTask {
+
+        @LHTaskMethod("${task.first.name}")
+        @LHTaskMethodConfig(value = "dup.key", type = LHTaskConfigType.STR)
+        public void first() {}
+
+        @LHTaskMethod("${task.second.name}")
+        @LHTaskMethodConfig(value = "dup.key", type = LHTaskConfigType.STR)
+        public void second() {}
     }
 }

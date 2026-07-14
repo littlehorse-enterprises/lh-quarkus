@@ -328,7 +328,7 @@ public class LHSaddleBagProcessor {
                 configs);
     }
 
-    List<TaskException> buildTaskExceptions(Method method) {
+    private List<TaskException> buildTaskExceptions(Method method) {
         List<TaskException> exceptions = new ArrayList<>();
 
         LHTaskMethodException[] annotations =
@@ -385,7 +385,7 @@ public class LHSaddleBagProcessor {
         return new ResolvedConfig(resolved, configKey);
     }
 
-    List<Property> buildStruct(
+    private List<Property> buildStruct(
             LHStructDefBuildItem structDef, Map<String, String> placeholderValues)
             throws IntrospectionException {
 
@@ -406,7 +406,7 @@ public class LHSaddleBagProcessor {
         return structProperties;
     }
 
-    List<Input> handleTaskParameters(
+    private List<Input> handleTaskParameters(
             Method method,
             Map<Class<?>, VariableType> typeAdapterMap,
             Map<String, String> placeholderValues) {
@@ -437,7 +437,7 @@ public class LHSaddleBagProcessor {
         return parameters;
     }
 
-    Type buildType(TypeDefinition typeDef) {
+    private Type buildType(TypeDefinition typeDef) {
         return switch (typeDef.getDefinedTypeCase()) {
             case STRUCT_DEF_ID -> Type.struct(typeDef.getStructDefId().getName());
             case INLINE_ARRAY_DEF ->
