@@ -22,9 +22,16 @@ jobs:
   tests:
     needs:
       - prepare
+    strategy:
+      matrix:
+        project:
+          - littlehorse-quarkus
+          - littlehorse-quarkus-restful-gateway
+          - littlehorse-saddle-bag
     uses: ./.github/workflows/tests.yml
     with:
       version: ${{ needs.prepare.outputs.tag }}
+      project: ${{ matrix.project }}
 
   publish:
     runs-on: ubuntu-latest
@@ -72,7 +79,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -F CHANGELOG.md
 
-  restful-gateway:
+  docker-build-restful-gateway:
     needs:
       - prepare
       - publish

@@ -19,6 +19,13 @@ jobs:
   tests:
     needs:
       - prepare
+    strategy:
+      matrix:
+        project:
+          - littlehorse-quarkus
+          - littlehorse-quarkus-restful-gateway
+          - littlehorse-saddle-bag
     uses: ./.github/workflows/tests.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
+      project: ${{ matrix.project }}
