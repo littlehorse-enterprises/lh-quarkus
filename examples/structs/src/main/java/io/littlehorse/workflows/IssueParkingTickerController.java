@@ -1,7 +1,7 @@
-package io.littlehorse.workflow;
+package io.littlehorse.workflows;
 
-import static io.littlehorse.workflow.IssueParkingTicketWorkflow.CAR_INPUT_VAR;
-import static io.littlehorse.workflow.IssueParkingTicketWorkflow.ISSUE_PARKING_TICKET_WF;
+import static io.littlehorse.workflows.IssueParkingTicketWorkflow.CAR_INPUT_VAR;
+import static io.littlehorse.workflows.IssueParkingTicketWorkflow.ISSUE_PARKING_TICKET_WF;
 
 import io.littlehorse.quarkus.reactive.LittleHorseReactiveStub;
 import io.littlehorse.sdk.common.LHLibUtil;

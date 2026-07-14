@@ -1,9 +1,9 @@
-package io.littlehorse.saddlebag.tasks;
+package io.littlehorse.tasks;
 
 import io.littlehorse.quarkus.task.LHTask;
-import io.littlehorse.saddlebag.structs.Order;
-import io.littlehorse.saddlebag.structs.ShippingAddress;
 import io.littlehorse.sdk.worker.LHTaskMethod;
+import io.littlehorse.structs.Order;
+import io.littlehorse.structs.ShippingAddress;
 
 @LHTask
 public class OrderTask {

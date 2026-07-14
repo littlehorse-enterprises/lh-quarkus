@@ -1,4 +1,4 @@
-package io.littlehorse.saddlebag.structs;
+package io.littlehorse.structs;
 
 import io.littlehorse.sdk.worker.LHStructDef;
 

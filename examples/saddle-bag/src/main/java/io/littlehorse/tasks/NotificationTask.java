@@ -1,4 +1,4 @@
-package io.littlehorse.saddlebag.tasks;
+package io.littlehorse.tasks;
 
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;

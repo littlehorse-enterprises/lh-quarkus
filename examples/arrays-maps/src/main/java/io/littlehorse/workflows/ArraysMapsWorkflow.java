@@ -1,4 +1,4 @@
-package io.littlehorse.arraysmaps;
+package io.littlehorse.workflows;
 
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.workflow.LHWorkflow;

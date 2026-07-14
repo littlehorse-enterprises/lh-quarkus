@@ -1,4 +1,4 @@
-package io.littlehorse.saddlebag.adapter;
+package io.littlehorse.adapter;
 
 import io.littlehorse.quarkus.adapter.LHTypeAdapter;
 import io.littlehorse.sdk.common.adapter.LHStringAdapter;
