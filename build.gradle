@@ -92,6 +92,10 @@ configure(file("examples").listFiles().findAll { it.isDirectory() }.collect { pr
 
 configure(file("extras").listFiles().findAll { it.isDirectory() }.collect { project(":${it.name}") }) {
     apply plugin: "io.quarkus"
+}
+
+configure(file("integration-tests").listFiles().findAll { it.isDirectory() }.collect { project(":integration-tests-${it.name}") }) {
+    apply plugin: "io.quarkus"
 
     quarkusIntTest {
         systemProperty "version", version

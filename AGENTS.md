@@ -9,9 +9,9 @@ Quarkus extensions for the [LittleHorse](https://littlehorse.io/) workflow engin
 - `extensions/littlehorse-quarkus/` — Core extension (runtime + deployment modules)
 - `extensions/littlehorse-quarkus-restful-gateway/` — RESTful gateway extension (runtime + deployment)
 - `extensions/littlehorse-saddle-bag/` — Saddle Bag extension for self-describing task worker Docker images (runtime + deployment)
-- `restful-gateway/` — Standalone Quarkus app using the gateway extension
+- `extras/restful-gateway/` — Standalone Quarkus app using the gateway extension
 - `examples/` — Usage examples (basic, child-workflow, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
-- `integration-tests/` — End-to-end tests against a running LittleHorse instance
+- `integration-tests/` — End-to-end tests against a running LittleHorse instance, split per concern into subprojects: `core/` (base extension, project `integration-tests-core`), `restful-gateway/` (gateway extension, project `integration-tests-restful-gateway`), `saddle-bag/` (Saddle Bag extension, project `integration-tests-saddle-bag`)
 
 Each extension follows the Quarkus extension structure: `deployment/` for build-time processors, `runtime/` for CDI beans and recorders.
 
@@ -25,10 +25,10 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 ./gradlew test
 
 # Integration tests (requires ./gradlew dockerComposeUp)
-./gradlew integration-tests:quarkusIntTest
+./gradlew integration-tests-core:quarkusIntTest integration-tests-restful-gateway:quarkusIntTest integration-tests-saddle-bag:quarkusIntTest
 
 # Native integration tests
-./gradlew integration-tests:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
+./gradlew integration-tests-core:quarkusIntTest integration-tests-restful-gateway:quarkusIntTest integration-tests-saddle-bag:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
 
 # Publish locally (version=dev)
 ./gradlew publishToMavenLocal
