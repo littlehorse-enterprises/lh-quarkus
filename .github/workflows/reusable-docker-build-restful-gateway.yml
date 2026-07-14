@@ -6,6 +6,10 @@ on:
       version:
         required: true
         type: string
+      prerelease:
+        required: false
+        type: string
+        default: "true"
 
 env:
   ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
@@ -48,5 +52,5 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           ghcr-root: true
           tags: |
-            type=raw,value=latest,enable=false
+            type=raw,value=latest,enable=${{ inputs.prerelease == 'false' }}
             type=raw,value=${{ inputs.version }},enable=true
