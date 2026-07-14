@@ -287,19 +287,12 @@ class LHSaddleBagProcessorTest {
                 null,
                 "task.send-notification.name",
                 "Sends a notification",
-                List.of(
-                        new Config(
-                                "notification.service.url",
-                                "Notification service base URL",
-                                false,
-                                Type.primitive("STR"),
-                                null),
-                        new Config(
-                                "notification.service.api-key",
-                                "API key for the notification service",
-                                true,
-                                Type.primitive("STR"),
-                                "5000")));
+                List.of(new Config(
+                        "notification.channel",
+                        "Notification channel",
+                        false,
+                        Type.primitive("STR"),
+                        null)));
 
         Map<String, Task> tasks = new LinkedHashMap<>();
         tasks.put("add-numbers", addNumbers);
@@ -315,6 +308,20 @@ class LHSaddleBagProcessorTest {
         Map<String, Struct> structs = new LinkedHashMap<>();
         structs.put("order", order);
 
+        List<Config> configs = List.of(
+                new Config(
+                        "notification.service.url",
+                        "Notification service base URL",
+                        false,
+                        Type.primitive("STR"),
+                        null),
+                new Config(
+                        "notification.service.api-key",
+                        "API key for the notification service",
+                        true,
+                        Type.primitive("STR"),
+                        "5000"));
+
         return new SaddleBag(
                 "example-saddle-bag",
                 "Example Saddle Bag",
@@ -323,7 +330,8 @@ class LHSaddleBagProcessorTest {
                 "1.2-SNAPSHOT",
                 metadata,
                 tasks,
-                structs);
+                structs,
+                configs);
     }
 
     private Property findProperty(List<Property> properties, String name) {

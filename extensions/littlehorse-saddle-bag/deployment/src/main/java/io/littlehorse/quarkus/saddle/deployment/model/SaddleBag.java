@@ -19,7 +19,8 @@ public record SaddleBag(
         String version,
         Metadata metadata,
         Map<String, Task> tasks,
-        Map<String, Struct> structs) {
+        Map<String, Struct> structs,
+        List<Config> configs) {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Metadata(
@@ -81,17 +82,26 @@ public record SaddleBag(
         }
 
         public static Type array(Type elements) {
-            return new Type(null, null, new ArrayType(elements), null);
+            return new Type(null, null, new ArrayType(new Elements(elements)), null);
         }
 
         public static Type map(Type key, Type value) {
-            return new Type(null, null, null, new MapType(key, value));
+            return new Type(null, null, null, new MapType(new Key(key), new Value(value)));
         }
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record ArrayType(Type elements) {}
+    public record ArrayType(Elements elements) {}
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record MapType(Type key, Type value) {}
+    public record MapType(Key key, Value value) {}
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record Elements(Type type) {}
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record Key(Type type) {}
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record Value(Type type) {}
 }

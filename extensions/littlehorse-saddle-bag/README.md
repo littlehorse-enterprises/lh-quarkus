@@ -97,9 +97,13 @@ task.process-order.name=process-order
 
 ## Declaring Required Configurations
 
-Use the `@LHTaskConfig` annotation to declare external configuration properties that your task worker requires at runtime.
-This is useful when your task depends on external services (APIs, databases, message brokers, etc.) and consumers
-of the saddle bag need to know which configurations to provide.
+Configurations describe external properties (API URLs, credentials, service endpoints, etc.) that a
+task worker requires at runtime. There are two annotations, depending on the scope of the config:
+
+- `@LHTaskConfig` — declared on an `@LHTask` **class**. Emitted as a **global** saddle-bag config
+  under the top-level `configs` field (same level as `tasks`).
+- `@LHTaskMethodConfig` — declared on an `@LHTaskMethod` **method**. Emitted under the `configs`
+  field of that specific task.
 
 ```java
 @LHTask
@@ -109,13 +113,26 @@ of the saddle bag need to know which configurations to provide.
 public class EmailNotificationTask {
 
     @LHTaskMethod(value = "${task.send-email.name}", description = "Sends an email notification")
+    @LHTaskMethodConfig(value = "email.send.max-retries", description = "Max delivery attempts", defaultValue = "3", type = LHTaskConfigType.INT)
     public void sendEmail(String recipient, String subject, String body) {
         // ...
     }
 }
 ```
 
-### `@LHTaskConfig` Attributes
+### Deduplication and Validation
+
+- If two `@LHTask` classes declare the same `@LHTaskConfig` key, it is emitted **once** in the global
+  `configs` (duplicates are collapsed).
+- If a single `@LHTaskMethod` declares the same `@LHTaskMethodConfig` key more than once, it is emitted
+  **once** for that task.
+- If two **different** `@LHTaskMethod`s declare the same `@LHTaskMethodConfig` key, the build **fails**.
+  Shared configuration must instead be declared once at the class level with `@LHTaskConfig` so it
+  becomes a global saddle-bag config.
+
+### `@LHTaskConfig` / `@LHTaskMethodConfig` Attributes
+
+Both annotations share the same attributes:
 
 | Attribute      | Type      | Default | Description                                                        |
 |----------------|-----------|---------|--------------------------------------------------------------------|
@@ -125,7 +142,9 @@ public class EmailNotificationTask {
 | `defaultValue` | `String`     | `""`    | Default value; empty means the property is mandatory               |
 | `type`         | `LHTaskConfigType` | —       | Value type for validation: `STR`, `INT`, `DOUBLE`, or `BOOL` (required) |
 
-The declared configurations appear in the generated manifest under the `configs` field for each task.
+Global configs appear under the top-level `configs` field; method-level configs appear under the
+`configs` field of the owning task.
+
 
 ## Declaring Business Exceptions
 
@@ -194,22 +213,12 @@ tasks:
     config-name: "task.process-order.name"
     description: "Processes an incoming order and returns a confirmation"
     configs:
-    - key: "orders.service.url"
-      description: "Orders service base URL"
-      sensitive: false
-      type:
-        primitive: "STR"
-    - key: "orders.service.timeout-ms"
-      description: "Orders service request timeout"
+    - key: "orders.process.max-retries"
+      description: "Max processing attempts"
       sensitive: false
       type:
         primitive: "INT"
-      default-value: "5000"
-    - key: "orders.service.api-key"
-      description: "Orders service API key"
-      sensitive: true
-      type:
-        primitive: "STR"
+      default-value: "3"
 structs:
   order:
     config-name: "struct.order.name"
@@ -221,6 +230,23 @@ structs:
     - name: "quantity"
       type:
         primitive: "INT"
+configs:
+- key: "orders.service.url"
+  description: "Orders service base URL"
+  sensitive: false
+  type:
+    primitive: "STR"
+- key: "orders.service.timeout-ms"
+  description: "Orders service request timeout"
+  sensitive: false
+  type:
+    primitive: "INT"
+  default-value: "5000"
+- key: "orders.service.api-key"
+  description: "Orders service API key"
+  sensitive: true
+  type:
+    primitive: "STR"
 ```
 
 ## Type Representation
@@ -233,11 +259,11 @@ the kind of type (a `oneof`, mirroring the LittleHorse `TypeDefinition`):
 |-------------|------------------------------------------------------------------------------------------|
 | `primitive` | A primitive `VariableType` name: `STR`, `INT`, `DOUBLE`, `BOOL`, `BYTES`, `TIMESTAMP`, `WF_RUN_ID`, `JSON_OBJ`, `JSON_ARR`. |
 | `struct`    | The referenced `@LHStructDef` struct's resolved name (a key under the top-level `structs` section). |
-| `array`     | An object with an `elements` type descriptor.                                            |
-| `map`       | An object with `key` and `value` type descriptors.                                       |
+| `array`     | An object with an `elements` field holding a `type` descriptor.                          |
+| `map`       | An object with `key` and `value` fields, each holding a `type` descriptor.               |
 
-The `elements`, `key`, and `value` values are themselves type descriptors, so arrays of structs, maps
-of structs, and nested arrays/maps are all supported. Native `Array`/`Map` types come from
+The `elements`, `key`, and `value` fields each hold a nested `type` descriptor, so arrays of structs,
+maps of structs, and nested arrays/maps are all supported. Native `Array`/`Map` types come from
 `@LHType(isLHArray = true)` / `@LHType(isLHMap = true)` on task parameters/returns, or from array/`Map`
 struct properties.
 
@@ -252,7 +278,8 @@ tasks:
       type:
         array:
           elements:
-            primitive: "INT"
+            type:
+              primitive: "INT"
     config-name: "task.sum-numbers.name"
     description: "Sums a native Array of integers"
   count-items:
@@ -264,9 +291,11 @@ tasks:
       type:
         map:
           key:
-            primitive: "STR"
+            type:
+              primitive: "STR"
           value:
-            primitive: "INT"
+            type:
+              primitive: "INT"
     config-name: "task.count-items.name"
     description: "Counts the entries in a native Map"
   create-order:
@@ -290,6 +319,16 @@ structs:
     - name: "shippingAddress"
       type:
         struct: "shipping-address"
+  shipping-address:
+    config-name: "struct.shipping-address.name"
+    description: "A shipping destination address"
+    properties:
+    - name: "street"
+      type:
+        primitive: "STR"
+    - name: "zipCode"
+      type:
+        primitive: "INT"
 ```
 
 # Building a Docker Image

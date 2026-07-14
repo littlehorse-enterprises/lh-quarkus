@@ -18,6 +18,7 @@ import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleCon
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
+import io.littlehorse.quarkus.saddle.config.LHTaskMethodConfig;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Config;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Input;
@@ -53,6 +54,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,6 +85,8 @@ public class LHSaddleBagProcessor {
         OutputConfig outputConfig = bagConfig.output();
 
         ConfigEvaluator configEvaluator = new ConfigEvaluator(ConfigProvider.getConfig());
+
+        validateMethodConfigs(taskMethods);
 
         Map<Class<?>, VariableType> typeAdapterMap = buildTypeAdapterMap(typeAdapters);
 
@@ -125,6 +129,36 @@ public class LHSaddleBagProcessor {
         }
     }
 
+    private void validateMethodConfigs(List<LHTaskMethodBuildItem> taskMethods) {
+        Map<String, Method> configOwners = new HashMap<>();
+
+        taskMethods.stream()
+                .map(item -> item.toRecordable().getBeanClass())
+                .distinct()
+                .flatMap(beanClass -> Arrays.stream(beanClass.getMethods()))
+                .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
+                .forEach(method -> {
+                    for (LHTaskMethodConfig annotation :
+                            method.getAnnotationsByType(LHTaskMethodConfig.class)) {
+                        Method owner = configOwners.putIfAbsent(annotation.value(), method);
+                        if (owner != null && !owner.equals(method)) {
+                            throw new IllegalStateException("Config '"
+                                    + annotation.value()
+                                    + "' declared by @LHTaskMethodConfig on "
+                                    + owner.getDeclaringClass().getName()
+                                    + "#"
+                                    + owner.getName()
+                                    + " is duplicated in another method "
+                                    + method.getDeclaringClass().getName()
+                                    + "#"
+                                    + method.getName()
+                                    + ". Use @LHTaskConfig at the class level to make it a global"
+                                    + " saddle bag config.");
+                        }
+                    }
+                });
+    }
+
     private Map<Class<?>, VariableType> buildTypeAdapterMap(
             List<LHTypeAdapterBuildItem> typeAdapters) {
         if (typeAdapters == null || typeAdapters.isEmpty()) {
@@ -160,7 +194,8 @@ public class LHSaddleBagProcessor {
                 buildMetadata(bagConfig.metadata()),
                 buildSaddleBagTasks(
                         configEvaluator, taskMethods, typeAdapterMap, placeholderValues),
-                buildSaddleBagStructs(configEvaluator, structDefs, placeholderValues));
+                buildSaddleBagStructs(configEvaluator, structDefs, placeholderValues),
+                buildGlobalConfigs(taskMethods));
     }
 
     private Map<String, String> buildStructPlaceholderValues(
@@ -199,22 +234,51 @@ public class LHSaddleBagProcessor {
         return tasks;
     }
 
-    private List<Config> buildRequiredConfigs(Class<?> beanClass) {
-        List<Config> configs = new ArrayList<>();
+    private List<Config> buildGlobalConfigs(List<LHTaskMethodBuildItem> taskMethods) {
+        Map<String, Config> configs = new LinkedHashMap<>();
 
-        LHTaskConfig[] annotations = beanClass.getAnnotationsByType(LHTaskConfig.class);
-        for (LHTaskConfig annotation : annotations) {
-            String defaultValue =
-                    annotation.defaultValue().isEmpty() ? null : annotation.defaultValue();
-            configs.add(new Config(
-                    annotation.value(),
-                    annotation.description(),
-                    annotation.sensitive(),
-                    Type.primitive(annotation.type().name()),
-                    defaultValue));
+        taskMethods.stream()
+                .map(item -> item.toRecordable().getBeanClass())
+                .distinct()
+                .flatMap(beanClass ->
+                        Arrays.stream(beanClass.getAnnotationsByType(LHTaskConfig.class)))
+                .forEach(annotation ->
+                        configs.putIfAbsent(annotation.value(), toConfig(annotation)));
+
+        return configs.isEmpty() ? null : List.copyOf(configs.values());
+    }
+
+    private List<Config> buildMethodConfigs(Method method) {
+        Map<String, Config> configs = new LinkedHashMap<>();
+
+        for (LHTaskMethodConfig annotation :
+                method.getAnnotationsByType(LHTaskMethodConfig.class)) {
+            configs.putIfAbsent(annotation.value(), toConfig(annotation));
         }
 
-        return configs;
+        return configs.isEmpty() ? null : List.copyOf(configs.values());
+    }
+
+    private Config toConfig(LHTaskConfig annotation) {
+        String defaultValue =
+                annotation.defaultValue().isEmpty() ? null : annotation.defaultValue();
+        return new Config(
+                annotation.value(),
+                annotation.description(),
+                annotation.sensitive(),
+                Type.primitive(annotation.type().name()),
+                defaultValue);
+    }
+
+    private Config toConfig(LHTaskMethodConfig annotation) {
+        String defaultValue =
+                annotation.defaultValue().isEmpty() ? null : annotation.defaultValue();
+        return new Config(
+                annotation.value(),
+                annotation.description(),
+                annotation.sensitive(),
+                Type.primitive(annotation.type().name()),
+                defaultValue);
     }
 
     private Task buildSaddleBagTask(
@@ -228,6 +292,7 @@ public class LHSaddleBagProcessor {
         Output output = null;
         List<Input> inputs = List.of();
         List<TaskException> exceptions = List.of();
+        List<Config> configs = null;
 
         Method[] methods = taskMethod.toRecordable().getBeanClass().getMethods();
         for (Method method : methods) {
@@ -250,10 +315,9 @@ public class LHSaddleBagProcessor {
 
                 inputs = handleTaskParameters(method, typeAdapterMap, placeholderValues);
                 exceptions = buildTaskExceptions(method);
+                configs = buildMethodConfigs(method);
             }
         }
-
-        List<Config> configs = buildRequiredConfigs(taskMethod.toRecordable().getBeanClass());
 
         return new Task(
                 output,
@@ -261,7 +325,7 @@ public class LHSaddleBagProcessor {
                 exceptions.isEmpty() ? null : exceptions,
                 configKey,
                 taskMethod.toRecordable().getDescription(),
-                configs.isEmpty() ? null : configs);
+                configs);
     }
 
     List<TaskException> buildTaskExceptions(Method method) {
