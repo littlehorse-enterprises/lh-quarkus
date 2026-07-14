@@ -229,7 +229,11 @@ public class LHSaddleBagProcessor {
                     resolveConfigExpression(configEvaluator, item.toRecordable().getName());
             Task task = buildSaddleBagTask(
                     item, typeAdapterMap, placeholderValues, resolved.configKey());
-            tasks.put(resolved.name(), task);
+            if (tasks.putIfAbsent(resolved.name(), task) != null) {
+                throw new IllegalStateException(
+                        "Duplicated tasks are not allowed, but found more than one task named: "
+                                + resolved.name());
+            }
         }
         return tasks;
     }
@@ -355,7 +359,11 @@ public class LHSaddleBagProcessor {
                     resolved.configKey(),
                     item.toRecordable().getDescription(),
                     buildStruct(item, placeholderValues));
-            structs.put(resolved.name(), struct);
+            if (structs.putIfAbsent(resolved.name(), struct) != null) {
+                throw new IllegalStateException(
+                        "Duplicated structs are not allowed, but found more than one struct named: "
+                                + resolved.name());
+            }
         }
         return structs;
     }

@@ -228,6 +228,29 @@ class LHSaddleBagProcessorTest {
                 .hasMessageContaining("@LHTaskConfig");
     }
 
+    @Test
+    void generateSaddlebagFailsWhenTasksAreDuplicated() {
+        assertThatThrownBy(() -> generateSaddlebag(
+                        List.of(taskItem(NoConfigTask.class), taskItem(NoConfigTask.class)),
+                        Map.of("task.plain.name", "plain")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Duplicated tasks are not allowed")
+                .hasMessageContaining("plain");
+    }
+
+    @Test
+    void generateSaddlebagFailsWhenStructsAreDuplicated() {
+        assertThatThrownBy(() -> generateSaddlebag(
+                        List.of(),
+                        List.of(
+                                structItem(PlaceholderAddress.class),
+                                structItem(PlaceholderAddress.class)),
+                        Map.of("struct.ph-address.name", "resolved-address")))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Duplicated structs are not allowed")
+                .hasMessageContaining("resolved-address");
+    }
+
     // ---------------------------------------------------------------------------------------------
     // Test harness: drives the generateSaddlebag build step and reads back the generated JSON file.
     // ---------------------------------------------------------------------------------------------
