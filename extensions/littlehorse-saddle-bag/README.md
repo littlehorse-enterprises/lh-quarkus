@@ -20,7 +20,7 @@ what a task worker image provides.
   * [Basic Setup](#basic-setup)
   * [Declaring Required Configurations](#declaring-required-configurations)
     * [Deduplication and Validation](#deduplication-and-validation)
-    * [`@LHTaskConfig` / `@LHTaskMethodConfig` Attributes](#lhtaskconfig--lhtaskmethodconfig-attributes)
+    * [`@LHTaskConfig` Attributes](#lhtaskconfig-attributes)
   * [Declaring Business Exceptions](#declaring-business-exceptions)
     * [`@LHTaskMethodException` Attributes](#lhtaskmethodexception-attributes)
 * [Generated Output](#generated-output)
@@ -103,22 +103,21 @@ task.process-order.name=process-order
 ## Declaring Required Configurations
 
 Configurations describe external properties (API URLs, credentials, service endpoints, etc.) that a
-task worker requires at runtime. There are two annotations, depending on the scope of the config:
+task worker requires at runtime. The `@LHTaskConfig` annotation declares them, and its scope depends
+on where it is placed:
 
-- `@LHTaskConfig` — declared on an `@LHTask` **class**. Emitted as a **global** saddle-bag config
-  under the top-level `configs` field (same level as `tasks`).
-- `@LHTaskMethodConfig` — declared on an `@LHTaskMethod` **method**. Emitted under the `configs`
-  field of that specific task.
+- On an `@LHTask` **class** — emitted as a **global** saddle-bag config under the top-level `configs`
+  field (same level as `tasks`).
+- On an `@LHTaskMethod` **method** — emitted under the `configs` field of that specific task.
 
 ```java
 @LHTask
 @LHTaskConfig(value = "smtp.host", description = "SMTP server hostname", type = LHTaskConfigType.STR)
-@LHTaskConfig(value = "smtp.port", description = "SMTP server port", defaultValue = "587", type = LHTaskConfigType.INT)
 @LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true, type = LHTaskConfigType.STR)
 public class EmailNotificationTask {
 
     @LHTaskMethod(value = "${task.send-email.name}", description = "Sends an email notification")
-    @LHTaskMethodConfig(value = "email.send.max-retries", description = "Max delivery attempts", defaultValue = "3", type = LHTaskConfigType.INT)
+    @LHTaskConfig(value = "email.send.max-retries", description = "Max delivery attempts", defaultValue = "3", type = LHTaskConfigType.INT)
     public void sendEmail(String recipient, String subject, String body) {
         // ...
     }
@@ -127,17 +126,17 @@ public class EmailNotificationTask {
 
 ### Deduplication and Validation
 
-- If two `@LHTask` classes declare the same `@LHTaskConfig` key, it is emitted **once** in the global
-  `configs` (duplicates are collapsed).
-- If a single `@LHTaskMethod` declares the same `@LHTaskMethodConfig` key more than once, it is emitted
-  **once** for that task.
-- If two **different** `@LHTaskMethod`s declare the same `@LHTaskMethodConfig` key, the build **fails**.
-  Shared configuration must instead be declared once at the class level with `@LHTaskConfig` so it
-  becomes a global saddle-bag config.
+- If two `@LHTask` classes declare the same class-level `@LHTaskConfig` key, it is emitted **once** in
+  the global `configs` (duplicates are collapsed).
+- If a single `@LHTaskMethod` declares the same method-level `@LHTaskConfig` key more than once, it is
+  emitted **once** for that task.
+- If two **different** `@LHTaskMethod`s declare the same method-level `@LHTaskConfig` key, the build
+  **fails**. Shared configuration must instead be declared once at the class level so it becomes a
+  global saddle-bag config.
 
-### `@LHTaskConfig` / `@LHTaskMethodConfig` Attributes
+### `@LHTaskConfig` Attributes
 
-Both annotations share the same attributes:
+The annotation supports the same attributes on both classes and methods:
 
 | Attribute      | Type      | Default | Description                                                        |
 |----------------|-----------|---------|--------------------------------------------------------------------|

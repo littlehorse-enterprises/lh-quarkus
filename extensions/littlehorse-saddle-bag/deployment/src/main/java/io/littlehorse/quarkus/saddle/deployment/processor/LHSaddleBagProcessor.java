@@ -18,7 +18,6 @@ import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleCon
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
-import io.littlehorse.quarkus.saddle.config.LHTaskMethodConfig;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Config;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Input;
@@ -138,13 +137,13 @@ public class LHSaddleBagProcessor {
                 .flatMap(beanClass -> Arrays.stream(beanClass.getMethods()))
                 .filter(method -> method.isAnnotationPresent(LHTaskMethod.class))
                 .forEach(method -> {
-                    for (LHTaskMethodConfig annotation :
-                            method.getAnnotationsByType(LHTaskMethodConfig.class)) {
+                    for (LHTaskConfig annotation :
+                            method.getAnnotationsByType(LHTaskConfig.class)) {
                         Method owner = configOwners.putIfAbsent(annotation.value(), method);
                         if (owner != null && !owner.equals(method)) {
                             throw new IllegalStateException("Config '"
                                     + annotation.value()
-                                    + "' declared by @LHTaskMethodConfig on "
+                                    + "' declared by @LHTaskConfig on "
                                     + owner.getDeclaringClass().getName()
                                     + "#"
                                     + owner.getName()
@@ -256,8 +255,7 @@ public class LHSaddleBagProcessor {
     private List<Config> buildMethodConfigs(Method method) {
         Map<String, Config> configs = new LinkedHashMap<>();
 
-        for (LHTaskMethodConfig annotation :
-                method.getAnnotationsByType(LHTaskMethodConfig.class)) {
+        for (LHTaskConfig annotation : method.getAnnotationsByType(LHTaskConfig.class)) {
             configs.putIfAbsent(annotation.value(), toConfig(annotation));
         }
 
@@ -265,17 +263,6 @@ public class LHSaddleBagProcessor {
     }
 
     private Config toConfig(LHTaskConfig annotation) {
-        String defaultValue =
-                annotation.defaultValue().isEmpty() ? null : annotation.defaultValue();
-        return new Config(
-                annotation.value(),
-                annotation.description(),
-                annotation.sensitive(),
-                Type.primitive(annotation.type().name()),
-                defaultValue);
-    }
-
-    private Config toConfig(LHTaskMethodConfig annotation) {
         String defaultValue =
                 annotation.defaultValue().isEmpty() ? null : annotation.defaultValue();
         return new Config(

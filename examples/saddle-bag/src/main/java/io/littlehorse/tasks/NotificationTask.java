@@ -2,7 +2,6 @@ package io.littlehorse.tasks;
 
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
-import io.littlehorse.quarkus.saddle.config.LHTaskMethodConfig;
 import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
@@ -31,7 +30,7 @@ public class NotificationTask {
     @LHTaskMethod(
             value = SEND_NOTIFICATION,
             description = "Sends a notification to the given recipient using workflow context")
-    @LHTaskMethodConfig(
+    @LHTaskConfig(
             value = "notification.send.max-retries",
             description = "Maximum number of delivery attempts for a notification",
             defaultValue = "3",
@@ -50,7 +49,7 @@ public class NotificationTask {
     @LHTaskMethod(
             value = CANCEL_NOTIFICATION,
             description = "Cancels a previously scheduled notification by its identifier")
-    @LHTaskMethodConfig(
+    @LHTaskConfig(
             value = "notification.cancel.grace-period-ms",
             description =
                     "Grace period in milliseconds during which a notification can be canceled",

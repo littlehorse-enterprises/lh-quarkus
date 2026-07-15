@@ -2,7 +2,7 @@
 
 This example shows you how to use the Saddle Bag extension to package task workers as self-describing Docker images.
 
-The Saddle Bag extension scans `@LHTask` classes at build time and produces a manifest describing all tasks, their inputs/outputs, struct definitions, and required configurations. Use `@LHTaskConfig` (class level) to declare **global** external configurations, `@LHTaskMethodConfig` (method level) to declare configurations required by a single task method, and `@LHTaskMethodException` to declare the business exceptions a task method may throw.
+The Saddle Bag extension scans `@LHTask` classes at build time and produces a manifest describing all tasks, their inputs/outputs, struct definitions, and required configurations. Use `@LHTaskConfig` on a class to declare **global** external configurations or on a task method to declare configurations required by that single task method, and `@LHTaskMethodException` to declare the business exceptions a task method may throw.
 
 ```java
 @LHTask
@@ -27,7 +27,7 @@ public class NotificationTask {
     @LHTaskMethod(
             value = SEND_NOTIFICATION,
             description = "Sends a notification to the given recipient using workflow context")
-    @LHTaskMethodConfig(
+    @LHTaskConfig(
             value = "notification.send.max-retries",
             description = "Maximum number of delivery attempts for a notification",
             defaultValue = "3",
@@ -45,7 +45,7 @@ public class NotificationTask {
 }
 ```
 
-Class-level `@LHTaskConfig` values are emitted once under the top-level `configs` field (deduplicated across classes), while `@LHTaskMethodConfig` values are emitted under the owning task. A given `@LHTaskMethodConfig` key may only be used by one task method — shared configuration should use `@LHTaskConfig` instead.
+Class-level `@LHTaskConfig` values are emitted once under the top-level `configs` field (deduplicated across classes), while method-level `@LHTaskConfig` values are emitted under the owning task. A given method-level `@LHTaskConfig` key may only be used by one task method — shared configuration should be declared at the class level instead.
 
 Business exceptions are thrown from your task code via `LHTaskException` (or a subclass). Declaring them with `@LHTaskMethodException` lets consumers of the saddle bag know which `EXCEPTION`s a `WfSpec` can catch. See the [exception handling docs](https://littlehorse.io/docs/server/concepts/exception-handling) for details.
 

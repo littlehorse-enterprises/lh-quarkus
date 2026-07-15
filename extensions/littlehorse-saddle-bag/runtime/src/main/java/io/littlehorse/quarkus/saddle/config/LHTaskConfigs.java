@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Container annotation for repeatable {@link LHTaskConfig} annotations.
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LHTaskConfigs {
     LHTaskConfig[] value();
