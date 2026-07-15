@@ -28,7 +28,7 @@ import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Struct;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Task;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.TaskException;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Type;
-import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
+import io.littlehorse.quarkus.saddle.exception.LHThrownException;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
 import io.littlehorse.sdk.common.proto.TypeDefinition;
 import io.littlehorse.sdk.common.proto.VariableType;
@@ -323,9 +323,8 @@ public class LHSaddleBagProcessor {
     private List<TaskException> buildTaskExceptions(Method method) {
         List<TaskException> exceptions = new ArrayList<>();
 
-        LHTaskMethodException[] annotations =
-                method.getAnnotationsByType(LHTaskMethodException.class);
-        for (LHTaskMethodException annotation : annotations) {
+        LHThrownException[] annotations = method.getAnnotationsByType(LHThrownException.class);
+        for (LHThrownException annotation : annotations) {
             exceptions.add(new TaskException(annotation.name(), annotation.description()));
         }
 

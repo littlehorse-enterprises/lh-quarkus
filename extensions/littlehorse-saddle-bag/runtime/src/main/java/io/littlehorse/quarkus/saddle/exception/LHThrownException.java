@@ -17,8 +17,8 @@ import java.lang.annotation.Target;
  * <p>Example:
  * <pre>{@code
  * @LHTaskMethod("charge-credit-card")
- * @LHTaskMethodException(name = "insufficient-funds", description = "Card balance too low")
- * @LHTaskMethodException(name = "amount-too-large", description = "Charge exceeds $10,000")
+ * @LHThrownException(name = "insufficient-funds", description = "Card balance too low")
+ * @LHThrownException(name = "amount-too-large", description = "Charge exceeds $10,000")
  * public void chargeCreditCard(String userId, double amount) {
  *     // ...
  * }
@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Repeatable(LHTaskMethodExceptions.class)
-public @interface LHTaskMethodException {
+@Repeatable(LHThrownExceptions.class)
+public @interface LHThrownException {
 
     /**
      * The business exception name thrown by the task (kebab-case, e.g. {@code "insufficient-funds"}).

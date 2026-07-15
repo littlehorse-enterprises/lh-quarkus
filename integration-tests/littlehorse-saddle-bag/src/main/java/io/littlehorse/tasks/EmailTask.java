@@ -2,7 +2,7 @@ package io.littlehorse.tasks;
 
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
-import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
+import io.littlehorse.quarkus.saddle.exception.LHThrownException;
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 
@@ -26,7 +26,7 @@ public class EmailTask {
             description = "SMTP server port",
             defaultValue = "587",
             type = LHTaskConfigType.INT)
-    @LHTaskMethodException(
+    @LHThrownException(
             name = "invalid-address",
             description = "The recipient email address is invalid")
     public boolean sendEmail(String to, String body) {

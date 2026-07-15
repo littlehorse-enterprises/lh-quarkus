@@ -2,7 +2,7 @@
 
 This example shows you how to use the Saddle Bag extension to package task workers as self-describing Docker images.
 
-The Saddle Bag extension scans `@LHTask` classes at build time and produces a manifest describing all tasks, their inputs/outputs, struct definitions, and required configurations. Use `@LHTaskConfig` on a class to declare **global** external configurations or on a task method to declare configurations required by that single task method, and `@LHTaskMethodException` to declare the business exceptions a task method may throw.
+The Saddle Bag extension scans `@LHTask` classes at build time and produces a manifest describing all tasks, their inputs/outputs, struct definitions, and required configurations. Use `@LHTaskConfig` on a class to declare **global** external configurations or on a task method to declare configurations required by that single task method, and `@LHThrownException` to declare the business exceptions a task method may throw.
 
 ```java
 @LHTask
@@ -32,10 +32,10 @@ public class NotificationTask {
             description = "Maximum number of delivery attempts for a notification",
             defaultValue = "3",
             type = LHTaskConfigType.INT)
-    @LHTaskMethodException(
+    @LHThrownException(
             name = "recipient-unreachable",
             description = "The recipient could not be reached by the notification service")
-    @LHTaskMethodException(
+    @LHThrownException(
             name = "invalid-recipient",
             description = "The recipient address is malformed or not allowed")
     public String sendNotification(String recipient, String message, WorkerContext context) {
@@ -47,7 +47,7 @@ public class NotificationTask {
 
 Class-level `@LHTaskConfig` values are emitted once under the top-level `configs` field (deduplicated across classes), while method-level `@LHTaskConfig` values are emitted under the owning task. A given method-level `@LHTaskConfig` key may only be used by one task method — shared configuration should be declared at the class level instead.
 
-Business exceptions are thrown from your task code via `LHTaskException` (or a subclass). Declaring them with `@LHTaskMethodException` lets consumers of the saddle bag know which `EXCEPTION`s a `WfSpec` can catch. See the [exception handling docs](https://littlehorse.io/docs/server/concepts/exception-handling) for details.
+Business exceptions are thrown from your task code via `LHTaskException` (or a subclass). Declaring them with `@LHThrownException` lets consumers of the saddle bag know which `EXCEPTION`s a `WfSpec` can catch. See the [exception handling docs](https://littlehorse.io/docs/server/concepts/exception-handling) for details.
 
 
 ## Running the Example

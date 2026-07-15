@@ -22,7 +22,7 @@ import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Struct;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Task;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.TaskException;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Type;
-import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
+import io.littlehorse.quarkus.saddle.exception.LHThrownException;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
@@ -604,8 +604,8 @@ class LHSaddleBagProcessorTest {
     public static class ExceptionTask {
 
         @LHTaskMethod("${task.charge.name}")
-        @LHTaskMethodException(name = "insufficient-funds", description = "Card balance too low")
-        @LHTaskMethodException(name = "amount-too-large")
+        @LHThrownException(name = "insufficient-funds", description = "Card balance too low")
+        @LHThrownException(name = "amount-too-large")
         public void charge(double amount) {}
     }
 

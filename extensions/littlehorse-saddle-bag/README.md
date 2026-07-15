@@ -22,7 +22,7 @@ what a task worker image provides.
     * [Deduplication and Validation](#deduplication-and-validation)
     * [`@LHTaskConfig` Attributes](#lhtaskconfig-attributes)
   * [Declaring Business Exceptions](#declaring-business-exceptions)
-    * [`@LHTaskMethodException` Attributes](#lhtaskmethodexception-attributes)
+    * [`@LHThrownException` Attributes](#lhthrownexception-attributes)
 * [Generated Output](#generated-output)
   * [Type Representation](#type-representation)
 * [Building a Docker Image](#building-a-docker-image)
@@ -152,7 +152,7 @@ Global configs appear under the top-level `configs` field; method-level configs 
 
 ## Declaring Business Exceptions
 
-Use the `@LHTaskMethodException` annotation on an `@LHTaskMethod` to declare the business `EXCEPTION`s that the
+Use the `@LHThrownException` annotation on an `@LHTaskMethod` to declare the business `EXCEPTION`s that the
 task may throw. Business exceptions are thrown from your task code via `LHTaskException` (or a subclass) and can be
 caught by a `WfSpec`. Declaring them lets consumers of the saddle bag know which exceptions to handle. See the
 [exception handling docs](https://littlehorse.io/docs/server/concepts/exception-handling) for more details.
@@ -162,8 +162,8 @@ caught by a `WfSpec`. Declaring them lets consumers of the saddle bag know which
 public class PaymentTask {
 
     @LHTaskMethod(value = "${task.charge-credit-card.name}", description = "Charges a credit card")
-    @LHTaskMethodException(name = "insufficient-funds", description = "Card balance is too low")
-    @LHTaskMethodException(name = "amount-too-large", description = "Charge exceeds $10,000")
+    @LHThrownException(name = "insufficient-funds", description = "Card balance is too low")
+    @LHThrownException(name = "amount-too-large", description = "Charge exceeds $10,000")
     public void chargeCreditCard(String userId, double amount) {
         if (amount > 10000) {
             throw new LHTaskException("amount-too-large", "Cannot charge more than $10,000");
@@ -173,7 +173,7 @@ public class PaymentTask {
 }
 ```
 
-### `@LHTaskMethodException` Attributes
+### `@LHThrownException` Attributes
 
 | Attribute     | Type     | Default | Description                                                            |
 |---------------|----------|---------|-----------------------------------------------------------------------|
