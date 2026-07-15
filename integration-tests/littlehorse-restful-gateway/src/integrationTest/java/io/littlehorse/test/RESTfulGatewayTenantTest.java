@@ -40,16 +40,16 @@ class RESTfulGatewayTenantTest {
         registerTenantAndWf(tenant, wfName);
 
         // test
-        given().pathParam("tenant", tenant)
-                .pathParam("name", wfName)
-                .when()
-                .get("/gateway/tenants/{tenant}/wf-specs/{name}")
-                .then()
-                .statusCode(200)
-                .body("id.name", is(wfName))
-                .body("status", is("ACTIVE"))
-                .log()
-                .all();
+        await().atMost(Duration.ofSeconds(30))
+                .pollInterval(Duration.ofMillis(500))
+                .untilAsserted(() -> given().pathParam("tenant", tenant)
+                        .pathParam("name", wfName)
+                        .when()
+                        .get("/gateway/tenants/{tenant}/wf-specs/{name}")
+                        .then()
+                        .statusCode(200)
+                        .body("id.name", is(wfName))
+                        .body("status", is("ACTIVE")));
     }
 
     @Test

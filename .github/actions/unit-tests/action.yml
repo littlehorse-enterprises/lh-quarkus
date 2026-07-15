@@ -1,0 +1,22 @@
+name: Unit Tests
+description: Run all unit tests with a given Java version
+inputs:
+  java-version:
+    required: true
+    description: Java version to run the tests with
+  version:
+    required: true
+    description: Project version
+runs:
+  using: composite
+  steps:
+    - name: Setup Java ${{ inputs.java-version }}
+      uses: actions/setup-java@v5
+      with:
+        distribution: corretto
+        java-version: ${{ inputs.java-version }}
+    - name: Unit Tests
+      shell: bash
+      env:
+        ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
+      run: ./gradlew -x spotlessJavaCheck test

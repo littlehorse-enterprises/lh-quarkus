@@ -1,0 +1,39 @@
+name: Publish
+description: Publish artifacts to Sonatype (Maven Central) with Java 17
+inputs:
+  version:
+    required: true
+    description: Project version
+  prerelease:
+    required: false
+    default: "true"
+    description: When "false", close and release the Sonatype staging repository (promote to Maven Central)
+  signing-key:
+    required: true
+    description: GPG private key
+  signing-password:
+    required: true
+    description: GPG passphrase
+  sonatype-username:
+    required: true
+    description: Sonatype (OSSRH) username
+  sonatype-password:
+    required: true
+    description: Sonatype (OSSRH) password
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: corretto
+        java-version: "17"
+    - name: Publish
+      shell: bash
+      env:
+        ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
+        ORG_GRADLE_PROJECT_signingKey: ${{ inputs.signing-key }}
+        ORG_GRADLE_PROJECT_signingPassword: ${{ inputs.signing-password }}
+        ORG_GRADLE_PROJECT_sonatypeUsername: ${{ inputs.sonatype-username }}
+        ORG_GRADLE_PROJECT_sonatypePassword: ${{ inputs.sonatype-password }}
+      run: ./gradlew publishToSonatype ${{ inputs.prerelease == 'false' && 'closeAndReleaseSonatypeStagingRepository' || '' }}

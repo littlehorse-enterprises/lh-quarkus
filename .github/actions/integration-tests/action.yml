@@ -1,0 +1,32 @@
+name: Integration Tests
+description: Run jar and native integration tests for a project
+inputs:
+  project:
+    required: true
+    description: Extension project to test (e.g. littlehorse-quarkus)
+  version:
+    required: true
+    description: Project version
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: graalvm
+        java-version: "25"
+    - name: Jar Tests
+      shell: bash
+      env:
+        ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
+      run: ./gradlew integration-tests-${{ inputs.project }}:quarkusIntTest
+    - name: Native Tests
+      shell: bash
+      env:
+        ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
+      run: >-
+        ./gradlew
+        integration-tests-${{ inputs.project }}:quarkusIntTest
+        -Dquarkus.native.enabled=true
+        -Dquarkus.package.jar.enabled=false
+        -Dquarkus.native.container-build=false

@@ -34,52 +34,85 @@ jobs:
           fi
 
   format:
-    uses: ./.github/workflows/reusable-format.yml
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Format
+        uses: ./.github/actions/format
 
-  tests:
+  unit-tests:
     needs:
       - prepare
       - format
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: ["17", "21", "25"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Unit Tests
+        uses: ./.github/actions/unit-tests
+        with:
+          java-version: ${{ matrix.java-version }}
+          version: ${{ needs.prepare.outputs.version }}
+
+  integration-tests:
+    needs:
+      - prepare
+      - unit-tests
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         project:
           - littlehorse-quarkus
           - littlehorse-restful-gateway
           - littlehorse-saddle-bag
-    uses: ./.github/workflows/reusable-tests.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
-      project: ${{ matrix.project }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Integration Tests
+        uses: ./.github/actions/integration-tests
+        with:
+          project: ${{ matrix.project }}
+          version: ${{ needs.prepare.outputs.version }}
 
   publish:
     needs:
       - prepare
-      - tests
+      - integration-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: "corretto"
-          java-version: "25"
-
       - name: Publish Snapshot
-        env:
-          ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.version }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
-          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
-          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
-        run: ./gradlew publishToSonatype
+        uses: ./.github/actions/publish
+        with:
+          version: ${{ needs.prepare.outputs.version }}
+          signing-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          signing-password: ${{ secrets.GPG_PASSPHRASE }}
+          sonatype-username: ${{ secrets.OSSRH_USERNAME }}
+          sonatype-password: ${{ secrets.OSSRH_PASSWORD }}
 
   docker-build-restful-gateway:
     needs:
       - prepare
-      - tests
+      - integration-tests
       - publish
-    uses: ./.github/workflows/reusable-docker-build-restful-gateway.yml
-    with:
-      version: ${{ needs.prepare.outputs.version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Docker Build RESTful Gateway
+        uses: ./.github/actions/docker-build
+        with:
+          gradle-project: restful-gateway
+          image-name: lh-restful-gateway
+          dockerfile: ./extras/restful-gateway/Dockerfile
+          context: ./extras/restful-gateway
+          version: ${{ needs.prepare.outputs.version }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
