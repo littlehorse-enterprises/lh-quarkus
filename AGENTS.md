@@ -39,7 +39,7 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 
 ## Code Style
 
-- Java 25
+- Java 17
 - Palantir Java Format (AOSP style) enforced via Spotless
 - Run `./gradlew spotlessApply` to auto-format before committing
 - Pre-commit hooks are configured — run `pre-commit install` after cloning
