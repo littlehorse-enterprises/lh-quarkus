@@ -81,21 +81,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: corretto
-          java-version: "17"
-
       - name: Publish
-        env:
-          ORG_GRADLE_PROJECT_version: ${{ needs.prepare.outputs.tag }}
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
-          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.OSSRH_USERNAME }}
-          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.OSSRH_PASSWORD }}
-        run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+        uses: ./.github/actions/publish
+        with:
+          version: ${{ needs.prepare.outputs.tag }}
+          prerelease: ${{ needs.prepare.outputs.prerelease }}
+          signing-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          signing-password: ${{ secrets.GPG_PASSPHRASE }}
+          sonatype-username: ${{ secrets.OSSRH_USERNAME }}
+          sonatype-password: ${{ secrets.OSSRH_PASSWORD }}
 
   create-release:
     needs:
