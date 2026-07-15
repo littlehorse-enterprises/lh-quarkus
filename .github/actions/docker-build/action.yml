@@ -1,0 +1,60 @@
+name: Docker Build
+description: Build a Quarkus app (jar + native) and publish its Docker image to GHCR
+inputs:
+  gradle-project:
+    required: true
+    description: Gradle project name to build (e.g. restful-gateway)
+  image-name:
+    required: true
+    description: Docker image name (e.g. lh-restful-gateway)
+  dockerfile:
+    required: true
+    description: Path to the Dockerfile (e.g. ./extras/restful-gateway/Dockerfile)
+  context:
+    required: true
+    description: Docker build context path (e.g. ./extras/restful-gateway)
+  version:
+    required: true
+    description: The version to tag the image with
+  github-token:
+    required: true
+    description: GitHub token for pushing to GHCR
+  prerelease:
+    required: false
+    description: Whether this is a pre-release (true/false)
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: graalvm
+        java-version: "25"
+    - name: Build Jar
+      shell: bash
+      env:
+        ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
+      run: ./gradlew ${{ inputs.gradle-project }}:build
+    - name: Build Native
+      shell: bash
+      env:
+        ORG_GRADLE_PROJECT_version: ${{ inputs.version }}
+      run: >-
+        ./gradlew ${{ inputs.gradle-project }}:build
+        -Dquarkus.native.enabled=true
+        -Dquarkus.package.runner-suffix=-run
+        -Dquarkus.package.output-name=quarkus
+        -Dquarkus.package.jar.enabled=false
+        -Dquarkus.native.container-build=false
+    - name: Build and Publish
+      uses: littlehorse-enterprises/publish-image@v1
+      with:
+        image-name: ${{ inputs.image-name }}
+        dockerfile: ${{ inputs.dockerfile }}
+        context: ${{ inputs.context }}
+        github-token: ${{ inputs.github-token }}
+        ghcr-root: true
+        tags: |
+          type=raw,value=latest,enable=${{ inputs.prerelease == 'false' }}
+          type=raw,value=${{ inputs.version }},enable=true

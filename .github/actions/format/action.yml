@@ -1,0 +1,13 @@
+name: Format Check
+description: Check Java formatting with Spotless
+runs:
+  using: composite
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: corretto
+        java-version: "25"
+    - name: Format
+      shell: bash
+      run: ./gradlew spotlessJavaCheck
