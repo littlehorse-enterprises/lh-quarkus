@@ -44,10 +44,6 @@ jobs:
     strategy:
       matrix:
         java-version: ["17", "21", "25"]
-        project:
-          - littlehorse-quarkus
-          - littlehorse-restful-gateway
-          - littlehorse-saddle-bag
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -55,7 +51,6 @@ jobs:
         uses: ./.github/actions/unit-tests
         with:
           java-version: ${{ matrix.java-version }}
-          project: ${{ matrix.project }}
           version: ${{ needs.prepare.outputs.tag }}
 
   integration-tests:
