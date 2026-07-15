@@ -6,10 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Container annotation for repeatable {@link LHTaskMethodException} annotations.
+ * Container annotation for repeatable {@link LHThrownException} annotations.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LHTaskMethodExceptions {
-    LHTaskMethodException[] value();
+public @interface LHThrownExceptions {
+    LHThrownException[] value();
 }

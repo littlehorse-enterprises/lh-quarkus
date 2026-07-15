@@ -20,13 +20,12 @@ what a task worker image provides.
   * [Basic Setup](#basic-setup)
   * [Declaring Required Configurations](#declaring-required-configurations)
     * [Deduplication and Validation](#deduplication-and-validation)
-    * [`@LHTaskConfig` / `@LHTaskMethodConfig` Attributes](#lhtaskconfig--lhtaskmethodconfig-attributes)
+    * [`@LHTaskConfig` Attributes](#lhtaskconfig-attributes)
   * [Declaring Business Exceptions](#declaring-business-exceptions)
-    * [`@LHTaskMethodException` Attributes](#lhtaskmethodexception-attributes)
+    * [`@LHThrownException` Attributes](#lhthrownexception-attributes)
 * [Generated Output](#generated-output)
   * [Type Representation](#type-representation)
 * [Building a Docker Image](#building-a-docker-image)
-  * [Action Inputs](#action-inputs)
 * [Configurations](#configurations)
   * [Bag Configurations](#bag-configurations)
   * [Metadata Configurations](#metadata-configurations)
@@ -104,22 +103,21 @@ task.process-order.name=process-order
 ## Declaring Required Configurations
 
 Configurations describe external properties (API URLs, credentials, service endpoints, etc.) that a
-task worker requires at runtime. There are two annotations, depending on the scope of the config:
+task worker requires at runtime. The `@LHTaskConfig` annotation declares them, and its scope depends
+on where it is placed:
 
-- `@LHTaskConfig` — declared on an `@LHTask` **class**. Emitted as a **global** saddle-bag config
-  under the top-level `configs` field (same level as `tasks`).
-- `@LHTaskMethodConfig` — declared on an `@LHTaskMethod` **method**. Emitted under the `configs`
-  field of that specific task.
+- On an `@LHTask` **class** — emitted as a **global** saddle-bag config under the top-level `configs`
+  field (same level as `tasks`).
+- On an `@LHTaskMethod` **method** — emitted under the `configs` field of that specific task.
 
 ```java
 @LHTask
 @LHTaskConfig(value = "smtp.host", description = "SMTP server hostname", type = LHTaskConfigType.STR)
-@LHTaskConfig(value = "smtp.port", description = "SMTP server port", defaultValue = "587", type = LHTaskConfigType.INT)
 @LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true, type = LHTaskConfigType.STR)
 public class EmailNotificationTask {
 
     @LHTaskMethod(value = "${task.send-email.name}", description = "Sends an email notification")
-    @LHTaskMethodConfig(value = "email.send.max-retries", description = "Max delivery attempts", defaultValue = "3", type = LHTaskConfigType.INT)
+    @LHTaskConfig(value = "email.send.max-retries", description = "Max delivery attempts", defaultValue = "3", type = LHTaskConfigType.INT)
     public void sendEmail(String recipient, String subject, String body) {
         // ...
     }
@@ -128,17 +126,17 @@ public class EmailNotificationTask {
 
 ### Deduplication and Validation
 
-- If two `@LHTask` classes declare the same `@LHTaskConfig` key, it is emitted **once** in the global
-  `configs` (duplicates are collapsed).
-- If a single `@LHTaskMethod` declares the same `@LHTaskMethodConfig` key more than once, it is emitted
-  **once** for that task.
-- If two **different** `@LHTaskMethod`s declare the same `@LHTaskMethodConfig` key, the build **fails**.
-  Shared configuration must instead be declared once at the class level with `@LHTaskConfig` so it
-  becomes a global saddle-bag config.
+- If two `@LHTask` classes declare the same class-level `@LHTaskConfig` key, it is emitted **once** in
+  the global `configs` (duplicates are collapsed).
+- If a single `@LHTaskMethod` declares the same method-level `@LHTaskConfig` key more than once, it is
+  emitted **once** for that task.
+- If two **different** `@LHTaskMethod`s declare the same method-level `@LHTaskConfig` key, the build
+  **fails**. Shared configuration must instead be declared once at the class level so it becomes a
+  global saddle-bag config.
 
-### `@LHTaskConfig` / `@LHTaskMethodConfig` Attributes
+### `@LHTaskConfig` Attributes
 
-Both annotations share the same attributes:
+The annotation supports the same attributes on both classes and methods:
 
 | Attribute      | Type      | Default | Description                                                        |
 |----------------|-----------|---------|--------------------------------------------------------------------|
@@ -154,7 +152,7 @@ Global configs appear under the top-level `configs` field; method-level configs 
 
 ## Declaring Business Exceptions
 
-Use the `@LHTaskMethodException` annotation on an `@LHTaskMethod` to declare the business `EXCEPTION`s that the
+Use the `@LHThrownException` annotation on an `@LHTaskMethod` to declare the business `EXCEPTION`s that the
 task may throw. Business exceptions are thrown from your task code via `LHTaskException` (or a subclass) and can be
 caught by a `WfSpec`. Declaring them lets consumers of the saddle bag know which exceptions to handle. See the
 [exception handling docs](https://littlehorse.io/docs/server/concepts/exception-handling) for more details.
@@ -164,8 +162,8 @@ caught by a `WfSpec`. Declaring them lets consumers of the saddle bag know which
 public class PaymentTask {
 
     @LHTaskMethod(value = "${task.charge-credit-card.name}", description = "Charges a credit card")
-    @LHTaskMethodException(name = "insufficient-funds", description = "Card balance is too low")
-    @LHTaskMethodException(name = "amount-too-large", description = "Charge exceeds $10,000")
+    @LHThrownException(name = "insufficient-funds", description = "Card balance is too low")
+    @LHThrownException(name = "amount-too-large", description = "Charge exceeds $10,000")
     public void chargeCreditCard(String userId, double amount) {
         if (amount > 10000) {
             throw new LHTaskException("amount-too-large", "Cannot charge more than $10,000");
@@ -175,7 +173,7 @@ public class PaymentTask {
 }
 ```
 
-### `@LHTaskMethodException` Attributes
+### `@LHThrownException` Attributes
 
 | Attribute     | Type     | Default | Description                                                            |
 |---------------|----------|---------|-----------------------------------------------------------------------|
@@ -347,56 +345,8 @@ It builds the Quarkus application with Gradle, reads the OCI annotations from th
 
 > **Note:** Only JVM-based Quarkus Docker images are supported. Native images are not supported yet.
 
-Add a workflow to your repository:
-
-```yaml
-name: Deploy My Saddle Bag
-
-on:
-  push:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  packages: write
-
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Publish Saddle Bag
-        uses: littlehorse-enterprises/publish-saddle-bag@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          images: ghcr.io/${{ github.repository }}/my-saddle-bag
-```
-
-## Action Inputs
-
-| Input                | Required | Default                   | Description                                                                 |
-|----------------------|----------|---------------------------|-----------------------------------------------------------------------------|
-| `registry`           | ✅        | —                         | Container registry URL (e.g. `ghcr.io`)                                     |
-| `username`           | ✅        | —                         | Registry username                                                           |
-| `password`           | ✅        | —                         | Registry password or token                                                  |
-| `images`             | ✅        | —                         | Image name(s) passed to `docker/metadata-action` (one per line)             |
-| `working-directory`  | ❌        | `.`                       | Directory where the Gradle build is executed                                |
-| `context`            | ❌        | `working-directory`       | Docker build context path                                                   |
-| `dockerfile`         | ❌        | `''`                      | Path to the Dockerfile (defaults to `working-directory/Dockerfile`)         |
-| `tags`               | ❌        | `''`                      | Tag patterns passed to `docker/metadata-action` (one per line)              |
-| `labels`             | ❌        | `''`                      | Extra labels passed to `docker/metadata-action` (`KEY=VALUE`, one per line) |
-| `annotations`        | ❌        | `''`                      | Extra annotations passed to `docker/metadata-action` (`[TYPE:]KEY=VALUE`)   |
-| `docker-build-args`  | ❌        | `''`                      | Docker build arguments (`NAME=VALUE`, one per line)                         |
-| `quarkus-build-args` | ❌        | `''`                      | Quarkus build arguments (space-separated, e.g. `-Dkey=value`)               |
-| `platforms`          | ❌        | `linux/amd64,linux/arm64` | Architecture platforms                                                      |
-
 See the [`publish-saddle-bag`](https://github.com/littlehorse-enterprises/publish-saddle-bag)
-documentation for the full list of inputs, outputs, and an extended example.
+repository for full documentation, inputs, and usage examples.
 
 # Configurations
 

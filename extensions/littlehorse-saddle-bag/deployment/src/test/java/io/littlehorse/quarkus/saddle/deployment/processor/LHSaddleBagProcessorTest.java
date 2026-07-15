@@ -12,7 +12,6 @@ import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig;
 import io.littlehorse.quarkus.saddle.config.LHSaddleBagBuildtimeConfig.SaddleConfig.BagConfig.OutputConfig.Format;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig;
 import io.littlehorse.quarkus.saddle.config.LHTaskConfig.LHTaskConfigType;
-import io.littlehorse.quarkus.saddle.config.LHTaskMethodConfig;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Config;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Input;
@@ -23,7 +22,7 @@ import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Struct;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Task;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.TaskException;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Type;
-import io.littlehorse.quarkus.saddle.exception.LHTaskMethodException;
+import io.littlehorse.quarkus.saddle.exception.LHThrownException;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
@@ -178,7 +177,7 @@ class LHSaddleBagProcessorTest {
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Global (class-level @LHTaskConfig) and method-level (@LHTaskMethodConfig) configurations.
+    // Global (class-level @LHTaskConfig) and method-level (@LHTaskConfig) configurations.
     // ---------------------------------------------------------------------------------------------
 
     @Test
@@ -605,8 +604,8 @@ class LHSaddleBagProcessorTest {
     public static class ExceptionTask {
 
         @LHTaskMethod("${task.charge.name}")
-        @LHTaskMethodException(name = "insufficient-funds", description = "Card balance too low")
-        @LHTaskMethodException(name = "amount-too-large")
+        @LHThrownException(name = "insufficient-funds", description = "Card balance too low")
+        @LHThrownException(name = "amount-too-large")
         public void charge(double amount) {}
     }
 
@@ -621,7 +620,7 @@ class LHSaddleBagProcessorTest {
     public static class GlobalConfigTaskA {
 
         @LHTaskMethod("${task.alpha.name}")
-        @LHTaskMethodConfig(
+        @LHTaskConfig(
                 value = "alpha.retries",
                 description = "Alpha retries",
                 defaultValue = "3",
@@ -634,11 +633,11 @@ class LHSaddleBagProcessorTest {
     public static class GlobalConfigTaskB {
 
         @LHTaskMethod("${task.beta.name}")
-        @LHTaskMethodConfig(
+        @LHTaskConfig(
                 value = "beta.timeout",
                 description = "Beta timeout",
                 type = LHTaskConfigType.INT)
-        @LHTaskMethodConfig(
+        @LHTaskConfig(
                 value = "beta.timeout",
                 description = "Duplicate ignored",
                 type = LHTaskConfigType.INT)
@@ -648,11 +647,11 @@ class LHSaddleBagProcessorTest {
     public static class DuplicateAcrossMethodsTask {
 
         @LHTaskMethod("${task.first.name}")
-        @LHTaskMethodConfig(value = "dup.key", type = LHTaskConfigType.STR)
+        @LHTaskConfig(value = "dup.key", type = LHTaskConfigType.STR)
         public void first() {}
 
         @LHTaskMethod("${task.second.name}")
-        @LHTaskMethodConfig(value = "dup.key", type = LHTaskConfigType.STR)
+        @LHTaskConfig(value = "dup.key", type = LHTaskConfigType.STR)
         public void second() {}
     }
 }

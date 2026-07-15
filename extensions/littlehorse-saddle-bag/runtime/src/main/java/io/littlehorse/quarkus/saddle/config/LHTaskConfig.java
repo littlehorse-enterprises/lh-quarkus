@@ -7,11 +7,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares a configuration property that is required by an {@code @LHTask} class at runtime.
+ * Declares a configuration property that is required at runtime.
  *
- * <p>Use this annotation on classes annotated with {@code @LHTask} to document external
- * configuration dependencies (e.g., API URLs, credentials, service endpoints) that consumers
- * of the saddle-bag must provide in their {@code application.properties}.
+ * <p>Use this annotation to document external configuration dependencies (e.g., API URLs,
+ * credentials, service endpoints) that consumers of the saddle-bag must provide in their
+ * {@code application.properties}. It can be placed on:
+ *
+ * <ul>
+ *   <li>a class annotated with {@code @LHTask} — emitted as a <em>global</em> saddle-bag config
+ *       under the top-level {@code configs} field;
+ *   <li>a method annotated with {@code @LHTaskMethod} — emitted under the {@code configs} field of
+ *       that specific task.
+ * </ul>
  *
  * <p>Example:
  * <pre>{@code
@@ -19,11 +26,16 @@ import java.lang.annotation.Target;
  * @LHTaskConfig(value = "smtp.host", description = "SMTP server hostname", type = LHTaskConfigType.STR)
  * @LHTaskConfig(value = "smtp.password", description = "SMTP password", sensitive = true, type = LHTaskConfigType.STR)
  * public class EmailTask {
- *     // ...
+ *
+ *     @LHTaskMethod("${task.send-email.name}")
+ *     @LHTaskConfig(value = "smtp.port", description = "SMTP port", defaultValue = "587", type = LHTaskConfigType.INT)
+ *     public void sendEmail(String recipient) {
+ *         // ...
+ *     }
  * }
  * }</pre>
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(LHTaskConfigs.class)
 public @interface LHTaskConfig {
