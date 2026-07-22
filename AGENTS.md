@@ -10,7 +10,7 @@ Quarkus extensions for the [LittleHorse](https://littlehorse.io/) workflow engin
 - `extensions/littlehorse-restful-gateway/` — RESTful gateway extension (runtime + deployment)
 - `extensions/littlehorse-saddle-bag/` — Saddle Bag extension for self-describing task worker Docker images (runtime + deployment)
 - `extras/restful-gateway/` — Standalone Quarkus app using the gateway extension
-- `examples/` — Usage examples (arrays-maps, basic, child-workflow, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
+- `examples/` — Usage examples (arrays-maps, basic, child-workflow, inline-structs, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
 - `integration-tests/` — End-to-end tests against a running LittleHorse instance, split per concern into subprojects named after the extension they cover: `littlehorse-quarkus/` (project `integration-tests-littlehorse-quarkus`), `littlehorse-restful-gateway/` (project `integration-tests-littlehorse-restful-gateway`), `littlehorse-saddle-bag/` (project `integration-tests-littlehorse-saddle-bag`)
 
 Each extension follows the Quarkus extension structure: `deployment/` for build-time processors, `runtime/` for CDI beans and recorders.
@@ -24,13 +24,13 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 # Unit tests
 ./gradlew test
 
-# Integration tests (requires ./gradlew dockerComposeUp)
+# Integration tests (requires Docker; the tests start LittleHorse with Testcontainers)
 ./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest
 
 # Native integration tests
 ./gradlew integration-tests-littlehorse-quarkus:quarkusIntTest integration-tests-littlehorse-restful-gateway:quarkusIntTest integration-tests-littlehorse-saddle-bag:quarkusIntTest -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false
 
-# Publish locally (version=dev)
+# Publish locally (uses the version from gradle.properties)
 ./gradlew publishToMavenLocal
 
 # Run RESTful Gateway in dev mode
@@ -42,14 +42,21 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 - Java 17
 - Palantir Java Format (AOSP style) enforced via Spotless
 - Run `./gradlew spotlessApply` to auto-format before committing
-- Pre-commit hooks are configured — run `pre-commit install` after cloning
+- Pre-commit and commit-message hooks are configured — run `pre-commit install` after cloning
+
+## Commit Messages
+
+- Every commit must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+- Use the format `<type>(<optional scope>): <description>` (for example, `feat(examples): add inline structs example`).
+- Use an appropriate standard type: `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, or `test`.
+- Mark breaking changes with `!` before the colon or with a `BREAKING CHANGE:` footer.
 
 ## Conventions
 
-- Quarkus version: `3.37.0`, LittleHorse SDK: `1.2-SNAPSHOT`
+- Quarkus version: `3.37.2`, LittleHorse SDK: `1.2-SNAPSHOT`
 - Dependency versions are centralized in `gradle.properties`
-- Extension projects: `quarkus`, `restful-gateway`, `saddle-bag`
-- Example projects: `user-tasks`, `reactive`, `rest`, `basic`, `child-workflow`, `structs`, `type-adapter`, `saddle-bag`, `arrays-maps`
+- Extension projects: `littlehorse-quarkus`, `littlehorse-restful-gateway`, `littlehorse-saddle-bag` (each also has a `-deployment` project)
+- Example projects use the `example-` prefix: `example-arrays-maps`, `example-basic`, `example-child-workflow`, `example-inline-structs`, `example-reactive`, `example-rest`, `example-saddle-bag`, `example-structs`, `example-type-adapter`, `example-user-tasks`
 - Use `@LHTaskMethod` and related annotations for task/workflow registration
 - Use `@LHTaskConfig` to declare required external configurations for Saddle Bag manifests
 - Deployment processors scan annotations at build time — runtime beans are produced via recorders
