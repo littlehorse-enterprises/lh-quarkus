@@ -64,7 +64,7 @@ Setup:
 Execute it:
 
 ```shell
-./gradlew example-struct:quarkusDev
+./gradlew example-structs:quarkusDev
 ```
 
 Run workflow:

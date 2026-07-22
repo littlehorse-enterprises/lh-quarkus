@@ -43,6 +43,8 @@ class WorkflowRegistrationTest {
                             WfSpecId.newBuilder().setName("arrays-maps").build();
                     WfSpecId greetings =
                             WfSpecId.newBuilder().setName("greetings").build();
+                    WfSpecId inlineStructs =
+                            WfSpecId.newBuilder().setName("inline-structs").build();
                     WfSpecId json = WfSpecId.newBuilder().setName("json").build();
                     WfSpecId nestedChildWf =
                             WfSpecId.newBuilder().setName("nested-child-wf").build();
@@ -59,6 +61,7 @@ class WorkflowRegistrationTest {
                             .addResults(arraysMaps)
                             .addResults(typeAdapter)
                             .addResults(greetings)
+                            .addResults(inlineStructs)
                             .addResults(json)
                             .addResults(nestedChildWf)
                             .addResults(nestedGrandparentWf)
@@ -66,7 +69,7 @@ class WorkflowRegistrationTest {
                             .addResults(personWf)
                             .addResults(beanWorkflow)
                             .build();
-                    assertThat(results.getResultsCount()).isEqualTo(9);
+                    assertThat(results.getResultsCount()).isEqualTo(10);
                     assertThat(results).isEqualTo(expectedResult);
 
                     Stream.of(

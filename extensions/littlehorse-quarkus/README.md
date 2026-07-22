@@ -14,6 +14,8 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
   * [Registering a Workflow](#registering-a-workflow)
   * [Registering User Tasks](#registering-user-tasks)
   * [Registering Structs](#registering-structs)
+    * [Configured StructDef Names](#configured-structdef-names)
+    * [Raw InlineStruct Values](#raw-inlinestruct-values)
   * [Registering Type Adapters](#registering-type-adapters)
   * [LittleHorse Clients](#littlehorse-clients)
   * [Dependency Injection](#dependency-injection)
@@ -299,6 +301,60 @@ public class Person {
 
 Quarkus will register the [StructDef](https://littlehorse.io/docs/server/concepts/structdefs#define-the-structdef)
 when starting the application.
+
+### Configured StructDef Names
+
+The `@LHStructDef` name may contain a configuration expression. This is useful when the deployed
+StructDef name is not known when the application is compiled:
+
+```java
+@LHStructDef("${customer.struct.name}")
+public class Customer {
+    // fields, constructors, getters, and setters
+}
+```
+
+Supply the value through any Quarkus configuration source, for example
+`application.properties`:
+
+```properties
+customer.struct.name=customer-acme
+```
+
+The extension registers the StructDef as `customer-acme` and supplies the same resolved name when
+the class is used by a workflow or task. For example,
+`wf.declareStruct("customer", Customer.class)` declares a variable backed by the
+`customer-acme` StructDef.
+
+### Raw InlineStruct Values
+
+Prefer the annotated Java type for normal StructDef task inputs and outputs. For advanced workers
+that need to handle raw `InlineStruct` values, bind the raw value to a StructDef using
+`@LHType(structDefName = ...)`:
+
+```java
+@LHTaskMethod("create-customer")
+@LHType(structDefName = "${customer.struct.name}")
+public InlineStruct createCustomer(String name, String email) {
+    return InlineStruct.newBuilder()
+            // Add fields compatible with the Customer StructDef.
+            .build();
+}
+
+@LHTaskMethod("email-customer")
+public String emailCustomer(
+        @LHType(structDefName = "${customer.struct.name}") InlineStruct customer,
+        String message) {
+    String email = customer.getFieldsOrThrow("email").getValue().getStr();
+    return "Sent to " + email;
+}
+```
+
+The placeholder used by `@LHType` must match a placeholder available from a scanned
+`@LHStructDef`, such as the `Customer` class above. The extension passes its resolved value through
+task registration, input deserialization, and output serialization.
+
+See the complete [Inline Structs example](../../examples/inline-structs).
 
 More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/structdefs).
 

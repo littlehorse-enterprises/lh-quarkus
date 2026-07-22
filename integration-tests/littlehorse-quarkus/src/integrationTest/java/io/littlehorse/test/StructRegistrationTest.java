@@ -39,11 +39,14 @@ class StructRegistrationTest {
                                     .setName("lh-address")
                                     .build())
                             .addResults(StructDefId.newBuilder()
+                                    .setName("lh-inline-customer")
+                                    .build())
+                            .addResults(StructDefId.newBuilder()
                                     .setName("lh-person")
                                     .build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(2);
+                    assertThat(results.getResultsCount()).isEqualTo(3);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }
