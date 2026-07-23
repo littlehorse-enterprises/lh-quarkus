@@ -49,6 +49,9 @@ class TaskRegistrationTest {
                             .addResults(TaskDefId.newBuilder()
                                     .setName("email-inline-customer")
                                     .build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("external-inline-struct-test-task")
+                                    .build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("get-uuid").build())
                             .addResults(
@@ -67,7 +70,7 @@ class TaskRegistrationTest {
                                     TaskDefId.newBuilder().setName("sum-array").build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(13);
+                    assertThat(results.getResultsCount()).isEqualTo(14);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

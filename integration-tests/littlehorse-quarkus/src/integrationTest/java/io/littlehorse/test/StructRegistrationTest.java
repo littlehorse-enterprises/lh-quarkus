@@ -39,6 +39,12 @@ class StructRegistrationTest {
                                     .setName("lh-address")
                                     .build())
                             .addResults(StructDefId.newBuilder()
+                                    .setName("lh-external-request")
+                                    .build())
+                            .addResults(StructDefId.newBuilder()
+                                    .setName("lh-external-response")
+                                    .build())
+                            .addResults(StructDefId.newBuilder()
                                     .setName("lh-inline-customer")
                                     .build())
                             .addResults(StructDefId.newBuilder()
@@ -46,7 +52,7 @@ class StructRegistrationTest {
                                     .build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(3);
+                    assertThat(results.getResultsCount()).isEqualTo(5);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

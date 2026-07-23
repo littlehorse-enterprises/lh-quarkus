@@ -334,7 +334,7 @@ that need to handle raw `InlineStruct` values, bind the raw value to a StructDef
 
 ```java
 @LHTaskMethod("create-customer")
-@LHType(structDefName = "${customer.struct.name}")
+@LHType(structDefName = "${customer.response.struct.name}")
 public InlineStruct createCustomer(String name, String email) {
     return InlineStruct.newBuilder()
             // Add fields compatible with the Customer StructDef.
@@ -343,16 +343,30 @@ public InlineStruct createCustomer(String name, String email) {
 
 @LHTaskMethod("email-customer")
 public String emailCustomer(
-        @LHType(structDefName = "${customer.struct.name}") InlineStruct customer,
+        @LHType(structDefName = "${customer.request.struct.name}") InlineStruct customer,
         String message) {
     String email = customer.getFieldsOrThrow("email").getValue().getStr();
     return "Sent to " + email;
 }
 ```
 
-The placeholder used by `@LHType` must match a placeholder available from a scanned
-`@LHStructDef`, such as the `Customer` class above. The extension passes its resolved value through
-task registration, input deserialization, and output serialization.
+The extension resolves `@LHType.structDefName` expressions directly from any Quarkus configuration
+source. The referenced StructDefs do not need corresponding local `@LHStructDef` classes:
+
+```properties
+customer.request.struct.name=external-customer-request
+customer.response.struct.name=external-customer-response
+```
+
+This only supplies the StructDef names used for task registration, input deserialization, and
+output serialization. It does not register synthetic StructDefs; externally defined StructDefs
+remain owned and registered by the consuming application.
+
+Configuration-expression defaults are also supported, for example
+`@LHType(structDefName = "${customer.struct.name:customer}")`. If the same placeholder appears in
+multiple task annotation locations, matching resolved values are reused. Conflicting resolved
+values fail startup, and a missing value without a default reports the missing configuration key.
+Placeholders supplied by scanned `@LHStructDef` classes continue to work as before.
 
 See the complete [Inline Structs example](../../examples/inline-structs).
 
