@@ -1,5 +1,6 @@
 package io.littlehorse.common;
 
+import static io.littlehorse.tasks.ExternalInlineStructTask.PROMPT_STRUCT_DEF_NAME;
 import static io.littlehorse.tasks.ExternalInlineStructTask.REQUEST_STRUCT_DEF_NAME;
 import static io.littlehorse.tasks.ExternalInlineStructTask.RESPONSE_STRUCT_DEF_NAME;
 
@@ -9,6 +10,7 @@ import io.littlehorse.sdk.common.proto.InlineStructDef;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.PutStructDefRequest;
 import io.littlehorse.sdk.common.proto.StructDefCompatibilityType;
+import io.littlehorse.sdk.common.proto.StructDefId;
 import io.littlehorse.sdk.common.proto.StructFieldDef;
 import io.littlehorse.sdk.common.proto.TypeDefinition;
 import io.littlehorse.sdk.common.proto.VariableType;
@@ -48,8 +50,14 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
 
     private void registerExternalStructDefs() {
         blockingStub.putStructDef(PutStructDefRequest.newBuilder()
+                .setName(PROMPT_STRUCT_DEF_NAME)
+                .setStructDef(InlineStructDef.newBuilder().putFields("text", stringField()))
+                .setAllowedUpdates(StructDefCompatibilityType.NO_SCHEMA_UPDATES)
+                .build());
+        blockingStub.putStructDef(PutStructDefRequest.newBuilder()
                 .setName(REQUEST_STRUCT_DEF_NAME)
-                .setStructDef(InlineStructDef.newBuilder().putFields("prompt", stringField()))
+                .setStructDef(InlineStructDef.newBuilder()
+                        .putFields("prompt", structField(PROMPT_STRUCT_DEF_NAME)))
                 .setAllowedUpdates(StructDefCompatibilityType.NO_SCHEMA_UPDATES)
                 .build());
         blockingStub.putStructDef(PutStructDefRequest.newBuilder()
@@ -62,6 +70,13 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
     private static StructFieldDef stringField() {
         return StructFieldDef.newBuilder()
                 .setFieldType(TypeDefinition.newBuilder().setPrimitiveType(VariableType.STR))
+                .build();
+    }
+
+    private static StructFieldDef structField(String structDefName) {
+        return StructFieldDef.newBuilder()
+                .setFieldType(TypeDefinition.newBuilder()
+                        .setStructDefId(StructDefId.newBuilder().setName(structDefName)))
                 .build();
     }
 

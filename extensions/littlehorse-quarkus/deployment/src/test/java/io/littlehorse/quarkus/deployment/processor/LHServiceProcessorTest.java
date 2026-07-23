@@ -2,37 +2,45 @@ package io.littlehorse.quarkus.deployment.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
+import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
 import io.littlehorse.sdk.common.proto.InlineStruct;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
+import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 
 import org.jboss.jandex.Index;
-import org.jboss.jandex.MethodInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
 
 class LHServiceProcessorTest {
 
     @Test
     void shouldCollectInputAndOutputStructDefNameTemplates() throws IOException {
-        MethodInfo method = methodInfo("transform");
-
-        assertThat(LHServiceProcessor.getStructDefNameTemplates(method))
+        assertThat(scanTask("transform").getStructDefNameTemplates())
                 .containsExactly("${raw.input.struct.name}", "${raw.output.struct.name}");
     }
 
     @Test
     void shouldDeduplicateStructDefNameTemplatesDeterministically() throws IOException {
-        MethodInfo method = methodInfo("reuse");
-
-        assertThat(LHServiceProcessor.getStructDefNameTemplates(method))
+        assertThat(scanTask("reuse").getStructDefNameTemplates())
                 .containsExactly("${shared.struct.name}");
     }
 
-    private static MethodInfo methodInfo(String methodName) throws IOException {
-        return Index.singleClass(RawInlineStructTask.class).methods().stream()
-                .filter(method -> method.name().equals(methodName))
+    private static LHTaskMethodRecordable scanTask(String taskName) throws IOException {
+        Index index = Index.of(RawInlineStructTask.class);
+        BeanArchiveIndexBuildItem indexBuildItem =
+                new BeanArchiveIndexBuildItem(index, index, Set.of());
+        ArrayList<LHTaskMethodBuildItem> taskMethods = new ArrayList<>();
+
+        new LHServiceProcessor().scanLHTaskMethod(taskMethods::add, indexBuildItem);
+
+        return taskMethods.stream()
+                .map(LHTaskMethodBuildItem::toRecordable)
+                .filter(recordable -> recordable.getName().equals(taskName))
                 .findFirst()
                 .orElseThrow();
     }

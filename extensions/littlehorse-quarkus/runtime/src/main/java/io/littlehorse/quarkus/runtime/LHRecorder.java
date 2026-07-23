@@ -64,7 +64,7 @@ public class LHRecorder {
                 });
     }
 
-    static Map<String, String> computeTaskPlaceholderValues(
+    private static Map<String, String> computeTaskPlaceholderValues(
             ConfigEvaluator configEvaluator,
             Map<String, String> structPlaceholderValues,
             LHTaskMethodRecordable recordable) {

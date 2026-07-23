@@ -9,6 +9,7 @@ import io.littlehorse.sdk.worker.LHType;
 public class ExternalInlineStructTask {
 
     public static final String TASK_DEF_NAME = "external-inline-struct-test-task";
+    public static final String PROMPT_STRUCT_DEF_NAME = "lh-external-prompt";
     public static final String REQUEST_STRUCT_DEF_NAME = "lh-external-request";
     public static final String RESPONSE_STRUCT_DEF_NAME = "lh-external-response";
     public static final String REQUEST_VARIABLE = "request";
@@ -25,7 +26,13 @@ public class ExternalInlineStructTask {
             @LHType(name = REQUEST_VARIABLE, structDefName = REQUEST_STRUCT_EXPRESSION)
                     InlineStruct request) {
         return InlineStruct.newBuilder()
-                .putFields("response", request.getFieldsOrThrow("prompt"))
+                .putFields(
+                        "response",
+                        request.getFieldsOrThrow("prompt")
+                                .getValue()
+                                .getStruct()
+                                .getStruct()
+                                .getFieldsOrThrow("text"))
                 .build();
     }
 }

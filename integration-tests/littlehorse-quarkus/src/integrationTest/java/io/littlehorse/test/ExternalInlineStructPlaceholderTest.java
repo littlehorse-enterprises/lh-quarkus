@@ -1,5 +1,6 @@
 package io.littlehorse.test;
 
+import static io.littlehorse.tasks.ExternalInlineStructTask.PROMPT_STRUCT_DEF_NAME;
 import static io.littlehorse.tasks.ExternalInlineStructTask.REQUEST_STRUCT_DEF_NAME;
 import static io.littlehorse.tasks.ExternalInlineStructTask.REQUEST_VARIABLE;
 import static io.littlehorse.tasks.ExternalInlineStructTask.RESPONSE_STRUCT_DEF_NAME;
@@ -55,8 +56,17 @@ class ExternalInlineStructPlaceholderTest {
 
     @Test
     void shouldRunQuarkusManagedTaskWithExternalConfiguredStructDefs() {
+        StructDef promptStructDef = blockingStub.getStructDef(
+                StructDefId.newBuilder().setName(PROMPT_STRUCT_DEF_NAME).build());
         StructDef requestStructDef = blockingStub.getStructDef(
                 StructDefId.newBuilder().setName(REQUEST_STRUCT_DEF_NAME).build());
+        assertThat(requestStructDef
+                        .getStructDef()
+                        .getFieldsOrThrow("prompt")
+                        .getFieldType()
+                        .getStructDefId()
+                        .getName())
+                .isEqualTo(PROMPT_STRUCT_DEF_NAME);
         WfRun wfRun = null;
         WfSpecId wfSpecId = null;
 
@@ -77,7 +87,9 @@ class ExternalInlineStructPlaceholderTest {
 
             wfRun = blockingStub.runWf(RunWfRequest.newBuilder()
                     .setWfSpecName(WORKFLOW_NAME)
-                    .putVariables(REQUEST_VARIABLE, requestValue(requestStructDef.getId()))
+                    .putVariables(
+                            REQUEST_VARIABLE,
+                            requestValue(requestStructDef.getId(), promptStructDef.getId()))
                     .build());
             assertWorkflowCompleted(wfRun);
         } finally {
@@ -131,17 +143,28 @@ class ExternalInlineStructPlaceholderTest {
                         .doesNotContain(WORKFLOW_NAME));
     }
 
-    private static VariableValue requestValue(StructDefId structDefId) {
+    private static VariableValue requestValue(
+            StructDefId requestStructDefId, StructDefId promptStructDefId) {
+        VariableValue promptValue = VariableValue.newBuilder()
+                .setStruct(structValue(
+                        promptStructDefId,
+                        "text",
+                        VariableValue.newBuilder().setStr(PROMPT).build()))
+                .build();
+
         return VariableValue.newBuilder()
-                .setStruct(Struct.newBuilder()
-                        .setStructDefId(structDefId)
-                        .setStruct(InlineStruct.newBuilder()
-                                .putFields(
-                                        "prompt",
-                                        StructField.newBuilder()
-                                                .setValue(VariableValue.newBuilder()
-                                                        .setStr(PROMPT))
-                                                .build())))
+                .setStruct(structValue(requestStructDefId, "prompt", promptValue))
+                .build();
+    }
+
+    private static Struct structValue(
+            StructDefId structDefId, String fieldName, VariableValue fieldValue) {
+        return Struct.newBuilder()
+                .setStructDefId(structDefId)
+                .setStruct(InlineStruct.newBuilder()
+                        .putFields(
+                                fieldName,
+                                StructField.newBuilder().setValue(fieldValue).build()))
                 .build();
     }
 
