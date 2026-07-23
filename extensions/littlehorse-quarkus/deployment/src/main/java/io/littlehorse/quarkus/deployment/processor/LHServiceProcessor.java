@@ -55,12 +55,12 @@ class LHServiceProcessor {
                     return new LHTaskMethodBuildItem(
                             beanClass,
                             new LHTaskMethodDescriptor(new OptionalAnnotation(annotated)),
-                            getStructDefNameExpressions(methodInfo));
+                            getStructDefNameTemplates(methodInfo));
                 })
                 .forEach(producer::produce);
     }
 
-    static List<String> getStructDefNameExpressions(MethodInfo methodInfo) {
+    static List<String> getStructDefNameTemplates(MethodInfo methodInfo) {
         return methodInfo.annotations(LH_TYPE).stream()
                 .map(annotation -> annotation.value("structDefName"))
                 .filter(value -> value != null && "structDefName".equals(value.name()))

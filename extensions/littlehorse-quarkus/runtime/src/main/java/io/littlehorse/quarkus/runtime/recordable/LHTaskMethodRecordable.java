@@ -7,7 +7,7 @@ import java.util.List;
 public class LHTaskMethodRecordable extends LHRecordable {
 
     private final String description;
-    private final List<String> structDefNameExpressions;
+    private final List<String> structDefNameTemplates;
 
     public LHTaskMethodRecordable(Class<?> beanClass, String name, String description) {
         this(beanClass, name, description, List.of());
@@ -18,17 +18,17 @@ public class LHTaskMethodRecordable extends LHRecordable {
             Class<?> beanClass,
             String name,
             String description,
-            List<String> structDefNameExpressions) {
+            List<String> structDefNameTemplates) {
         super(beanClass, name);
         this.description = description;
-        this.structDefNameExpressions = List.copyOf(structDefNameExpressions);
+        this.structDefNameTemplates = List.copyOf(structDefNameTemplates);
     }
 
     public String getDescription() {
         return description;
     }
 
-    public List<String> getStructDefNameExpressions() {
-        return structDefNameExpressions;
+    public List<String> getStructDefNameTemplates() {
+        return structDefNameTemplates;
     }
 }

@@ -34,13 +34,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Recorder
 public class LHRecorder {
     private static final Logger log = LoggerFactory.getLogger(LHRecorder.class);
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{(.*?)}");
     private final RuntimeValue<LHRuntimeConfig> runtimeConfig;
 
     public LHRecorder(RuntimeValue<LHRuntimeConfig> runtimeConfig) {
@@ -73,38 +70,20 @@ public class LHRecorder {
             LHTaskMethodRecordable recordable) {
         Map<String, String> placeholderValues = new LinkedHashMap<>();
         mergePlaceholderValues(placeholderValues, structPlaceholderValues);
-        mergeExpressionPlaceholderValues(placeholderValues, configEvaluator, recordable.getName());
-        recordable.getStructDefNameExpressions().stream()
+        mergeTemplatePlaceholderValues(placeholderValues, configEvaluator, recordable.getName());
+        recordable.getStructDefNameTemplates().stream()
                 .sorted()
-                .forEach(expression -> mergeExpressionPlaceholderValues(
-                        placeholderValues, configEvaluator, expression));
+                .forEach(template -> mergeTemplatePlaceholderValues(
+                        placeholderValues, configEvaluator, template));
         return Map.copyOf(placeholderValues);
     }
 
-    private static void mergeExpressionPlaceholderValues(
+    private static void mergeTemplatePlaceholderValues(
             Map<String, String> placeholderValues,
             ConfigEvaluator configEvaluator,
-            String expression) {
-        ConfigEvaluator.ConfigExpression expanded = configEvaluator.expand(expression);
+            String template) {
+        ConfigEvaluator.ConfigExpression expanded = configEvaluator.expand(template);
         mergePlaceholderValues(placeholderValues, expanded.getMembers());
-
-        // The LittleHorse SDK treats the complete contents of `${...}` as the placeholder key.
-        // ConfigEvaluator instead reports the configuration key without its default, so add an
-        // alias that lets expressions such as `${customer.name:customer}` reach the SDK intact.
-        Matcher matcher = PLACEHOLDER_PATTERN.matcher(expression);
-        while (matcher.find()) {
-            String sdkPlaceholderKey = matcher.group(1);
-            int defaultSeparator = sdkPlaceholderKey.indexOf(':');
-            if (defaultSeparator < 0) {
-                continue;
-            }
-
-            String configKey = sdkPlaceholderKey.substring(0, defaultSeparator);
-            String value = expanded.getMembers().get(configKey);
-            if (value != null) {
-                mergePlaceholderValue(placeholderValues, sdkPlaceholderKey, value);
-            }
-        }
     }
 
     private static void mergePlaceholderValues(
@@ -253,8 +232,8 @@ public class LHRecorder {
         structDefRecordables.stream()
                 .map(LHStructDefRecordable::getName)
                 .sorted()
-                .forEach(expression -> mergeExpressionPlaceholderValues(
-                        placeholderValues, configEvaluator, expression));
+                .forEach(template -> mergeTemplatePlaceholderValues(
+                        placeholderValues, configEvaluator, template));
         return Map.copyOf(placeholderValues);
     }
 

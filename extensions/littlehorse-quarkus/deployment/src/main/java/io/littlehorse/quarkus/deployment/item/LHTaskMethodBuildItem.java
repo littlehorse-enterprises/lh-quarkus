@@ -9,7 +9,7 @@ import java.util.List;
 public final class LHTaskMethodBuildItem extends MultiBuildItem {
     private final Class<?> beanClass;
     private final LHTaskMethodDescriptor descriptor;
-    private final List<String> structDefNameExpressions;
+    private final List<String> structDefNameTemplates;
 
     public LHTaskMethodBuildItem(Class<?> beanClass, LHTaskMethodDescriptor descriptor) {
         this(beanClass, descriptor, List.of());
@@ -18,10 +18,10 @@ public final class LHTaskMethodBuildItem extends MultiBuildItem {
     public LHTaskMethodBuildItem(
             Class<?> beanClass,
             LHTaskMethodDescriptor descriptor,
-            List<String> structDefNameExpressions) {
+            List<String> structDefNameTemplates) {
         this.descriptor = descriptor;
         this.beanClass = beanClass;
-        this.structDefNameExpressions = List.copyOf(structDefNameExpressions);
+        this.structDefNameTemplates = List.copyOf(structDefNameTemplates);
     }
 
     public LHTaskMethodRecordable toRecordable() {
@@ -29,6 +29,6 @@ public final class LHTaskMethodBuildItem extends MultiBuildItem {
                 beanClass,
                 descriptor.getTaskDefName(),
                 descriptor.getDescription(),
-                structDefNameExpressions);
+                structDefNameTemplates);
     }
 }

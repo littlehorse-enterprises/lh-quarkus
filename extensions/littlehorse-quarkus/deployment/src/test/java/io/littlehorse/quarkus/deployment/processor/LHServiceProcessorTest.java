@@ -15,20 +15,19 @@ import java.io.IOException;
 class LHServiceProcessorTest {
 
     @Test
-    void shouldCollectInputAndOutputStructDefNameExpressions() throws IOException {
+    void shouldCollectInputAndOutputStructDefNameTemplates() throws IOException {
         MethodInfo method = methodInfo("transform");
 
-        assertThat(LHServiceProcessor.getStructDefNameExpressions(method))
-                .containsExactly(
-                        "${raw.input.struct.name}", "${raw.output.struct.name:default-response}");
+        assertThat(LHServiceProcessor.getStructDefNameTemplates(method))
+                .containsExactly("${raw.input.struct.name}", "${raw.output.struct.name}");
     }
 
     @Test
-    void shouldDeduplicateStructDefNameExpressionsDeterministically() throws IOException {
+    void shouldDeduplicateStructDefNameTemplatesDeterministically() throws IOException {
         MethodInfo method = methodInfo("reuse");
 
-        assertThat(LHServiceProcessor.getStructDefNameExpressions(method))
-                .containsExactly("${shared.struct.name:shared}");
+        assertThat(LHServiceProcessor.getStructDefNameTemplates(method))
+                .containsExactly("${shared.struct.name}");
     }
 
     private static MethodInfo methodInfo(String methodName) throws IOException {
@@ -41,16 +40,15 @@ class LHServiceProcessorTest {
     static class RawInlineStructTask {
 
         @LHTaskMethod("transform")
-        @LHType(structDefName = "${raw.output.struct.name:default-response}")
+        @LHType(structDefName = "${raw.output.struct.name}")
         InlineStruct transform(
                 @LHType(structDefName = "${raw.input.struct.name}") InlineStruct input) {
             return input;
         }
 
         @LHTaskMethod("reuse")
-        @LHType(structDefName = "${shared.struct.name:shared}")
-        InlineStruct reuse(
-                @LHType(structDefName = "${shared.struct.name:shared}") InlineStruct input) {
+        @LHType(structDefName = "${shared.struct.name}")
+        InlineStruct reuse(@LHType(structDefName = "${shared.struct.name}") InlineStruct input) {
             return input;
         }
     }

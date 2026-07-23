@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-class LHRecorderTaskPlaceholderTest {
+class LHRecorderTest {
 
     private ConfigEvaluator configEvaluator;
 
@@ -28,24 +28,21 @@ class LHRecorderTaskPlaceholderTest {
     @Test
     void shouldResolveRawInlineStructInputAndOutputPlaceholdersWithoutLocalStructDefs() {
         LHTaskMethodRecordable recordable = recordable(
-                "${raw.task.name:raw-task}",
-                "${raw.input.struct.name}",
-                "${raw.output.struct.name:default-response}");
+                "${raw.task.name}", "${raw.input.struct.name}", "${raw.output.struct.name}");
 
         Map<String, String> values =
                 LHRecorder.computeTaskPlaceholderValues(configEvaluator, Map.of(), recordable);
 
         assertThat(values)
                 .containsEntry("raw.task.name", "raw-task")
-                .containsEntry("raw.task.name:raw-task", "raw-task")
                 .containsEntry("raw.input.struct.name", "configured-request")
-                .containsEntry("raw.output.struct.name", "default-response")
-                .containsEntry("raw.output.struct.name:default-response", "default-response");
+                .containsEntry("raw.output.struct.name", "configured-response");
+        assertThat(PlaceholderUtil.replacePlaceholders("${raw.task.name}", values))
+                .isEqualTo("raw-task");
         assertThat(PlaceholderUtil.replacePlaceholders("${raw.input.struct.name}", values))
                 .isEqualTo("configured-request");
-        assertThat(PlaceholderUtil.replacePlaceholders(
-                        "${raw.output.struct.name:default-response}", values))
-                .isEqualTo("default-response");
+        assertThat(PlaceholderUtil.replacePlaceholders("${raw.output.struct.name}", values))
+                .isEqualTo("configured-response");
     }
 
     @Test
@@ -74,21 +71,22 @@ class LHRecorderTaskPlaceholderTest {
     }
 
     @Test
-    void shouldFailDeterministicallyForConflictingDuplicatePlaceholderValues() {
-        LHTaskMethodRecordable recordable = recordable(
-                "raw-task", "${duplicate.struct.name:first}", "${duplicate.struct.name:second}");
+    void shouldFailDeterministicallyForConflictingPlaceholderValues() {
+        LHTaskMethodRecordable recordable = recordable("raw-task", "${my.config.test}");
 
         assertThatThrownBy(() -> LHRecorder.computeTaskPlaceholderValues(
-                        configEvaluator, Map.of(), recordable))
+                        configEvaluator,
+                        Map.of("my.config.test", "configured-by-struct"),
+                        recordable))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Conflicting values for configuration placeholder "
-                        + "'duplicate.struct.name': 'first' and 'second'");
+                        + "'my.config.test': 'configured-by-struct' and 'this-is-a-test'");
     }
 
     private static LHTaskMethodRecordable recordable(
-            String taskName, String... structDefNameExpressions) {
+            String taskName, String... structDefNameTemplates) {
         return new LHTaskMethodRecordable(
-                RawInlineStructTask.class, taskName, null, List.of(structDefNameExpressions));
+                RawInlineStructTask.class, taskName, null, List.of(structDefNameTemplates));
     }
 
     static class RawInlineStructTask {}
