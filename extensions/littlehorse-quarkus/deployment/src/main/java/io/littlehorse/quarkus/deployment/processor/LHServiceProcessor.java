@@ -40,8 +40,6 @@ import java.util.List;
 
 class LHServiceProcessor {
 
-    private static final DotName LH_TYPE = DotName.createSimple(LHType.class);
-
     @BuildStep
     void scanLHTaskMethod(
             BuildProducer<LHTaskMethodBuildItem> producer,
@@ -61,7 +59,7 @@ class LHServiceProcessor {
     }
 
     static List<String> getStructDefNameTemplates(MethodInfo methodInfo) {
-        return methodInfo.annotations(LH_TYPE).stream()
+        return methodInfo.annotations(LHType.class).stream()
                 .map(annotation -> annotation.value("structDefName"))
                 .filter(value -> value != null && "structDefName".equals(value.name()))
                 .map(value -> value.asString())
