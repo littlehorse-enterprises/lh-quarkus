@@ -30,6 +30,7 @@
 - [Saddle Bag](examples/saddle-bag): How to create a saddle bag.
 - [User Tasks](examples/user-tasks): How to use and register user tasks.
 - [Structs](examples/structs): How to use and register structs.
+- [Inline Structs](examples/inline-structs): How to use raw inline structs with configured StructDef names.
 - [Type Adapters](examples/type-adapter): How to use and register type adapters.
 - [Arrays & Maps](examples/arrays-maps): How to use native `Array` and `Map` types.
 

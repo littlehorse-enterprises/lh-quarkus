@@ -39,10 +39,16 @@ class TaskRegistrationTest {
                             .addResults(
                                     TaskDefId.newBuilder().setName("count-map").build())
                             .addResults(TaskDefId.newBuilder()
+                                    .setName("create-inline-customer")
+                                    .build())
+                            .addResults(TaskDefId.newBuilder()
                                     .setName("describe-person")
                                     .build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("echo-uuid").build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("email-inline-customer")
+                                    .build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("get-uuid").build())
                             .addResults(
@@ -61,7 +67,7 @@ class TaskRegistrationTest {
                                     TaskDefId.newBuilder().setName("sum-array").build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(11);
+                    assertThat(results.getResultsCount()).isEqualTo(13);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }
