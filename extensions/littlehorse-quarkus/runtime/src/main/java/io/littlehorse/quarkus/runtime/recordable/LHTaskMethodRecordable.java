@@ -2,15 +2,15 @@ package io.littlehorse.quarkus.runtime.recordable;
 
 import io.quarkus.runtime.annotations.RecordableConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 public class LHTaskMethodRecordable extends LHRecordable {
 
     private final String description;
-    private final List<String> structDefNameTemplates;
+    private final Set<String> structDefNameTemplates;
 
     public LHTaskMethodRecordable(Class<?> beanClass, String name, String description) {
-        this(beanClass, name, description, List.of());
+        this(beanClass, name, description, Set.of());
     }
 
     @RecordableConstructor
@@ -18,17 +18,17 @@ public class LHTaskMethodRecordable extends LHRecordable {
             Class<?> beanClass,
             String name,
             String description,
-            List<String> structDefNameTemplates) {
+            Set<String> structDefNameTemplates) {
         super(beanClass, name);
         this.description = description;
-        this.structDefNameTemplates = List.copyOf(structDefNameTemplates);
+        this.structDefNameTemplates = Set.copyOf(structDefNameTemplates);
     }
 
     public String getDescription() {
         return description;
     }
 
-    public List<String> getStructDefNameTemplates() {
+    public Set<String> getStructDefNameTemplates() {
         return structDefNameTemplates;
     }
 }

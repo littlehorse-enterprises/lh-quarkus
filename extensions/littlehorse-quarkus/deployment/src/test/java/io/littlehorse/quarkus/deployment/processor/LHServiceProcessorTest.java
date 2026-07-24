@@ -21,13 +21,13 @@ class LHServiceProcessorTest {
     @Test
     void shouldCollectInputAndOutputStructDefNameTemplates() throws IOException {
         assertThat(scanTask("transform").getStructDefNameTemplates())
-                .containsExactly("${raw.input.struct.name}", "${raw.output.struct.name}");
+                .containsExactlyInAnyOrder("${raw.input.struct.name}", "${raw.output.struct.name}");
     }
 
     @Test
     void shouldDeduplicateStructDefNameTemplatesDeterministically() throws IOException {
         assertThat(scanTask("reuse").getStructDefNameTemplates())
-                .containsExactly("${shared.struct.name}");
+                .containsExactlyInAnyOrder("${shared.struct.name}");
     }
 
     private static LHTaskMethodRecordable scanTask(String taskName) throws IOException {

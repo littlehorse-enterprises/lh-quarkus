@@ -37,6 +37,8 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class LHServiceProcessor {
 
@@ -58,15 +60,13 @@ class LHServiceProcessor {
                 .forEach(producer::produce);
     }
 
-    private static List<String> getStructDefNameTemplates(MethodInfo methodInfo) {
+    private static Set<String> getStructDefNameTemplates(MethodInfo methodInfo) {
         return methodInfo.annotations(LHType.class).stream()
                 .map(annotation -> annotation.value("structDefName"))
                 .filter(value -> value != null && "structDefName".equals(value.name()))
                 .map(value -> value.asString())
                 .filter(value -> !value.isBlank())
-                .distinct()
-                .sorted()
-                .toList();
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @BuildStep

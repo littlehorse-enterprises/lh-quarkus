@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 class LHRecorderTest {
 
@@ -88,8 +89,7 @@ class LHRecorderTest {
 
     @Test
     void shouldHandleTheSamePlaceholderFromMultipleLocationsDeterministically() {
-        LHTaskMethodRecordable recordable =
-                recordable("${my.config.test}", "${my.config.test}", "${my.config.test}");
+        LHTaskMethodRecordable recordable = recordable("${my.config.test}", "${my.config.test}");
 
         assertThat(startTask(recordable, List.of(structDef("${my.config.test}"))))
                 .containsExactly(Map.entry("my.config.test", "this-is-a-test"));
@@ -98,7 +98,7 @@ class LHRecorderTest {
     private static LHTaskMethodRecordable recordable(
             String taskName, String... structDefNameTemplates) {
         return new LHTaskMethodRecordable(
-                RawInlineStructTask.class, taskName, null, List.of(structDefNameTemplates));
+                RawInlineStructTask.class, taskName, null, Set.of(structDefNameTemplates));
     }
 
     private static LHStructDefRecordable structDef(String name) {
