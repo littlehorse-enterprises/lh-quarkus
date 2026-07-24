@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Immutable model of a generated saddle bag manifest. All optional fields are omitted from the
@@ -24,7 +25,7 @@ public record SaddleBag(
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Metadata(
-            List<String> tags,
+            Set<String> tags,
             String licence,
             @JsonProperty("documentation-url") String documentationUrl,
             @JsonProperty("icon-url") String iconUrl,

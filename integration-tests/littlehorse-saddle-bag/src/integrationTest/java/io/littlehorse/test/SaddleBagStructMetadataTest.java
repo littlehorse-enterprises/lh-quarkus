@@ -17,7 +17,7 @@ class SaddleBagStructMetadataTest {
 
     @Test
     void shouldEmitStructWithPropertyTypes() {
-        JsonNode struct = SaddleBagManifest.struct(SaddleBagManifest.read(), "address");
+        JsonNode struct = SaddleBagManifest.read().path("structs").path("address");
         assertThat(struct.isMissingNode()).isFalse();
 
         JsonNode properties = struct.path("properties");

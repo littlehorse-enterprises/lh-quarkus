@@ -11,6 +11,9 @@ import io.quarkus.test.junit.QuarkusIntegrationTest;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @QuarkusIntegrationTest
 @QuarkusTestResource(ContainersTestResource.class)
 class SaddleBagManifestTest {
@@ -34,6 +37,14 @@ class SaddleBagManifestTest {
         assertThat(metadata.path("licence").asText()).isEqualTo("Apache-2.0");
         assertThat(metadata.path("docker-image").asText())
                 .isEqualTo("ghcr.io/littlehorse/integration-tests-saddle-bag");
-        assertThat(SaddleBagManifest.texts(metadata.path("tags"))).contains("test", "integration");
+        assertThat(texts(metadata.path("tags"))).contains("test", "integration");
+    }
+
+    private static List<String> texts(JsonNode array) {
+        List<String> values = new ArrayList<>();
+        if (array != null && array.isArray()) {
+            array.forEach(element -> values.add(element.asText()));
+        }
+        return values;
     }
 }
