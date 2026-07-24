@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 
 class LHServiceProcessor {
 
+    private static final String STRUCT_DEF_NAME = "structDefName";
+
     @BuildStep
     void scanLHTaskMethod(
             BuildProducer<LHTaskMethodBuildItem> producer,
@@ -62,8 +64,8 @@ class LHServiceProcessor {
 
     private static Set<String> getStructDefNameTemplates(MethodInfo methodInfo) {
         return methodInfo.annotations(LHType.class).stream()
-                .map(annotation -> annotation.value("structDefName"))
-                .filter(value -> value != null && "structDefName".equals(value.name()))
+                .map(annotation -> annotation.value(STRUCT_DEF_NAME))
+                .filter(value -> value != null && STRUCT_DEF_NAME.equals(value.name()))
                 .map(value -> value.asString())
                 .filter(value -> !value.isBlank())
                 .collect(Collectors.toUnmodifiableSet());
