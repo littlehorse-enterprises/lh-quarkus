@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 class LHSaddleBagProcessorTest {
 
@@ -121,6 +122,14 @@ class LHSaddleBagProcessorTest {
                 .isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
         assertThat(saddlebag.tasks().get("produce-array").output().type())
                 .isEqualTo(Type.array(Type.primitive("INT")));
+    }
+
+    @Test
+    void generateSaddlebagDeduplicatesMetadataTags() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(), Map.of("quarkus.littlehorse.saddle.bag.metadata.tags", "t1,t2,t1"));
+
+        assertThat(saddlebag.metadata().tags()).containsExactlyInAnyOrder("t1", "t2");
     }
 
     @Test
@@ -390,7 +399,7 @@ class LHSaddleBagProcessorTest {
 
     private SaddleBag sampleSaddlebag() {
         Metadata metadata = new Metadata(
-                List.of("test", "example"),
+                Set.of("test", "example"),
                 "MIT",
                 "https://example.com/docs",
                 null,

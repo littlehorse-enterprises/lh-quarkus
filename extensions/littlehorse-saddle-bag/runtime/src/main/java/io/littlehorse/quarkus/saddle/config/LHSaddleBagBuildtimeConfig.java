@@ -6,7 +6,7 @@ import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 
-import java.util.List;
+import java.util.Set;
 
 @ConfigMapping(prefix = "quarkus.littlehorse")
 @ConfigRoot(phase = ConfigPhase.BUILD_AND_RUN_TIME_FIXED)
@@ -51,7 +51,7 @@ public interface LHSaddleBagBuildtimeConfig {
             }
 
             interface MetadataConfig {
-                List<String> tags();
+                Set<String> tags();
 
                 String licence();
 

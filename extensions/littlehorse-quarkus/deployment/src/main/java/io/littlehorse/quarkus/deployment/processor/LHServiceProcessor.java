@@ -23,6 +23,7 @@ import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
+import io.littlehorse.sdk.worker.LHType;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
@@ -36,8 +37,12 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class LHServiceProcessor {
+
+    private static final String STRUCT_DEF_NAME = "structDefName";
 
     @BuildStep
     void scanLHTaskMethod(
@@ -51,9 +56,19 @@ class LHServiceProcessor {
                     Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
                     return new LHTaskMethodBuildItem(
                             beanClass,
-                            new LHTaskMethodDescriptor(new OptionalAnnotation(annotated)));
+                            new LHTaskMethodDescriptor(new OptionalAnnotation(annotated)),
+                            getStructDefNameTemplates(methodInfo));
                 })
                 .forEach(producer::produce);
+    }
+
+    private static Set<String> getStructDefNameTemplates(MethodInfo methodInfo) {
+        return methodInfo.annotations(LHType.class).stream()
+                .map(annotation -> annotation.value(STRUCT_DEF_NAME))
+                .filter(value -> value != null && STRUCT_DEF_NAME.equals(value.name()))
+                .map(value -> value.asString())
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @BuildStep

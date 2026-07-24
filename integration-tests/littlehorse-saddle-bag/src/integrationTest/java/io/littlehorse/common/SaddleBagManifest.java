@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Reads the saddle bag manifest generated at build time by the saddle bag extension.
@@ -38,10 +36,6 @@ public final class SaddleBagManifest {
         return manifest.path("tasks").path(name);
     }
 
-    public static JsonNode struct(JsonNode manifest, String name) {
-        return manifest.path("structs").path(name);
-    }
-
     /**
      * Finds an element inside a manifest array (e.g. {@code configs} or {@code inputs}) whose
      * {@code fieldName} equals {@code value}. Returns a missing node when not found.
@@ -55,14 +49,5 @@ public final class SaddleBagManifest {
             }
         }
         return MAPPER.missingNode();
-    }
-
-    /** Collects every element of a JSON array as plain text values. */
-    public static List<String> texts(JsonNode array) {
-        List<String> values = new ArrayList<>();
-        if (array != null && array.isArray()) {
-            array.forEach(element -> values.add(element.asText()));
-        }
-        return values;
     }
 }

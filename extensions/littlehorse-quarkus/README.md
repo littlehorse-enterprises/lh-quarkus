@@ -304,8 +304,8 @@ when starting the application.
 
 ### Configured StructDef Names
 
-The `@LHStructDef` name may contain a configuration expression. This is useful when the deployed
-StructDef name is not known when the application is compiled:
+The `@LHStructDef` name may contain a LittleHorse SDK placeholder template. This is useful when the
+deployed StructDef name is not known when the application is compiled:
 
 ```java
 @LHStructDef("${customer.struct.name}")
@@ -334,7 +334,7 @@ that need to handle raw `InlineStruct` values, bind the raw value to a StructDef
 
 ```java
 @LHTaskMethod("create-customer")
-@LHType(structDefName = "${customer.struct.name}")
+@LHType(structDefName = "${customer.response.struct.name}")
 public InlineStruct createCustomer(String name, String email) {
     return InlineStruct.newBuilder()
             // Add fields compatible with the Customer StructDef.
@@ -343,16 +343,35 @@ public InlineStruct createCustomer(String name, String email) {
 
 @LHTaskMethod("email-customer")
 public String emailCustomer(
-        @LHType(structDefName = "${customer.struct.name}") InlineStruct customer,
+        @LHType(structDefName = "${customer.request.struct.name}") InlineStruct customer,
         String message) {
     String email = customer.getFieldsOrThrow("email").getValue().getStr();
     return "Sent to " + email;
 }
 ```
 
-The placeholder used by `@LHType` must match a placeholder available from a scanned
-`@LHStructDef`, such as the `Customer` class above. The extension passes its resolved value through
-task registration, input deserialization, and output serialization.
+The extension records `@LHType.structDefName` templates at build time and supplies their
+placeholder values from any Quarkus configuration source when constructing the worker. The
+referenced StructDefs do not need corresponding local `@LHStructDef` classes:
+
+```properties
+customer.request.struct.name=external-customer-request
+customer.response.struct.name=external-customer-response
+```
+
+This only supplies the StructDef names used for task registration, input deserialization, and
+output serialization. It does not register synthetic StructDefs; externally defined StructDefs
+remain owned and registered by the consuming application.
+
+`@LHType.structDefName` follows the LittleHorse SDK placeholder syntax and supports
+`${placeholder}` expressions. SDK-owned worker annotations do not support configuration-expression
+defaults such as `${placeholder:default}`. This applies consistently to `@LHType`,
+`@LHTaskMethod`, and `@LHStructDef`.
+
+If the same placeholder appears in multiple task annotation locations, matching resolved values
+are reused. Conflicting resolved values fail startup, and a missing value reports the missing
+configuration key. Placeholders supplied by scanned `@LHStructDef` classes continue to work as
+before.
 
 See the complete [Inline Structs example](../../examples/inline-structs).
 
@@ -361,7 +380,7 @@ More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/s
 ## Registering Type Adapters
 
 Type Adapters allow the LittleHorse SDK to convert between your types and LittleHorse's native typing system.
-Check available type adapters at [Type Adapter Interfaces](https://littlehorse.io/next/docs/server/developer-guide/sdk-type-adapters#type-adapter-interfaces).
+Check available type adapters at [Type Adapter Interfaces](https://littlehorse.io/docs/server/developer-guide/sdk-type-adapters#type-adapter-interfaces).
 
 Annotate a type adapter class with the `@LHTypeAdapter` annotation specifying the target `VariableType` and the adapted Java class. Quarkus will register the type adapter for you. Example:
 
@@ -386,7 +405,7 @@ public class UUIDTypeAdapter implements LHStringAdapter<UUID> {
 }
 ```
 
-More about type adapters at : [SDK Type Adapters](https://littlehorse.io/next/docs/server/developer-guide/sdk-type-adapters).
+More about type adapters at: [SDK Type Adapters](https://littlehorse.io/docs/server/developer-guide/sdk-type-adapters).
 
 ## LittleHorse Clients
 
@@ -439,8 +458,11 @@ public class GreetingsResource {
 
 ## Dependency Injection
 
-Objects annotated with `@LHTask`, `@LHUserTaskForm` o `@LHWorkflow` are marked as beans and are managed by the Quarkus
-[CDI](https://quarkus.io/guides/cdi), so it is possible to inject other beans into them.
+Classes annotated with `@LHTask`, `@LHWorkflow`, `@LHUserTaskForm`, `@LHStructDef`, or
+`@LHTypeAdapter` are marked as beans and managed by Quarkus
+[CDI](https://quarkus.io/guides/cdi), so it is possible to inject other beans into them. A class
+that declares a method-level `@LHWorkflow` must otherwise be a CDI bean, for example by adding
+`@ApplicationScoped`.
 
 ```java
 @LHTask
@@ -464,8 +486,8 @@ Add `quarkus-smallrye-health` to your project.
 implementation "io.quarkus:quarkus-smallrye-health"
 ```
 
-This extension will automatically add all [LHTaskWorker::healthStatus](https://github.com/littlehorse-enterprises/littlehorse/blob/master/sdk-java/src/main/java/io/littlehorse/sdk/worker/LHTaskWorker.java#L254)
-to the quarkus health checks.
+This extension automatically contributes the health status of every managed `LHTaskWorker` to the
+Quarkus health checks.
 
 To disable this feature, you have to pass `quarkus.littlehorse.health.enabled=false`
 config at build time (either `jar` or `native`). Example:
@@ -474,7 +496,7 @@ config at build time (either `jar` or `native`). Example:
 ./gradlew build -Dquarkus.littlehorse.health.enabled=false
 ```
 
-More about quarkus healthy checks at: [Smallrey Health](https://quarkus.io/guides/smallrye-health).
+More about Quarkus health checks at: [SmallRye Health](https://quarkus.io/guides/smallrye-health).
 
 ## Native Build
 
@@ -503,8 +525,9 @@ dependencies {
 }
 ```
 
-Then we need to create a [QuarkusTestResourceLifecycleManager](https://quarkus.io/guides/getting-started-testing#launching-containers)
-class, and start LittleHorse:
+Create a
+[QuarkusTestResourceLifecycleManager](https://quarkus.io/guides/getting-started-testing#starting-services-before-the-quarkus-application-starts)
+and start LittleHorse:
 
 ```java
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
@@ -527,7 +550,7 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
 }
 ```
 
-Add the test resource at your test:
+Add the test resource to your test:
 
 ```java
 @QuarkusTest
@@ -562,14 +585,16 @@ More about tests at: [Testing Your Quarkus Application](https://quarkus.io/guide
 
 ## Transactional LHTaskMethod
 
-It is very common to persist data into relational databases inside `@LHTaskMethods`.
-It is also very common to use framework like [Hibernate](https://quarkus.io/guides/hibernate-orm),
+It is very common to persist data into relational databases inside methods annotated with
+`@LHTaskMethod`. It is also common to use frameworks like
+[Hibernate](https://quarkus.io/guides/hibernate-orm),
 or, in the case of Quarkus, [Panache](https://quarkus.io/guides/hibernate-orm-panache).
 
-As it is now, every `@LHTaskMethod` needs an [LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development)
-which are created and managed by the LH Quarkus extension. An LHTaskWorker runs inside
-its own thread and outside the Quarkus CDI (read more at [Manage Non-CDI Service](https://quarkus.io/guides/writing-extensions#manage-non-cdi-service)).
-Therefore, you could receive `ContextNotActiveException`, example:
+Every `@LHTaskMethod` needs an
+[LHTaskWorker](https://littlehorse.io/docs/server/developer-guide/task-worker-development), which
+is created and managed by the LittleHorse Quarkus extension. Workers invoke task methods on their
+own threads, where request and transaction contexts are not automatically active. Therefore, you
+could receive a `ContextNotActiveException`, for example:
 
 ```
 jakarta.enterprise.context.ContextNotActiveException: Cannot use the EntityManager/Session because neither
@@ -663,12 +688,17 @@ Some examples could be:
 This extension supports [Expressions Expansion](https://smallrye.io/smallrye-config/Main/config/expressions/)
 for configurations.
 
-An expression string is a mix of plain strings and expression segments, which are wrapped by the sequence: `${ … }`.
-Additionally, the Expression Expansion engine supports the following segments:
+For values evaluated directly by the Quarkus extension, an expression string is a mix of plain
+strings and expression segments wrapped by the sequence `${ … }`. The expression expansion engine
+supports the following segments. This applies to `@LHWorkflow`, its nested
+`@LHExponentialBackoffRetry`, and `@LHUserTaskForm` values:
 
 `${expression:value}` - Provides a default value after the `:` if the expansion doesn’t find a value.
 `${my.prop${compose}}` - Composed expressions. Inner expressions are resolved first.
 `${my.prop}${my.prop}` - Multiple expressions.
+
+The LittleHorse SDK-owned `@LHTaskMethod`, `@LHStructDef`, and `@LHType` annotations support plain
+`${placeholder}` substitution only, as described in [Raw InlineStruct Values](#raw-inlinestruct-values).
 
 Examples:
 
@@ -712,12 +742,14 @@ and [Configuring the Clients](https://littlehorse.io/docs/server/developer-guide
 The bootstrap host for the LittleHorse Server.
 
 * Type: string
+* Default: localhost
 * Importance: high
 
 ``lhc.api.port``
 The bootstrap port for the LittleHorse Server.
 
 * Type: int
+* Default: 2023
 * Importance: high
 
 ``lhc.api.protocol``
@@ -770,6 +802,20 @@ Time in milliseconds to configure the timeout for the keepalive pings on the grp
 * Default: 5000 (5 seconds)
 * Importance: low
 
+``lhc.grpc.resource.exhausted.retry``
+Enables transparent retries for unary gRPC calls rejected with `RESOURCE_EXHAUSTED`.
+
+* Type: boolean
+* Default: true
+* Importance: low
+
+``lhc.inflight.tasks``
+The maximum number of in-flight tasks per polling thread.
+
+* Type: int
+* Default: 1
+* Importance: medium
+
 ``lhc.oauth.access.token.url``
 Optional Access Token URL provided by the OAuth Authorization Server. Used by the Worker to obtain a token using client credentials flow.
 
@@ -797,7 +843,7 @@ Optional OAuth2 Client Secret. Used by the Worker to identify itself at an Autho
 The number of worker threads to run. It allows you to improve the task execution's performance parallelizing the tasks assigned to this worker.
 
 * Type: int
-* Default: 8
+* Default: 2
 * Importance: medium
 
 ``lhw.task.worker.id``

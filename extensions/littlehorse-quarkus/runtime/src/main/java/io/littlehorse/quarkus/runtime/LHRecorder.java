@@ -30,7 +30,7 @@ import jakarta.enterprise.inject.spi.CDI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -57,12 +57,51 @@ public class LHRecorder {
         taskMethodRecordables.stream()
                 .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
                 .forEach(recordable -> {
-                    Map<String, String> placeholderValues = new HashMap<>(structPlaceholderValues);
-                    placeholderValues.putAll(
-                            configEvaluator.expand(recordable.getName()).getMembers());
+                    Map<String, String> placeholderValues = computeTaskPlaceholderValues(
+                            configEvaluator, structPlaceholderValues, recordable);
                     recordable.setPlaceholderValues(placeholderValues);
                     registerAndStartTask(recordable, shutdownContext);
                 });
+    }
+
+    private static Map<String, String> computeTaskPlaceholderValues(
+            ConfigEvaluator configEvaluator,
+            Map<String, String> structPlaceholderValues,
+            LHTaskMethodRecordable recordable) {
+        Map<String, String> placeholderValues = new LinkedHashMap<>();
+        mergePlaceholderValues(placeholderValues, structPlaceholderValues);
+        mergeTemplatePlaceholderValues(placeholderValues, configEvaluator, recordable.getName());
+        recordable.getStructDefNameTemplates().stream()
+                .sorted()
+                .forEach(template -> mergeTemplatePlaceholderValues(
+                        placeholderValues, configEvaluator, template));
+        return Map.copyOf(placeholderValues);
+    }
+
+    private static void mergeTemplatePlaceholderValues(
+            Map<String, String> placeholderValues,
+            ConfigEvaluator configEvaluator,
+            String template) {
+        ConfigEvaluator.ConfigExpression expanded = configEvaluator.expand(template);
+        mergePlaceholderValues(placeholderValues, expanded.getMembers());
+    }
+
+    private static void mergePlaceholderValues(
+            Map<String, String> placeholderValues, Map<String, String> additions) {
+        additions.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry ->
+                        mergePlaceholderValue(placeholderValues, entry.getKey(), entry.getValue()));
+    }
+
+    private static void mergePlaceholderValue(
+            Map<String, String> placeholderValues, String key, String value) {
+        String existingValue = placeholderValues.putIfAbsent(key, value);
+        if (existingValue != null && !existingValue.equals(value)) {
+            throw new IllegalStateException(
+                    "Conflicting values for configuration placeholder '%s': '%s' and '%s'"
+                            .formatted(key, existingValue, value));
+        }
     }
 
     private void registerAndStartTask(
@@ -189,10 +228,13 @@ public class LHRecorder {
     private Map<String, String> computeStructPlaceholderValues(
             List<LHStructDefRecordable> structDefRecordables) {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
-        Map<String, String> placeholderValues = new HashMap<>();
-        structDefRecordables.forEach(recordable -> placeholderValues.putAll(
-                configEvaluator.expand(recordable.getName()).getMembers()));
-        return placeholderValues;
+        Map<String, String> placeholderValues = new LinkedHashMap<>();
+        structDefRecordables.stream()
+                .map(LHStructDefRecordable::getName)
+                .sorted()
+                .forEach(template -> mergeTemplatePlaceholderValues(
+                        placeholderValues, configEvaluator, template));
+        return Map.copyOf(placeholderValues);
     }
 
     private void registerLHStructDef(
