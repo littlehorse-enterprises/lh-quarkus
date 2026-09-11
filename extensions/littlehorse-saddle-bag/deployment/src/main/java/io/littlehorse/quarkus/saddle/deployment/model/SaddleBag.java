@@ -73,22 +73,31 @@ public record SaddleBag(
      * {@code oneof}.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record Type(String primitive, String struct, ArrayType array, MapType map) {
+    public record Type(
+            String primitive,
+            String struct,
+            ArrayType array,
+            MapType map,
+            @JsonProperty("inline-struct") InlineStructType inlineStruct) {
 
         public static Type primitive(String primitive) {
-            return new Type(primitive, null, null, null);
+            return new Type(primitive, null, null, null, null);
         }
 
         public static Type struct(String struct) {
-            return new Type(null, struct, null, null);
+            return new Type(null, struct, null, null, null);
         }
 
         public static Type array(Type elements) {
-            return new Type(null, null, new ArrayType(new Elements(elements)), null);
+            return new Type(null, null, new ArrayType(new Elements(elements)), null, null);
         }
 
         public static Type map(Type key, Type value) {
-            return new Type(null, null, null, new MapType(new Key(key), new Value(value)));
+            return new Type(null, null, null, new MapType(new Key(key), new Value(value)), null);
+        }
+
+        public static Type inlineStruct(List<Property> properties) {
+            return new Type(null, null, null, null, new InlineStructType(properties));
         }
     }
 
@@ -97,6 +106,9 @@ public record SaddleBag(
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record MapType(Key key, Value value) {}
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record InlineStructType(List<Property> properties) {}
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Elements(Type type) {}

@@ -326,6 +326,39 @@ the class is used by a workflow or task. For example,
 `wf.declareStruct("customer", Customer.class)` declares a variable backed by the
 `customer-acme` StructDef.
 
+### Anonymous Inline Structs
+
+Use an unannotated Java bean when a schema should be embedded directly in a WfSpec or TaskDef
+instead of registered as a named StructDef:
+
+```java
+public class DeliveryAddress {
+    // fields, blank constructor, getters, and setters
+}
+
+@LHTaskMethod("normalize-address")
+@LHType(isInlineStruct = true)
+public DeliveryAddress normalizeAddress(
+        @LHType(isInlineStruct = true) DeliveryAddress address) {
+    return address;
+}
+```
+
+Declare workflow variables with the same embedded schema:
+
+```java
+WfRunVariable address =
+        wf.declareInlineStruct("address", DeliveryAddress.class).required();
+```
+
+Unannotated Java beans nested inside an inline struct are embedded recursively, including bean
+types used as native array elements and typed map values. Runtime Struct values are anonymous and
+do not carry a `StructDefId`.
+
+The extension registers inline types reachable from task signatures for native-image reflection.
+If a class is used only as the class literal in `declareInlineStruct` and never appears in a task
+signature or `@LHStructDef`, annotate it with Quarkus `@RegisterForReflection`.
+
 ### Raw InlineStruct Values
 
 Prefer the annotated Java type for normal StructDef task inputs and outputs. For advanced workers
@@ -373,7 +406,9 @@ are reused. Conflicting resolved values fail startup, and a missing value report
 configuration key. Placeholders supplied by scanned `@LHStructDef` classes continue to work as
 before.
 
-See the complete [Inline Structs example](../../examples/inline-structs).
+See the complete [Inline StructDef example](../../examples/inline-struct-def) for the typed
+anonymous form and the [Inline Structs example](../../examples/inline-structs) for raw
+StructDef-bound values.
 
 More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/structdefs).
 

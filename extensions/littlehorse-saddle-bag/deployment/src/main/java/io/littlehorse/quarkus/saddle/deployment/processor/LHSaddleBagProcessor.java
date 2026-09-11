@@ -441,6 +441,12 @@ public class LHSaddleBagProcessor {
                 Type.map(
                         buildType(typeDef.getInlineMapDef().getKeyType()),
                         buildType(typeDef.getInlineMapDef().getValueType()));
+            case INLINE_STRUCT_DEF ->
+                Type.inlineStruct(typeDef.getInlineStructDef().getFieldsMap().entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .map(entry -> new Property(
+                                entry.getKey(), buildType(entry.getValue().getFieldType())))
+                        .toList());
             default -> Type.primitive(typeDef.getPrimitiveType().name());
         };
     }
