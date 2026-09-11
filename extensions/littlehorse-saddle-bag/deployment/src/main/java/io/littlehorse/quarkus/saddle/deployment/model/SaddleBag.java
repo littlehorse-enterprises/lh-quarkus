@@ -65,7 +65,12 @@ public record SaddleBag(
             List<Property> properties) {}
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record Property(String name, Type type) {}
+    public record Property(String name, String description, Type type) {
+
+        public Property(String name, Type type) {
+            this(name, null, type);
+        }
+    }
 
     /**
      * Standardized type descriptor shared by task inputs, task outputs, struct properties, and task

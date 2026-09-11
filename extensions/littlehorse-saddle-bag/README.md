@@ -13,23 +13,23 @@ what a task worker image provides.
 # Table of Content
 
 <!-- TOC -->
-* [LittleHorse Quarkus Saddle Bag Extension](#littlehorse-quarkus-saddle-bag-extension)
-* [Table of Content](#table-of-content)
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Basic Setup](#basic-setup)
-  * [Declaring Required Configurations](#declaring-required-configurations)
-    * [Deduplication and Validation](#deduplication-and-validation)
-    * [`@LHTaskConfig` Attributes](#lhtaskconfig-attributes)
-  * [Declaring Business Exceptions](#declaring-business-exceptions)
-    * [`@LHThrownException` Attributes](#lhthrownexception-attributes)
-* [Generated Output](#generated-output)
-  * [Type Representation](#type-representation)
-* [Building a Docker Image](#building-a-docker-image)
-* [Configurations](#configurations)
-  * [Bag Configurations](#bag-configurations)
-  * [Metadata Configurations](#metadata-configurations)
-  * [Output Configurations](#output-configurations)
+- [LittleHorse Quarkus Saddle Bag Extension](#littlehorse-quarkus-saddle-bag-extension)
+- [Table of Content](#table-of-content)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Basic Setup](#basic-setup)
+  - [Declaring Required Configurations](#declaring-required-configurations)
+    - [Deduplication and Validation](#deduplication-and-validation)
+    - [`@LHTaskConfig` Attributes](#lhtaskconfig-attributes)
+  - [Declaring Business Exceptions](#declaring-business-exceptions)
+    - [`@LHThrownException` Attributes](#lhthrownexception-attributes)
+- [Generated Output](#generated-output)
+  - [Type Representation](#type-representation)
+- [Building a Docker Image](#building-a-docker-image)
+- [Configurations](#configurations)
+  - [Bag Configurations](#bag-configurations)
+  - [Metadata Configurations](#metadata-configurations)
+  - [Output Configurations](#output-configurations)
 <!-- TOC -->
 
 # Installation
@@ -266,7 +266,7 @@ the kind of type (a `oneof`, mirroring the LittleHorse `TypeDefinition`):
 | `struct`    | The referenced `@LHStructDef` struct's resolved name (a key under the top-level `structs` section). |
 | `array`     | An object with an `elements` field holding a `type` descriptor.                          |
 | `map`       | An object with `key` and `value` fields, each holding a `type` descriptor.               |
-| `inline-struct` | An embedded schema with a `properties` list; each property contains a recursive `type` descriptor. |
+| `inline-struct` | An embedded schema with a `properties` list; each property contains a name, optional description, and recursive `type` descriptor. |
 
 The `elements`, `key`, `value`, and inline property fields each hold a nested `type` descriptor, so
 arrays, maps, named structs, and anonymous inline structs can be nested recursively. Native
@@ -321,6 +321,7 @@ tasks:
         inline-struct:
           properties:
           - name: "city"
+            description: "The delivery city"
             type:
               primitive: "STR"
           - name: "street"
@@ -332,6 +333,7 @@ tasks:
         inline-struct:
           properties:
           - name: "city"
+            description: "The delivery city"
             type:
               primitive: "STR"
           - name: "street"

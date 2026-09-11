@@ -3,6 +3,8 @@ package io.littlehorse.quarkus.saddle.deployment.processor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHTaskMethodDescriptor;
@@ -24,6 +26,7 @@ import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.TaskException;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Type;
 import io.littlehorse.quarkus.saddle.exception.LHThrownException;
 import io.littlehorse.sdk.worker.LHStructDef;
+import io.littlehorse.sdk.worker.LHStructField;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -131,7 +134,7 @@ class LHSaddleBagProcessorTest {
                 Map.of("task.normalize-customer.name", "normalize-customer"));
 
         Type addressType = Type.inlineStruct(List.of(
-                new Property("city", Type.primitive("STR")),
+                new Property("city", "The delivery city", Type.primitive("STR")),
                 new Property("street", Type.primitive("STR"))));
         Type customerType = Type.inlineStruct(List.of(
                 new Property("address", addressType),
@@ -142,6 +145,8 @@ class LHSaddleBagProcessorTest {
         Task task = saddlebag.tasks().get("normalize-customer");
         assertThat(task.inputs()).extracting(Input::type).containsExactly(customerType);
         assertThat(task.output().type()).isEqualTo(customerType);
+        assertThat(new String(processor.serialize(saddlebag, Format.YAML), UTF_8))
+                .contains("description: \"The delivery city\"");
     }
 
     @Test
@@ -682,6 +687,8 @@ class LHSaddleBagProcessorTest {
 
     public static class InlineAddress {
         private String street;
+
+        @LHStructField(description = "The delivery city")
         private String city;
 
         public InlineAddress() {}
