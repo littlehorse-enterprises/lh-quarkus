@@ -160,12 +160,12 @@ public class LHReflectionProcessor {
 
     private static void collectClass(
             DotName name, IndexView index, Set<DotName> typeNames, Set<DotName> visited) {
-                if (name.startsWith(JAVA_PACKAGE) || !visited.add(name)) {
+        if (name.startsWith(JAVA_PACKAGE) || !visited.add(name)) {
             return;
         }
 
         typeNames.add(name);
-                if (name.startsWith(LITTLEHORSE_SDK_PACKAGE)) {
+        if (name.startsWith(LITTLEHORSE_SDK_PACKAGE)) {
             return;
         }
 
