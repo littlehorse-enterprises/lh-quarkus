@@ -28,6 +28,10 @@ import java.util.function.Function;
 
 public class LHReflectionProcessor {
 
+    private static final DotName JAVA_PACKAGE = DotName.createSimple("java");
+    private static final DotName LITTLEHORSE_SDK_PACKAGE =
+            DotName.createSimple("io.littlehorse.sdk");
+
     private static final Function<String, ReflectiveClassBuildItem> newBuildItem = className ->
             ReflectiveClassBuildItem.builder(className).methods().fields().build();
 
@@ -156,12 +160,12 @@ public class LHReflectionProcessor {
 
     private static void collectClass(
             DotName name, IndexView index, Set<DotName> typeNames, Set<DotName> visited) {
-        if (name.toString().startsWith("java.") || !visited.add(name)) {
+                if (name.startsWith(JAVA_PACKAGE) || !visited.add(name)) {
             return;
         }
 
         typeNames.add(name);
-        if (name.toString().startsWith("io.littlehorse.sdk.")) {
+                if (name.startsWith(LITTLEHORSE_SDK_PACKAGE)) {
             return;
         }
 
