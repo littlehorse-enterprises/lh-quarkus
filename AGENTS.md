@@ -10,7 +10,7 @@ Quarkus extensions for the [LittleHorse](https://littlehorse.io/) workflow engin
 - `extensions/littlehorse-restful-gateway/` — RESTful gateway extension (runtime + deployment)
 - `extensions/littlehorse-saddle-bag/` — Saddle Bag extension for self-describing task worker Docker images (runtime + deployment)
 - `extras/restful-gateway/` — Standalone Quarkus app using the gateway extension
-- `examples/` — Usage examples (arrays-maps, basic, child-workflow, inline-structs, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
+- `examples/` — Usage examples (arrays-maps, basic, child-workflow, inline-struct-def, inline-structs, reactive, rest, saddle-bag, structs, type-adapter, user-tasks)
 - `integration-tests/` — End-to-end tests against a running LittleHorse instance, split per concern into subprojects named after the extension they cover: `littlehorse-quarkus/` (project `integration-tests-littlehorse-quarkus`), `littlehorse-restful-gateway/` (project `integration-tests-littlehorse-restful-gateway`), `littlehorse-saddle-bag/` (project `integration-tests-littlehorse-saddle-bag`)
 
 Each extension follows the Quarkus extension structure: `deployment/` for build-time processors, `runtime/` for CDI beans and recorders.
@@ -56,7 +56,7 @@ Each extension follows the Quarkus extension structure: `deployment/` for build-
 - Quarkus version: `3.37.2`, LittleHorse SDK: `1.2-SNAPSHOT`
 - Dependency versions are centralized in `gradle.properties`
 - Extension projects: `littlehorse-quarkus`, `littlehorse-restful-gateway`, `littlehorse-saddle-bag` (each also has a `-deployment` project)
-- Example projects use the `example-` prefix: `example-arrays-maps`, `example-basic`, `example-child-workflow`, `example-inline-structs`, `example-reactive`, `example-rest`, `example-saddle-bag`, `example-structs`, `example-type-adapter`, `example-user-tasks`
+- Example projects use the `example-` prefix: `example-arrays-maps`, `example-basic`, `example-child-workflow`, `example-inline-struct-def`, `example-inline-structs`, `example-reactive`, `example-rest`, `example-saddle-bag`, `example-structs`, `example-type-adapter`, `example-user-tasks`
 - Use `@LHTaskMethod` and related annotations for task/workflow registration
 - Use `@LHTaskConfig` to declare required external configurations for Saddle Bag manifests
 - Deployment processors scan annotations at build time — runtime beans are produced via recorders

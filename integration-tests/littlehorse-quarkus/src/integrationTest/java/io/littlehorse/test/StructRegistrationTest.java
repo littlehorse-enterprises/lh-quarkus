@@ -78,4 +78,43 @@ class StructRegistrationTest {
                             .isEqualTo("lh-address");
                 });
     }
+
+    @Test
+    void shouldRegisterArrayOfPojosAsInlineStructDefs() {
+        with().pollInterval(Duration.ofSeconds(1))
+                .ignoreExceptions()
+                .await()
+                .atMost(Duration.ofSeconds(30))
+                .untilAsserted(() -> {
+                    StructDef personStructDef = blockingStub.getStructDef(
+                            StructDefId.newBuilder().setName("lh-person").build());
+
+                    StructFieldDef previousAddressesField =
+                            personStructDef.getStructDef().getFieldsOrThrow("previousAddresses");
+
+                    assertThat(previousAddressesField.getFieldType().hasInlineArrayDef())
+                            .isTrue();
+                    assertThat(previousAddressesField
+                                    .getFieldType()
+                                    .getInlineArrayDef()
+                                    .getArrayType()
+                                    .hasInlineStructDef())
+                            .isTrue();
+                    assertThat(previousAddressesField
+                                    .getFieldType()
+                                    .getInlineArrayDef()
+                                    .getArrayType()
+                                    .getInlineStructDef()
+                                    .getFieldsMap())
+                            .containsOnlyKeys("city", "street");
+                    assertThat(previousAddressesField.hasDefaultValue()).isTrue();
+                    assertThat(previousAddressesField.getDefaultValue().hasArray())
+                            .isTrue();
+                    assertThat(previousAddressesField
+                                    .getDefaultValue()
+                                    .getArray()
+                                    .getItemsList())
+                            .isEmpty();
+                });
+    }
 }

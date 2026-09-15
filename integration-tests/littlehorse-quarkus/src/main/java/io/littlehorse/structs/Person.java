@@ -7,6 +7,7 @@ public class Person {
     private String firstName;
     private String lastName;
     private Address homeAddress;
+    private InlineStructDefAddress[] previousAddresses = new InlineStructDefAddress[0];
 
     public Person() {}
 
@@ -43,5 +44,13 @@ public class Person {
 
     public void setHomeAddress(Address homeAddress) {
         this.homeAddress = homeAddress;
+    }
+
+    public InlineStructDefAddress[] getPreviousAddresses() {
+        return previousAddresses;
+    }
+
+    public void setPreviousAddresses(InlineStructDefAddress[] previousAddresses) {
+        this.previousAddresses = previousAddresses;
     }
 }
