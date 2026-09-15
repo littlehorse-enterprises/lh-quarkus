@@ -5,35 +5,36 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
 # Table of Content
 
 <!-- TOC -->
-* [LittleHorse Quarkus Extension](#littlehorse-quarkus-extension)
-* [Table of Content](#table-of-content)
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Default Beans](#default-beans)
-  * [Creating a Task](#creating-a-task)
-  * [Registering a Workflow](#registering-a-workflow)
-  * [Registering User Tasks](#registering-user-tasks)
-  * [Registering Structs](#registering-structs)
-    * [Configured StructDef Names](#configured-structdef-names)
-    * [Raw InlineStruct Values](#raw-inlinestruct-values)
-  * [Registering Type Adapters](#registering-type-adapters)
-  * [LittleHorse Clients](#littlehorse-clients)
-  * [Dependency Injection](#dependency-injection)
-  * [Enabling Task Health Checks](#enabling-task-health-checks)
-  * [Native Build](#native-build)
-  * [Tests](#tests)
-* [Troubleshooting](#troubleshooting)
-  * [Transactional LHTaskMethod](#transactional-lhtaskmethod)
-  * [Missing LHTaskMethod Annotation](#missing-lhtaskmethod-annotation)
-* [Configurations](#configurations)
-  * [Passing Configurations](#passing-configurations)
-  * [Expressions Expansion](#expressions-expansion)
-  * [LittleHorse Client Configurations](#littlehorse-client-configurations)
-    * [Client](#client)
-    * [Task Worker](#task-worker)
-  * [LittleHorse Extension Configurations](#littlehorse-extension-configurations)
-    * [Buildtime Configurations](#buildtime-configurations)
-    * [Runtime Configurations](#runtime-configurations)
+- [LittleHorse Quarkus Extension](#littlehorse-quarkus-extension)
+- [Table of Content](#table-of-content)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Default Beans](#default-beans)
+  - [Creating a Task](#creating-a-task)
+  - [Registering a Workflow](#registering-a-workflow)
+  - [Registering User Tasks](#registering-user-tasks)
+  - [Registering Structs](#registering-structs)
+    - [Configured StructDef Names](#configured-structdef-names)
+    - [Anonymous Inline Structs](#anonymous-inline-structs)
+    - [Raw InlineStruct Values](#raw-inlinestruct-values)
+  - [Registering Type Adapters](#registering-type-adapters)
+  - [LittleHorse Clients](#littlehorse-clients)
+  - [Dependency Injection](#dependency-injection)
+  - [Enabling Task Health Checks](#enabling-task-health-checks)
+  - [Native Build](#native-build)
+  - [Tests](#tests)
+- [Troubleshooting](#troubleshooting)
+  - [Transactional LHTaskMethod](#transactional-lhtaskmethod)
+  - [Missing LHTaskMethod Annotation](#missing-lhtaskmethod-annotation)
+- [Configurations](#configurations)
+  - [Passing Configurations](#passing-configurations)
+  - [Expressions Expansion](#expressions-expansion)
+  - [LittleHorse Client Configurations](#littlehorse-client-configurations)
+    - [Client](#client)
+    - [Task Worker](#task-worker)
+  - [LittleHorse Extension Configurations](#littlehorse-extension-configurations)
+    - [Buildtime Configurations](#buildtime-configurations)
+    - [Runtime Configurations](#runtime-configurations)
 <!-- TOC -->
 
 # Installation
@@ -356,8 +357,20 @@ types used as native array elements and typed map values. Runtime Struct values 
 do not carry a `StructDefId`.
 
 The extension registers inline types reachable from task signatures for native-image reflection.
-If a class is used only as the class literal in `declareInlineStruct` and never appears in a task
-signature or `@LHStructDef`, annotate it with Quarkus `@RegisterForReflection`.
+
+> [!IMPORTANT]
+> If a class is referenced only by a `WfSpec` and never appears in a task signature or
+> `@LHStructDef`, annotate it with `@LHReflectiveType`:
+> 
+> ```java
+> @LHReflectiveType
+> public class DeliveryAddress {
+>     // fields, blank constructor, getters, and setters
+> }
+> ```
+> `@LHReflectiveType` also discovers nested JavaBean property types recursively. Quarkus
+> `@RegisterForReflection` remains available as a lower-level alternative when its direct reflection
+> configuration is sufficient.
 
 ### Raw InlineStruct Values
 

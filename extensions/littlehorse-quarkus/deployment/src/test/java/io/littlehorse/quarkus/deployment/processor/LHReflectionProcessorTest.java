@@ -2,6 +2,7 @@ package io.littlehorse.quarkus.deployment.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.littlehorse.quarkus.workflow.LHReflectiveType;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
@@ -25,6 +26,16 @@ class LHReflectionProcessorTest {
                         InlineAddress.class.getName(),
                         NamedEnvelope.class.getName())
                 .doesNotContain(String.class.getName(), Map.class.getName());
+    }
+
+    @Test
+    void shouldRegisterAnnotatedWorkflowTypeRecursively() throws IOException {
+        Index index = Index.of(WorkflowOnlyCustomer.class, WorkflowOnlyAddress.class);
+
+        assertThat(LHReflectionProcessor.reflectiveTypeNames(index))
+                .containsExactlyInAnyOrder(
+                        WorkflowOnlyCustomer.class.getName(), WorkflowOnlyAddress.class.getName())
+                .doesNotContain(String.class.getName());
     }
 
     static class InlineTask {
@@ -61,6 +72,23 @@ class LHReflectionProcessorTest {
 
         public InlineCustomer getCustomer() {
             return customer;
+        }
+    }
+
+    @LHReflectiveType
+    static class WorkflowOnlyCustomer {
+        private WorkflowOnlyAddress address;
+
+        public WorkflowOnlyAddress getAddress() {
+            return address;
+        }
+    }
+
+    static class WorkflowOnlyAddress {
+        private String street;
+
+        public String getStreet() {
+            return street;
         }
     }
 

@@ -4,6 +4,7 @@ import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
 
 import io.littlehorse.quarkus.task.LHTask;
 import io.littlehorse.quarkus.task.LHUserTaskForm;
+import io.littlehorse.quarkus.workflow.LHReflectiveType;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.usertask.annotations.UserTaskField;
 import io.littlehorse.sdk.worker.LHStructDef;
@@ -133,6 +134,12 @@ public class LHReflectionProcessor {
                 });
 
         index.getAnnotations(LHStructDef.class).stream()
+                .map(AnnotationInstance::target)
+                .map(AnnotationTarget::asClass)
+                .map(ClassInfo::name)
+                .forEach(name -> collectClass(name, index, typeNames, visited));
+
+        index.getAnnotations(LHReflectiveType.class).stream()
                 .map(AnnotationInstance::target)
                 .map(AnnotationTarget::asClass)
                 .map(ClassInfo::name)
