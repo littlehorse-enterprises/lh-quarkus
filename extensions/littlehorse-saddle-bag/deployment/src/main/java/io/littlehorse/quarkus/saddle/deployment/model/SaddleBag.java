@@ -55,6 +55,7 @@ public record SaddleBag(
             String key,
             String description,
             boolean sensitive,
+            boolean required,
             Type type,
             @JsonProperty("default-value") String defaultValue) {}
 

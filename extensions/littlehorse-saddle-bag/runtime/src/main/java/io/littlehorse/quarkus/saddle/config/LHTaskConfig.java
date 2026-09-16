@@ -57,6 +57,12 @@ public @interface LHTaskConfig {
     boolean sensitive() default false;
 
     /**
+     *
+     * Whether this configuration property is required.
+     */
+    boolean required() default true;
+
+    /**
      * Default value for this configuration property. Empty string means no default (mandatory).
      */
     String defaultValue() default "";
