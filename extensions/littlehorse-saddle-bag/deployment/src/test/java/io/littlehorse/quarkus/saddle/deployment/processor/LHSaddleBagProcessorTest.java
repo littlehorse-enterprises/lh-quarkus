@@ -3,6 +3,8 @@ package io.littlehorse.quarkus.saddle.deployment.processor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHTaskMethodDescriptor;
@@ -24,6 +26,7 @@ import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.TaskException;
 import io.littlehorse.quarkus.saddle.deployment.model.SaddleBag.Type;
 import io.littlehorse.quarkus.saddle.exception.LHThrownException;
 import io.littlehorse.sdk.worker.LHStructDef;
+import io.littlehorse.sdk.worker.LHStructField;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -122,6 +125,28 @@ class LHSaddleBagProcessorTest {
                 .isEqualTo(Type.map(Type.primitive("STR"), Type.primitive("INT")));
         assertThat(saddlebag.tasks().get("produce-array").output().type())
                 .isEqualTo(Type.array(Type.primitive("INT")));
+    }
+
+    @Test
+    void generateSaddlebagEmitsInlineStructInputAndOutputTypes() throws Exception {
+        SaddleBag saddlebag = generateSaddlebag(
+                List.of(taskItem(InlineStructTask.class)),
+                Map.of("task.normalize-customer.name", "normalize-customer"));
+
+        Type addressType = Type.inlineStruct(List.of(
+                new Property("city", "The delivery city", Type.primitive("STR")),
+                new Property("street", Type.primitive("STR"))));
+        Type customerType = Type.inlineStruct(List.of(
+                new Property("address", addressType),
+                new Property("addressesByLabel", Type.map(Type.primitive("STR"), addressType)),
+                new Property("name", Type.primitive("STR")),
+                new Property("previousAddresses", Type.array(addressType))));
+
+        Task task = saddlebag.tasks().get("normalize-customer");
+        assertThat(task.inputs()).extracting(Input::type).containsExactly(customerType);
+        assertThat(task.output().type()).isEqualTo(customerType);
+        assertThat(new String(processor.serialize(saddlebag, Format.YAML), UTF_8))
+                .contains("description: \"The delivery city\"");
     }
 
     @Test
@@ -438,7 +463,12 @@ class LHSaddleBagProcessorTest {
                 "Represents a customer order",
                 List.of(
                         new Property("price", Type.primitive("DOUBLE")),
-                        new Property("quantity", Type.primitive("INT"))));
+                        new Property("quantity", Type.primitive("INT")),
+                        new Property(
+                                "shippingAddress",
+                                Type.inlineStruct(List.of(
+                                        new Property("city", Type.primitive("STR")),
+                                        new Property("street", Type.primitive("STR")))))));
 
         Map<String, Struct> structs = new LinkedHashMap<>();
         structs.put("order", order);
@@ -601,6 +631,82 @@ class LHSaddleBagProcessorTest {
         @LHType(isLHArray = true)
         public Long[] produceArray() {
             return new Long[0];
+        }
+    }
+
+    public static class InlineStructTask {
+
+        @LHTaskMethod("${task.normalize-customer.name}")
+        @LHType(isInlineStruct = true)
+        public InlineCustomer normalizeCustomer(
+                @LHType(isInlineStruct = true) InlineCustomer customer) {
+            return customer;
+        }
+    }
+
+    public static class InlineCustomer {
+        private String name;
+        private InlineAddress address;
+        private InlineAddress[] previousAddresses;
+        private Map<String, InlineAddress> addressesByLabel;
+
+        public InlineCustomer() {}
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public InlineAddress getAddress() {
+            return address;
+        }
+
+        public void setAddress(InlineAddress address) {
+            this.address = address;
+        }
+
+        public InlineAddress[] getPreviousAddresses() {
+            return previousAddresses;
+        }
+
+        public void setPreviousAddresses(InlineAddress[] previousAddresses) {
+            this.previousAddresses = previousAddresses;
+        }
+
+        public Map<String, InlineAddress> getAddressesByLabel() {
+            return addressesByLabel;
+        }
+
+        public void setAddressesByLabel(Map<String, InlineAddress> addressesByLabel) {
+            this.addressesByLabel = addressesByLabel;
+        }
+    }
+
+    public static class InlineAddress {
+        private String street;
+
+        @LHStructField(description = "The delivery city")
+        private String city;
+
+        public InlineAddress() {}
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
         }
     }
 

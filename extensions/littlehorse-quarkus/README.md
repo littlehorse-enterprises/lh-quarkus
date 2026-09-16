@@ -5,35 +5,36 @@ This is the base Quarkus extension for [LittleHorse](https://littlehorse.io/).
 # Table of Content
 
 <!-- TOC -->
-* [LittleHorse Quarkus Extension](#littlehorse-quarkus-extension)
-* [Table of Content](#table-of-content)
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Default Beans](#default-beans)
-  * [Creating a Task](#creating-a-task)
-  * [Registering a Workflow](#registering-a-workflow)
-  * [Registering User Tasks](#registering-user-tasks)
-  * [Registering Structs](#registering-structs)
-    * [Configured StructDef Names](#configured-structdef-names)
-    * [Raw InlineStruct Values](#raw-inlinestruct-values)
-  * [Registering Type Adapters](#registering-type-adapters)
-  * [LittleHorse Clients](#littlehorse-clients)
-  * [Dependency Injection](#dependency-injection)
-  * [Enabling Task Health Checks](#enabling-task-health-checks)
-  * [Native Build](#native-build)
-  * [Tests](#tests)
-* [Troubleshooting](#troubleshooting)
-  * [Transactional LHTaskMethod](#transactional-lhtaskmethod)
-  * [Missing LHTaskMethod Annotation](#missing-lhtaskmethod-annotation)
-* [Configurations](#configurations)
-  * [Passing Configurations](#passing-configurations)
-  * [Expressions Expansion](#expressions-expansion)
-  * [LittleHorse Client Configurations](#littlehorse-client-configurations)
-    * [Client](#client)
-    * [Task Worker](#task-worker)
-  * [LittleHorse Extension Configurations](#littlehorse-extension-configurations)
-    * [Buildtime Configurations](#buildtime-configurations)
-    * [Runtime Configurations](#runtime-configurations)
+- [LittleHorse Quarkus Extension](#littlehorse-quarkus-extension)
+- [Table of Content](#table-of-content)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Default Beans](#default-beans)
+  - [Creating a Task](#creating-a-task)
+  - [Registering a Workflow](#registering-a-workflow)
+  - [Registering User Tasks](#registering-user-tasks)
+  - [Registering Structs](#registering-structs)
+    - [Configured StructDef Names](#configured-structdef-names)
+    - [Anonymous Inline Structs](#anonymous-inline-structs)
+    - [Raw InlineStruct Values](#raw-inlinestruct-values)
+  - [Registering Type Adapters](#registering-type-adapters)
+  - [LittleHorse Clients](#littlehorse-clients)
+  - [Dependency Injection](#dependency-injection)
+  - [Enabling Task Health Checks](#enabling-task-health-checks)
+  - [Native Build](#native-build)
+  - [Tests](#tests)
+- [Troubleshooting](#troubleshooting)
+  - [Transactional LHTaskMethod](#transactional-lhtaskmethod)
+  - [Missing LHTaskMethod Annotation](#missing-lhtaskmethod-annotation)
+- [Configurations](#configurations)
+  - [Passing Configurations](#passing-configurations)
+  - [Expressions Expansion](#expressions-expansion)
+  - [LittleHorse Client Configurations](#littlehorse-client-configurations)
+    - [Client](#client)
+    - [Task Worker](#task-worker)
+  - [LittleHorse Extension Configurations](#littlehorse-extension-configurations)
+    - [Buildtime Configurations](#buildtime-configurations)
+    - [Runtime Configurations](#runtime-configurations)
 <!-- TOC -->
 
 # Installation
@@ -326,6 +327,51 @@ the class is used by a workflow or task. For example,
 `wf.declareStruct("customer", Customer.class)` declares a variable backed by the
 `customer-acme` StructDef.
 
+### Anonymous Inline Structs
+
+Use an unannotated Java bean when a schema should be embedded directly in a WfSpec or TaskDef
+instead of registered as a named StructDef:
+
+```java
+public class DeliveryAddress {
+    // fields, blank constructor, getters, and setters
+}
+
+@LHTaskMethod("normalize-address")
+@LHType(isInlineStruct = true)
+public DeliveryAddress normalizeAddress(
+        @LHType(isInlineStruct = true) DeliveryAddress address) {
+    return address;
+}
+```
+
+Declare workflow variables with the same embedded schema:
+
+```java
+WfRunVariable address =
+        wf.declareInlineStruct("address", DeliveryAddress.class).required();
+```
+
+Unannotated Java beans nested inside an inline struct are embedded recursively, including bean
+types used as native array elements and typed map values. Runtime Struct values are anonymous and
+do not carry a `StructDefId`.
+
+The extension registers inline types reachable from task signatures for native-image reflection.
+
+> [!IMPORTANT]
+> If a class is referenced only by a `WfSpec` and never appears in a task signature or
+> `@LHStructDef`, annotate it with `@LHReflectiveType`:
+> 
+> ```java
+> @LHReflectiveType
+> public class DeliveryAddress {
+>     // fields, blank constructor, getters, and setters
+> }
+> ```
+> `@LHReflectiveType` also discovers nested JavaBean property types recursively. Quarkus
+> `@RegisterForReflection` remains available as a lower-level alternative when its direct reflection
+> configuration is sufficient.
+
 ### Raw InlineStruct Values
 
 Prefer the annotated Java type for normal StructDef task inputs and outputs. For advanced workers
@@ -373,7 +419,9 @@ are reused. Conflicting resolved values fail startup, and a missing value report
 configuration key. Placeholders supplied by scanned `@LHStructDef` classes continue to work as
 before.
 
-See the complete [Inline Structs example](../../examples/inline-structs).
+See the complete [Inline StructDef example](../../examples/inline-struct-def) for the typed
+anonymous form and the [Inline Structs example](../../examples/inline-structs) for raw
+StructDef-bound values.
 
 More about structs at: [StructDef](https://littlehorse.io/docs/server/concepts/structdefs).
 

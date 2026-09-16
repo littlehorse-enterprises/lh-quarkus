@@ -50,12 +50,18 @@ class TaskRegistrationTest {
                                     .setName("email-inline-customer")
                                     .build())
                             .addResults(TaskDefId.newBuilder()
+                                    .setName("email-inline-struct-def-customer")
+                                    .build())
+                            .addResults(TaskDefId.newBuilder()
                                     .setName("external-inline-struct-test-task")
                                     .build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("get-uuid").build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("greetings").build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("normalize-inline-struct-def-customer")
+                                    .build())
                             .addResults(TaskDefId.newBuilder().setName("print").build())
                             .addResults(TaskDefId.newBuilder()
                                     .setName("return-json-array")
@@ -70,7 +76,7 @@ class TaskRegistrationTest {
                                     TaskDefId.newBuilder().setName("sum-array").build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(14);
+                    assertThat(results.getResultsCount()).isEqualTo(16);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }
