@@ -13,9 +13,11 @@ import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
+import io.littlehorse.sdk.common.proto.VariableId;
 import io.littlehorse.sdk.common.proto.WfRun;
 import io.littlehorse.workflows.ArraysMapsWorkflow;
 import io.littlehorse.workflows.PersonWorkflow;
+import io.littlehorse.workflows.RecordPersonWorkflow;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
@@ -96,6 +98,40 @@ class RunWorkflowTest {
 
                     assertThat(result.getId().getId()).isEqualTo(expectedId);
                     assertThat(result.getStatus()).isEqualTo(LHStatus.COMPLETED);
+                });
+    }
+
+    @Test
+    void testRunRecordPersonWfWithNestedStructs() {
+        String expectedId = UUID.randomUUID().toString();
+
+        blockingStub.runWf(RunWfRequest.newBuilder()
+                .setId(expectedId)
+                .setWfSpecName(RecordPersonWorkflow.RECORD_PERSON_WORKFLOW)
+                .putVariables(
+                        RecordPersonWorkflow.FIRST_NAME_VARIABLE, LHLibUtil.objToVarVal("Padme"))
+                .putVariables(
+                        RecordPersonWorkflow.LAST_NAME_VARIABLE, LHLibUtil.objToVarVal("Amidala"))
+                .build());
+
+        with().pollInterval(Duration.ofSeconds(1))
+                .ignoreExceptions()
+                .await()
+                .atMost(Duration.ofSeconds(30))
+                .untilAsserted(() -> {
+                    WfRun result = blockingStub.getWfRun(LHLibUtil.wfRunIdFromString(expectedId));
+
+                    assertThat(result.getId().getId()).isEqualTo(expectedId);
+                    assertThat(result.getStatus()).isEqualTo(LHStatus.COMPLETED);
+                    assertThat(blockingStub
+                                    .getVariable(VariableId.newBuilder()
+                                            .setWfRunId(result.getId())
+                                            .setName(RecordPersonWorkflow.DESCRIPTION_VARIABLE)
+                                            .build())
+                                    .getValue()
+                                    .getStr())
+                            .isEqualTo(
+                                    "Padme Amidala lives in Anchorhead and receives mail in Theed");
                 });
     }
 
