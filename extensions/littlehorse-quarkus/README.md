@@ -327,6 +327,18 @@ the class is used by a workflow or task. For example,
 `wf.declareStruct("customer", Customer.class)` declares a variable backed by the
 `customer-acme` StructDef.
 
+### Java Record StructDefs
+
+Java records can define immutable StructDefs without JavaBean boilerplate:
+
+```java
+@LHStructDef("person")
+public record Person(String firstName, String lastName) {}
+```
+
+The LittleHorse SDK uses the record's canonical constructor during deserialization. Record
+components support the same StructDef field annotations as JavaBean properties.
+
 ### Anonymous Inline Structs
 
 Use an unannotated Java bean when a schema should be embedded directly in a WfSpec or TaskDef
@@ -352,9 +364,9 @@ WfRunVariable address =
         wf.declareInlineStruct("address", DeliveryAddress.class).required();
 ```
 
-Unannotated Java beans nested inside an inline struct are embedded recursively, including bean
-types used as native array elements and typed map values. Runtime Struct values are anonymous and
-do not carry a `StructDefId`.
+Unannotated Java beans and records nested inside an inline struct are embedded recursively,
+including types used as native array elements and typed map values. Runtime Struct values are
+anonymous and do not carry a `StructDefId`.
 
 The extension registers inline types reachable from task signatures for native-image reflection.
 
@@ -506,11 +518,14 @@ public class GreetingsResource {
 
 ## Dependency Injection
 
-Classes annotated with `@LHTask`, `@LHWorkflow`, `@LHUserTaskForm`, `@LHStructDef`, or
-`@LHTypeAdapter` are marked as beans and managed by Quarkus
+Classes annotated with `@LHTask`, `@LHWorkflow`, `@LHUserTaskForm`, or `@LHTypeAdapter`, along with
+JavaBean classes annotated with `@LHStructDef`, are marked as beans and managed by Quarkus
 [CDI](https://quarkus.io/guides/cdi), so it is possible to inject other beans into them. A class
 that declares a method-level `@LHWorkflow` must otherwise be a CDI bean, for example by adding
 `@ApplicationScoped`.
+
+Record StructDefs are immutable data carriers and are not CDI beans. Use a JavaBean StructDef when
+the StructDef class itself needs injected dependencies.
 
 ```java
 @LHTask
@@ -549,6 +564,9 @@ More about Quarkus health checks at: [SmallRye Health](https://quarkus.io/guides
 ## Native Build
 
 This extension fully supports native build.
+
+Annotated record StructDefs and non-Java component types reachable through their components are
+automatically registered for reflection, including array elements and typed map values.
 
 Run next command in your project root folder:
 
