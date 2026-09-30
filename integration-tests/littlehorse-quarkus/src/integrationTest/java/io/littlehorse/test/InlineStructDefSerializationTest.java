@@ -5,6 +5,7 @@ import static io.littlehorse.workflows.InlineStructDefWorkflow.DELIVERY_VARIABLE
 import static io.littlehorse.workflows.InlineStructDefWorkflow.INLINE_STRUCT_DEF_WORKFLOW;
 import static io.littlehorse.workflows.InlineStructDefWorkflow.MESSAGE_VARIABLE;
 import static io.littlehorse.workflows.InlineStructDefWorkflow.NORMALIZED_CUSTOMER_VARIABLE;
+import static io.littlehorse.workflows.InlineStructDefWorkflow.WORKFLOW_ONLY_CUSTOMER_VARIABLE;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.with;
@@ -13,13 +14,18 @@ import io.littlehorse.common.ContainersTestResource;
 import io.littlehorse.common.InjectLittleHorseBlockingStub;
 import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.adapter.LHTypeAdapterRegistry;
+import io.littlehorse.sdk.common.proto.InlineStructDef;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.ListVariablesRequest;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.RunWfRequest;
+import io.littlehorse.sdk.common.proto.ThreadVarDef;
 import io.littlehorse.sdk.common.proto.Variable;
+import io.littlehorse.sdk.common.proto.VariableDef;
+import io.littlehorse.sdk.common.proto.VariableType;
 import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRun;
+import io.littlehorse.sdk.common.proto.WfSpecId;
 import io.littlehorse.structs.InlineStructDefAddress;
 import io.littlehorse.structs.InlineStructDefCustomer;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -44,6 +50,41 @@ class InlineStructDefSerializationTest {
 
     @InjectLittleHorseBlockingStub
     LittleHorseBlockingStub blockingStub;
+
+    @Test
+    void shouldRegisterNestedTypesReferencedOnlyFromWorkflow() {
+        with().pollInterval(Duration.ofSeconds(1))
+                .ignoreExceptions()
+                .await()
+                .atMost(Duration.ofSeconds(30))
+                .untilAsserted(() -> {
+                    VariableDef customer = blockingStub
+                            .getWfSpec(WfSpecId.newBuilder()
+                                    .setName(INLINE_STRUCT_DEF_WORKFLOW)
+                                    .build())
+                            .getThreadSpecsOrThrow("entrypoint")
+                            .getVariableDefsList()
+                            .stream()
+                            .map(ThreadVarDef::getVarDef)
+                            .filter(variable ->
+                                    variable.getName().equals(WORKFLOW_ONLY_CUSTOMER_VARIABLE))
+                            .findFirst()
+                            .orElseThrow();
+
+                    InlineStructDef customerType = customer.getTypeDef().getInlineStructDef();
+                    assertThat(customerType.getFieldsMap()).containsOnlyKeys("address");
+                    InlineStructDef addressType = customerType
+                            .getFieldsOrThrow("address")
+                            .getFieldType()
+                            .getInlineStructDef();
+                    assertThat(addressType.getFieldsMap()).containsOnlyKeys("city");
+                    assertThat(addressType
+                                    .getFieldsOrThrow("city")
+                                    .getFieldType()
+                                    .getPrimitiveType())
+                            .isEqualTo(VariableType.STR);
+                });
+    }
 
     @Test
     void shouldReturnAndReceiveAnonymousInlineStructDef() throws Exception {
