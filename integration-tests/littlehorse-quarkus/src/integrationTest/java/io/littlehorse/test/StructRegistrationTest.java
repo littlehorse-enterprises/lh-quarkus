@@ -36,6 +36,9 @@ class StructRegistrationTest {
                             SearchStructDefRequest.newBuilder().build());
                     StructDefIdList expectedResult = StructDefIdList.newBuilder()
                             .addResults(StructDefId.newBuilder()
+                                    .setName("approval-result")
+                                    .build())
+                            .addResults(StructDefId.newBuilder()
                                     .setName("lh-address")
                                     .build())
                             .addResults(StructDefId.newBuilder()
@@ -55,7 +58,7 @@ class StructRegistrationTest {
                                     .build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(6);
+                    assertThat(results.getResultsCount()).isEqualTo(7);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

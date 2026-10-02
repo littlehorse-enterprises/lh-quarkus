@@ -6,15 +6,16 @@ import io.littlehorse.quarkus.runtime.health.LHTaskStatus;
 import io.littlehorse.quarkus.runtime.recordable.LHRecordableDependenciesGraph;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
-import io.littlehorse.quarkus.runtime.recordable.LHUserTaskFormRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHUserTaskDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
-import io.littlehorse.quarkus.task.LHUserTaskForm;
+import io.littlehorse.quarkus.task.LHUserTaskDef;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.PutStructDefRequest;
 import io.littlehorse.sdk.common.proto.PutUserTaskDefRequest;
 import io.littlehorse.sdk.common.proto.StructDefCompatibilityType;
+import io.littlehorse.sdk.common.proto.StructDefId;
 import io.littlehorse.sdk.usertask.UserTaskSchema;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.internal.structdefutil.LHStructDefType;
@@ -179,13 +180,17 @@ public class LHRecorder {
         workflow.registerWfSpec(config);
     }
 
-    public void registerLHUserTaskForms(List<LHUserTaskFormRecordable> userTaskFormRecordables) {
-        userTaskFormRecordables.stream()
+    public void registerLHUserTaskDefs(
+            List<LHUserTaskDefRecordable> userTaskDefRecordables,
+            RuntimeValue<Map<String, StructDefId>> registeredStructDefs) {
+        userTaskDefRecordables.stream()
                 .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
-                .forEach(this::registerLHUserTaskForm);
+                .forEach(recordable ->
+                        registerLHUserTaskDef(recordable, registeredStructDefs.getValue()));
     }
 
-    private void registerLHUserTaskForm(LHUserTaskFormRecordable recordable) {
+    private void registerLHUserTaskDef(
+            LHUserTaskDefRecordable recordable, Map<String, StructDefId> registeredStructDefs) {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
         Optional<LHRuntimeConfig.UserTaskConfig> taskConfig = Optional.ofNullable(
@@ -197,15 +202,24 @@ public class LHRecorder {
 
         if (!registerUserTask) return;
 
-        UserTaskSchema schema =
-                new UserTaskSchema(getBean(recordable.getBeanClass()), expandedName);
+        String structName =
+                configEvaluator.expand(recordable.getResultStructDefName()).asString();
+        StructDefId structDefId = registeredStructDefs.get(structName);
+        if (structDefId == null) {
+            throw new IllegalStateException(
+                    "Cannot register UserTaskDef '%s': result StructDef '%s' was not registered. "
+                                    .formatted(expandedName, structName)
+                            + "Enable registration of the result StructDef or disable registration of this UserTaskDef.");
+        }
+        UserTaskSchema schema = new UserTaskSchema(structDefId, expandedName);
         PutUserTaskDefRequest request = schema.compile();
 
-        logEvent("Registering", LHUserTaskForm.class, expandedName);
+        logEvent("Registering", LHUserTaskDef.class, expandedName);
         getBlockingStub().putUserTaskDef(request);
     }
 
-    public void registerLHStructDefs(List<LHStructDefRecordable> structDefRecordables) {
+    public RuntimeValue<Map<String, StructDefId>> registerLHStructDefs(
+            List<LHStructDefRecordable> structDefRecordables) {
         List<LHStructDefRecordable> existingRecordables = structDefRecordables.stream()
                 .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
                 .toList();
@@ -220,9 +234,12 @@ public class LHRecorder {
 
         LHRecordableDependenciesGraph<LHStructDefRecordable> structDefRecordableGraph =
                 new LHRecordableDependenciesGraph<>(existingRecordables);
-        structDefRecordableGraph
-                .toOrderedList()
-                .forEach(recordable -> registerLHStructDef(recordable, placeholderValues));
+        Map<String, StructDefId> registered = new LinkedHashMap<>();
+        for (LHStructDefRecordable recordable : structDefRecordableGraph.toOrderedList()) {
+            StructDefId id = registerLHStructDef(recordable, placeholderValues);
+            if (id != null) registered.put(id.getName(), id);
+        }
+        return new RuntimeValue<>(Map.copyOf(registered));
     }
 
     private Map<String, String> computeStructPlaceholderValues(
@@ -237,7 +254,7 @@ public class LHRecorder {
         return Map.copyOf(placeholderValues);
     }
 
-    private void registerLHStructDef(
+    private StructDefId registerLHStructDef(
             LHStructDefRecordable recordable, Map<String, String> placeholderValues) {
         ConfigEvaluator configEvaluator = getBean(ConfigEvaluator.class);
         String expandedName = configEvaluator.expand(recordable.getName()).asString();
@@ -248,7 +265,7 @@ public class LHRecorder {
                 .map(LHRuntimeConfig.StructConfig::registerEnabled)
                 .orElse(getLHRuntimeConfig().structsRegisterEnabled());
 
-        if (!registerStruct) return;
+        if (!registerStruct) return null;
 
         LHConfig config = getBean(LHConfig.class);
         LHStructDefType structDefType = new LHStructDefType(
@@ -265,7 +282,7 @@ public class LHRecorder {
         }
 
         logEvent("Registering", LHStructDef.class, expandedName);
-        getBlockingStub().putStructDef(builder.build());
+        return getBlockingStub().putStructDef(builder.build()).getId();
     }
 
     private LHRuntimeConfig getLHRuntimeConfig() {

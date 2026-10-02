@@ -5,22 +5,23 @@ import io.littlehorse.quarkus.deployment.annotation.OptionalAnnotation;
 import io.littlehorse.quarkus.deployment.descriptor.LHStructDefDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHTaskMethodDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHTypeAdapterDescriptor;
-import io.littlehorse.quarkus.deployment.descriptor.LHUserTaskFormDescriptor;
+import io.littlehorse.quarkus.deployment.descriptor.LHUserTaskDefDescriptor;
 import io.littlehorse.quarkus.deployment.descriptor.LHWorkflowDescriptor;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTaskMethodBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHTypeAdapterBuildItem;
-import io.littlehorse.quarkus.deployment.item.LHUserTaskFormBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHUserTaskDefBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
 import io.littlehorse.quarkus.deployment.util.ClassLoadingUtils;
 import io.littlehorse.quarkus.runtime.LHRecorder;
 import io.littlehorse.quarkus.runtime.recordable.LHStructDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHTaskMethodRecordable;
-import io.littlehorse.quarkus.runtime.recordable.LHUserTaskFormRecordable;
+import io.littlehorse.quarkus.runtime.recordable.LHUserTaskDefRecordable;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
-import io.littlehorse.quarkus.task.LHUserTaskForm;
+import io.littlehorse.quarkus.task.LHUserTaskDef;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
+import io.littlehorse.sdk.common.proto.StructDefId;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
@@ -31,12 +32,14 @@ import io.quarkus.deployment.annotations.ExecutionTime;
 import io.quarkus.deployment.annotations.Record;
 import io.quarkus.deployment.builditem.ServiceStartBuildItem;
 import io.quarkus.deployment.builditem.ShutdownContextBuildItem;
+import io.quarkus.runtime.RuntimeValue;
 
 import org.jboss.jandex.AnnotationTarget.Kind;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.MethodInfo;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -111,16 +114,26 @@ class LHServiceProcessor {
     }
 
     @BuildStep
-    void scanLHUserTaskForm(
-            BuildProducer<LHUserTaskFormBuildItem> producer,
+    void scanLHUserTaskDef(
+            BuildProducer<LHUserTaskDefBuildItem> producer,
             BeanArchiveIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAnnotations(LHUserTaskForm.class).stream()
+        indexContainer.getIndex().getAnnotations(LHUserTaskDef.class).stream()
                 .map(annotated -> {
                     String beanClassName = annotated.target().asClass().toString();
                     Class<?> beanClass = ClassLoadingUtils.loadClass(beanClassName);
-                    return new LHUserTaskFormBuildItem(
-                            beanClass,
-                            new LHUserTaskFormDescriptor(new OptionalAnnotation(annotated)));
+                    LHUserTaskDefDescriptor descriptor =
+                            new LHUserTaskDefDescriptor(new OptionalAnnotation(annotated));
+                    Class<?> resultClass =
+                            ClassLoadingUtils.loadClass(descriptor.getResultClassName());
+                    LHStructDef structDef = resultClass.getAnnotation(LHStructDef.class);
+                    if (structDef == null || structDef.value().isBlank()) {
+                        throw new IllegalArgumentException(
+                                "UserTaskDef '%s' result %s must declare a named @LHStructDef"
+                                        .formatted(
+                                                descriptor.getUserTaskDefName(),
+                                                resultClass.getName()));
+                    }
+                    return new LHUserTaskDefBuildItem(beanClass, descriptor, structDef.value());
                 })
                 .forEach(producer::produce);
     }
@@ -162,14 +175,15 @@ class LHServiceProcessor {
             LHRecorder recorder,
             ShutdownContextBuildItem shutdownContext,
             List<LHTaskMethodBuildItem> taskMethodBuildItems,
-            List<LHUserTaskFormBuildItem> userTaskFromBuildItems,
+            List<LHUserTaskDefBuildItem> userTaskDefBuildItems,
             List<LHWorkflowBuildItem> workflowBuildItems,
             List<LHStructDefBuildItem> structDefBuildItems) {
 
         List<LHStructDefRecordable> structDefRecordables = structDefBuildItems.stream()
                 .map(LHStructDefBuildItem::toRecordable)
                 .toList();
-        recorder.registerLHStructDefs(structDefRecordables);
+        RuntimeValue<Map<String, StructDefId>> registeredStructDefs =
+                recorder.registerLHStructDefs(structDefRecordables);
 
         List<LHTaskMethodRecordable> taskMethodRecordables = taskMethodBuildItems.stream()
                 .map(LHTaskMethodBuildItem::toRecordable)
@@ -177,10 +191,10 @@ class LHServiceProcessor {
         recorder.registerAndStartTasks(
                 taskMethodRecordables, structDefRecordables, shutdownContext);
 
-        List<LHUserTaskFormRecordable> userTaskFormRecordables = userTaskFromBuildItems.stream()
-                .map(LHUserTaskFormBuildItem::toRecordable)
+        List<LHUserTaskDefRecordable> userTaskDefRecordables = userTaskDefBuildItems.stream()
+                .map(LHUserTaskDefBuildItem::toRecordable)
                 .toList();
-        recorder.registerLHUserTaskForms(userTaskFormRecordables);
+        recorder.registerLHUserTaskDefs(userTaskDefRecordables, registeredStructDefs);
 
         List<LHWorkflowRecordable> workflowRecordables = workflowBuildItems.stream()
                 .map(LHWorkflowBuildItem::toRecordable)

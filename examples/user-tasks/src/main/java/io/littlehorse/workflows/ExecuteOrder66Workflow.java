@@ -1,6 +1,6 @@
 package io.littlehorse.workflows;
 
-import static io.littlehorse.forms.ApproveForm.APPROVE_USER_TASK;
+import static io.littlehorse.forms.ApproveUserTask.APPROVE_USER_TASK;
 
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
@@ -20,7 +20,7 @@ public class ExecuteOrder66Workflow implements LHWorkflowDefinition {
 
         UserTaskOutput userTaskOutput =
                 wf.assignUserTask(APPROVE_USER_TASK, executor, null).withNotes("Execute Order 66");
-        isApproved.assign(userTaskOutput.jsonPath("$.isApproved"));
+        isApproved.assign(userTaskOutput.get("isApproved"));
 
         wf.doIfElse(
                 wf.condition(isApproved, Comparator.EQUALS, true),
