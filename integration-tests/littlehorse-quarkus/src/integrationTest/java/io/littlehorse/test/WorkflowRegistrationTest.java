@@ -70,9 +70,12 @@ class WorkflowRegistrationTest {
                             .addResults(nestedGrandparentWf)
                             .addResults(nestedParentWf)
                             .addResults(personWf)
+                            .addResults(WfSpecId.newBuilder()
+                                    .setName("user-task-approval")
+                                    .build())
                             .addResults(beanWorkflow)
                             .build();
-                    assertThat(results.getResultsCount()).isEqualTo(11);
+                    assertThat(results.getResultsCount()).isEqualTo(12);
                     assertThat(results).isEqualTo(expectedResult);
 
                     Stream.of(

@@ -3,10 +3,8 @@ package io.littlehorse.quarkus.deployment.processor;
 import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
 
 import io.littlehorse.quarkus.task.LHTask;
-import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHReflectiveType;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
-import io.littlehorse.sdk.usertask.annotations.UserTaskField;
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -56,31 +54,6 @@ public class LHReflectionProcessor {
                 .map(MethodInfo::declaringClass)
                 .map(ClassInfo::toString)
                 .distinct()
-                .map(newBuildItem)
-                .forEach(producer::produce);
-    }
-
-    @BuildStep
-    void registerUserTaskField(
-            BuildProducer<ReflectiveClassBuildItem> producer,
-            CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getKnownClasses().stream()
-                .filter(classInfo -> classInfo.fields().stream()
-                        .anyMatch(fieldInfo -> fieldInfo.hasAnnotation(UserTaskField.class)))
-                .map(ClassInfo::toString)
-                .distinct()
-                .map(newBuildItem)
-                .forEach(producer::produce);
-    }
-
-    @BuildStep
-    void registerLHUserTaskForm(
-            BuildProducer<ReflectiveClassBuildItem> producer,
-            CombinedIndexBuildItem indexContainer) {
-        indexContainer.getIndex().getAnnotations(LHUserTaskForm.class).stream()
-                .map(AnnotationInstance::target)
-                .map(AnnotationTarget::asClass)
-                .map(ClassInfo::toString)
                 .map(newBuildItem)
                 .forEach(producer::produce);
     }

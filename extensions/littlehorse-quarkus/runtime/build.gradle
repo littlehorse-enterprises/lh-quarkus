@@ -13,7 +13,7 @@ dependencies {
     implementation "io.quarkus:quarkus-arc"
     implementation "org.jgrapht:jgrapht-core:${jgraphtVersion}"
     compileOnly "io.quarkus:quarkus-smallrye-health"
-    api("io.littlehorse:littlehorse-client:${version}") {
+    api("io.littlehorse:littlehorse-client:${littlehorseVersion}") {
         changing = true
         exclude group: "io.grpc", module: "grpc-netty-shaded"
         exclude group: "io.grpc", module: "grpc-services"

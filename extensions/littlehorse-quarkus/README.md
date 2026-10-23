@@ -244,22 +244,37 @@ public class ChildWorkflow {
 
 ## Registering User Tasks
 
-As well as the other beans, for a user task you have to add the annotation `@LHUserTaskForm`.
-Then you can add any number of fields (`@UserTaskField`).
+Declare the submitted data as a named `StructDef`, then reference its class from
+`@LHUserTaskDef`. The extension registers the StructDef first and uses the returned
+ID as the UserTaskDef's minimum result schema version. Workflows are registered
+after their UserTaskDefs.
 
 ```java
-@LHUserTaskForm("approve-user-task")
-public class ApproveForm {
+@LHStructDef("approval-result")
+public class ApprovalResult {
+    private Boolean approved;
 
-    @UserTaskField(
-            displayName = "Approved?",
-            description = "Reply 'true' if this is an acceptable request.")
-    public boolean isApproved;
+    @LHStructField(name = "isApproved", description = "Whether the request is approved.")
+    public Boolean getApproved() { return approved; }
+
+    public void setApproved(Boolean approved) { this.approved = approved; }
 }
 ```
 
-Quarkus will register the [UserTaskDef](https://littlehorse.io/docs/server/concepts/user-tasks#create-the-usertaskdef)
-when starting the application.
+```java
+@LHUserTaskDef(value = ApproveUserTask.APPROVE_USER_TASK, result = ApprovalResult.class)
+public class ApproveUserTask {
+    public static final String APPROVE_USER_TASK = "approve-user-task";
+}
+```
+
+Multiple UserTaskDefs can reference the same result class. The result must have
+`@LHStructDef`; the application controls form layout and presentation.
+
+The existing `quarkus.littlehorse.user-tasks.*.register.enabled` settings control
+UserTaskDef registration. A referenced StructDef must also have registration
+enabled. Set its `quarkus.littlehorse.structs.<name>.register.compatibility` to
+`FULLY_COMPATIBLE_SCHEMA_UPDATES` when registering compatible schema changes.
 
 More about user tasks at: [User Tasks](https://littlehorse.io/docs/server/concepts/user-tasks).
 
@@ -506,7 +521,7 @@ public class GreetingsResource {
 
 ## Dependency Injection
 
-Classes annotated with `@LHTask`, `@LHWorkflow`, `@LHUserTaskForm`, `@LHStructDef`, or
+Classes annotated with `@LHTask`, `@LHWorkflow`, `@LHUserTaskDef`, `@LHStructDef`, or
 `@LHTypeAdapter` are marked as beans and managed by Quarkus
 [CDI](https://quarkus.io/guides/cdi), so it is possible to inject other beans into them. A class
 that declares a method-level `@LHWorkflow` must otherwise be a CDI bean, for example by adding
@@ -739,7 +754,7 @@ for configurations.
 For values evaluated directly by the Quarkus extension, an expression string is a mix of plain
 strings and expression segments wrapped by the sequence `${ … }`. The expression expansion engine
 supports the following segments. This applies to `@LHWorkflow`, its nested
-`@LHExponentialBackoffRetry`, and `@LHUserTaskForm` values:
+`@LHExponentialBackoffRetry`, and `@LHUserTaskDef` values:
 
 `${expression:value}` - Provides a default value after the `:` if the expansion doesn’t find a value.
 `${my.prop${compose}}` - Composed expressions. Inner expressions are resolved first.
