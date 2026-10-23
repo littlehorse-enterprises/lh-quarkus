@@ -269,6 +269,7 @@ public class LHSaddleBagProcessor {
                 annotation.value(),
                 annotation.description(),
                 annotation.sensitive(),
+                annotation.required(),
                 Type.primitive(annotation.type().name()),
                 defaultValue);
     }

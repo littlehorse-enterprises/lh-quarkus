@@ -221,11 +221,28 @@ class LHSaddleBagProcessorTest {
                 Map.of("task.alpha.name", "alpha", "task.beta.name", "beta"));
 
         assertThat(saddlebag.configs())
-                .extracting(Config::key)
-                .containsExactly("shared.url", "task-a.key", "task-b.key");
-        assertThat(saddlebag.configs().get(0))
-                .isEqualTo(
-                        new Config("shared.url", "Shared URL", false, Type.primitive("STR"), null));
+                .containsExactly(
+                        new Config(
+                                "shared.url",
+                                "Shared URL",
+                                false,
+                                false,
+                                Type.primitive("STR"),
+                                null),
+                        new Config(
+                                "task-a.key",
+                                "Task A key",
+                                false,
+                                true,
+                                Type.primitive("INT"),
+                                null),
+                        new Config(
+                                "task-b.key",
+                                "Task B key",
+                                false,
+                                true,
+                                Type.primitive("BOOL"),
+                                null));
     }
 
     @Test
@@ -236,10 +253,15 @@ class LHSaddleBagProcessorTest {
 
         assertThat(saddlebag.tasks().get("alpha").configs())
                 .containsExactly(new Config(
-                        "alpha.retries", "Alpha retries", false, Type.primitive("INT"), "3"));
+                        "alpha.retries",
+                        "Alpha retries",
+                        false,
+                        false,
+                        Type.primitive("INT"),
+                        "3"));
         assertThat(saddlebag.tasks().get("beta").configs())
                 .containsExactly(new Config(
-                        "beta.timeout", "Beta timeout", false, Type.primitive("INT"), null));
+                        "beta.timeout", "Beta timeout", false, true, Type.primitive("INT"), null));
     }
 
     @Test
@@ -451,6 +473,7 @@ class LHSaddleBagProcessorTest {
                         "notification.channel",
                         "Notification channel",
                         false,
+                        false,
                         Type.primitive("STR"),
                         null)));
 
@@ -478,11 +501,13 @@ class LHSaddleBagProcessorTest {
                         "notification.service.url",
                         "Notification service base URL",
                         false,
+                        true,
                         Type.primitive("STR"),
                         null),
                 new Config(
                         "notification.service.api-key",
                         "API key for the notification service",
+                        true,
                         true,
                         Type.primitive("STR"),
                         "5000"));
@@ -730,7 +755,11 @@ class LHSaddleBagProcessorTest {
         public void plain() {}
     }
 
-    @LHTaskConfig(value = "shared.url", description = "Shared URL", type = LHTaskConfigType.STR)
+    @LHTaskConfig(
+            value = "shared.url",
+            description = "Shared URL",
+            required = false,
+            type = LHTaskConfigType.STR)
     @LHTaskConfig(value = "task-a.key", description = "Task A key", type = LHTaskConfigType.INT)
     public static class GlobalConfigTaskA {
 
@@ -739,6 +768,7 @@ class LHSaddleBagProcessorTest {
                 value = "alpha.retries",
                 description = "Alpha retries",
                 defaultValue = "3",
+                required = false,
                 type = LHTaskConfigType.INT)
         public void alpha() {}
     }
