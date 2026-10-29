@@ -357,10 +357,24 @@ types used as native array elements and typed map values. Runtime Struct values 
 do not carry a `StructDefId`.
 
 The extension registers inline types reachable from task signatures for native-image reflection.
+For native builds, it also compiles workflow definitions during augmentation and registers the
+classes returned by the SDK's `Workflow.getReferencedJavaTypes()`. This discovers workflow-only
+types passed through variables or helper methods, nested JavaBean properties, typed arrays and
+maps, and types used in child threads, handlers, and event registrations. No extra annotation is
+needed for these types when the definition can run at build time.
+
+Both `@LHWorkflow` classes implementing `LHWorkflowDefinition` and `@LHWorkflow` methods are
+supported. Discovery constructs a separate instance using its no-argument constructor; static
+workflow methods do not require an instance. CDI injection is not available during this pass.
+Configured StructDef names use configuration available at build time. Constructors and workflow
+definitions should be side-effect free, since discovery executes them in addition to normal
+runtime registration. JVM builds do not perform this extra compilation.
 
 > [!IMPORTANT]
-> If a class is referenced only by a `WfSpec` and never appears in a task signature or
-> `@LHStructDef`, annotate it with `@LHReflectiveType`:
+> If a workflow cannot compile without runtime CDI dependencies or runtime-only configuration,
+> discovery logs a warning and leaves runtime registration unchanged. Annotate its workflow-only
+> types with `@LHReflectiveType`. Also use this fallback for types selected by branches that differ
+> between build time and runtime:
 > 
 > ```java
 > @LHReflectiveType
