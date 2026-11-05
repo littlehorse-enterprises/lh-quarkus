@@ -2,10 +2,13 @@ package io.littlehorse.quarkus.deployment.processor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.littlehorse.quarkus.deployment.item.LHTypeAdapterBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
 import io.littlehorse.quarkus.workflow.LHReflectiveType;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
+import io.littlehorse.sdk.common.adapter.LHStringAdapter;
+import io.littlehorse.sdk.common.proto.VariableType;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
 import io.littlehorse.sdk.worker.LHStructDef;
@@ -13,6 +16,7 @@ import io.littlehorse.sdk.worker.LHTaskMethod;
 import io.littlehorse.sdk.worker.LHType;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
+import io.smallrye.config.SmallRyeConfigBuilder;
 
 import org.jboss.jandex.Index;
 import org.junit.jupiter.api.Test;
@@ -22,8 +26,83 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 class LHReflectionProcessorTest {
+
+    @Test
+    void shouldUseEnabledAdaptersDuringDiscovery() throws Exception {
+        Index index = Index.of(AdapterWorkflow.class, UUIDAdapter.class);
+        var indexItem = new BeanArchiveIndexBuildItem(index, index, Set.of());
+        List<LHWorkflowBuildItem> workflows = new ArrayList<>();
+        List<LHTypeAdapterBuildItem> adapters = new ArrayList<>();
+        var scanner = new LHServiceProcessor();
+        scanner.scanLHWorkflowDefinition(workflows::add, indexItem);
+        scanner.scanLHTypeAdapter(adapters::add, indexItem);
+        var config = new SmallRyeConfigBuilder().build();
+        var sdkConfig = LHReflectionProcessor.reflectionConfig(adapters, config);
+        var compiled = LHReflectionProcessor.workflowForReflection(
+                        workflows.get(0).toRecordable(), Map.of(), sdkConfig)
+                .compileWorkflow();
+        assertThat(compiled.getThreadSpecsOrThrow("entrypoint").getVariableDefsList().stream()
+                        .map(def -> def.getVarDef())
+                        .filter(def -> def.getName().equals("id"))
+                        .findFirst()
+                        .orElseThrow()
+                        .getDefaultValue()
+                        .getStr())
+                .isEqualTo("adapted-00000000-0000-0000-0000-000000000001");
+        List<ReflectiveClassBuildItem> reflection = new ArrayList<>();
+        new LHReflectionProcessor()
+                .registerWorkflowReferencedTypes(reflection::add, workflows, Map.of(), sdkConfig);
+        assertThat(reflection.stream().flatMap(item -> item.getClassNames().stream()))
+                .contains(WorkflowCustomer.class.getName(), WorkflowOnlyAddress.class.getName());
+
+        var disabled = new SmallRyeConfigBuilder()
+                .withDefaultValue("quarkus.littlehorse.type-adapters.register.enabled", "false")
+                .build();
+        assertThat(LHReflectionProcessor.reflectionConfig(adapters, disabled)
+                        .getTypeAdapterRegistry()
+                        .asMap())
+                .doesNotContainKey(UUID.class);
+        var overridden = new SmallRyeConfigBuilder()
+                .withDefaultValue("quarkus.littlehorse.type-adapters.register.enabled", "false")
+                .withDefaultValue(
+                        "quarkus.littlehorse.type-adapters.\"" + UUIDAdapter.class.getName()
+                                + "\".register.enabled",
+                        "true")
+                .build();
+        assertThat(LHReflectionProcessor.reflectionConfig(adapters, overridden)
+                        .getTypeAdapterRegistry()
+                        .asMap())
+                .containsKey(UUID.class);
+    }
+
+    @LHWorkflow("adapter-workflow")
+    public static class AdapterWorkflow implements LHWorkflowDefinition {
+        public void define(WorkflowThread thread) {
+            thread.declareStr("id")
+                    .withDefault(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+            thread.declareInlineStruct("customer", WorkflowCustomer.class);
+        }
+    }
+
+    @io.littlehorse.quarkus.adapter.LHTypeAdapter(
+            variableType = VariableType.STR,
+            adaptedType = UUID.class)
+    public static class UUIDAdapter implements LHStringAdapter<UUID> {
+        public String toString(UUID value) {
+            return "adapted-" + value;
+        }
+
+        public UUID fromString(String value) {
+            return UUID.fromString(value);
+        }
+
+        public Class<UUID> getTypeClass() {
+            return UUID.class;
+        }
+    }
 
     @Test
     void shouldRegisterTypesResolvedByWorkflowCompilation() {

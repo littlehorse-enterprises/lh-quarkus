@@ -365,7 +365,10 @@ needed for these types when the definition can run at build time.
 
 Both `@LHWorkflow` classes implementing `LHWorkflowDefinition` and `@LHWorkflow` methods are
 supported. Discovery constructs a separate instance using its no-argument constructor; static
-workflow methods do not require an instance. CDI injection is not available during this pass.
+workflow methods do not require an instance. CDI injection is not available during this pass. Annotated type adapters are also constructed
+with their no-argument constructors, honoring adapter enablement configuration available at build
+time. Adapters supplied through CDI producers or requiring injection need the manual reflection
+fallback; changes to adapter configuration at runtime can also require that fallback.
 Configured StructDef names use configuration available at build time. Constructors and workflow
 definitions should be side-effect free, since discovery executes them in addition to normal
 runtime registration. JVM builds do not perform this extra compilation.

@@ -4,6 +4,7 @@ import static org.jboss.jandex.AnnotationTarget.Kind.METHOD;
 
 import io.littlehorse.quarkus.config.ConfigEvaluator;
 import io.littlehorse.quarkus.deployment.item.LHStructDefBuildItem;
+import io.littlehorse.quarkus.deployment.item.LHTypeAdapterBuildItem;
 import io.littlehorse.quarkus.deployment.item.LHWorkflowBuildItem;
 import io.littlehorse.quarkus.runtime.recordable.LHWorkflowRecordable;
 import io.littlehorse.quarkus.task.LHTask;
@@ -11,6 +12,8 @@ import io.littlehorse.quarkus.task.LHUserTaskForm;
 import io.littlehorse.quarkus.workflow.LHReflectiveType;
 import io.littlehorse.quarkus.workflow.LHWorkflow;
 import io.littlehorse.quarkus.workflow.LHWorkflowDefinition;
+import io.littlehorse.sdk.common.adapter.LHTypeAdapter;
+import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.usertask.annotations.UserTaskField;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.wfsdk.WorkflowThread;
@@ -22,6 +25,7 @@ import io.quarkus.deployment.builditem.CombinedIndexBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import io.quarkus.deployment.pkg.NativeConfig;
 
+import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.AnnotationTarget;
@@ -141,6 +145,7 @@ public class LHReflectionProcessor {
             BuildProducer<ReflectiveClassBuildItem> producer,
             List<LHWorkflowBuildItem> workflows,
             List<LHStructDefBuildItem> structDefs,
+            List<LHTypeAdapterBuildItem> adapters,
             NativeConfig nativeConfig) {
         if (!nativeConfig.enabled()) {
             return;
@@ -157,19 +162,39 @@ public class LHReflectionProcessor {
                         exception, "StructDef name '%s' requires runtime configuration", template);
             }
         }
-        registerWorkflowReferencedTypes(producer, workflows, placeholderValues);
+        try {
+            registerWorkflowReferencedTypes(
+                    producer,
+                    workflows,
+                    placeholderValues,
+                    reflectionConfig(adapters, ConfigProvider.getConfig()));
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            LOG.warn(
+                    "Could not construct type adapters for workflow reflection discovery. "
+                            + "Use @LHReflectiveType for workflow-only types when adapters require runtime CDI.",
+                    exception);
+        }
     }
 
     void registerWorkflowReferencedTypes(
             BuildProducer<ReflectiveClassBuildItem> producer,
             List<LHWorkflowBuildItem> workflows,
             Map<String, String> placeholderValues) {
+        registerWorkflowReferencedTypes(
+                producer, workflows, placeholderValues, LHConfig.newBuilder().build());
+    }
+
+    void registerWorkflowReferencedTypes(
+            BuildProducer<ReflectiveClassBuildItem> producer,
+            List<LHWorkflowBuildItem> workflows,
+            Map<String, String> placeholderValues,
+            LHConfig config) {
         Set<String> typeNames = new LinkedHashSet<>();
         for (LHWorkflowBuildItem item : workflows) {
             LHWorkflowRecordable recordable = item.toRecordable();
             try {
                 typeNames.addAll(workflowReflectiveTypeNames(
-                        workflowForReflection(recordable, placeholderValues)));
+                        workflowForReflection(recordable, placeholderValues, config)));
             } catch (ReflectiveOperationException | RuntimeException exception) {
                 LOG.warnf(
                         "Could not discover reflection types for workflow '%s' (%s) at build time: %s. "
@@ -185,8 +210,30 @@ public class LHReflectionProcessor {
         typeNames.stream().map(newBuildItem).forEach(producer::produce);
     }
 
-    private static Workflow workflowForReflection(
-            LHWorkflowRecordable recordable, Map<String, String> placeholderValues)
+    static LHConfig reflectionConfig(List<LHTypeAdapterBuildItem> adapters, Config config)
+            throws ReflectiveOperationException {
+        var builder = LHConfig.newBuilder();
+        boolean enabled = config.getOptionalValue(
+                        "quarkus.littlehorse.type-adapters.register.enabled", Boolean.class)
+                .orElse(true);
+        for (LHTypeAdapterBuildItem item : adapters) {
+            Class<?> type = item.toRecordable().getBeanClass();
+            if (!config.getOptionalValue(
+                            "quarkus.littlehorse.type-adapters.\"" + type.getName()
+                                    + "\".register.enabled",
+                            Boolean.class)
+                    .orElse(enabled)) {
+                continue;
+            }
+            Constructor<?> constructor = type.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            builder.addTypeAdapter((LHTypeAdapter<?>) constructor.newInstance());
+        }
+        return builder.build();
+    }
+
+    static Workflow workflowForReflection(
+            LHWorkflowRecordable recordable, Map<String, String> placeholderValues, LHConfig config)
             throws ReflectiveOperationException {
         Class<?> beanClass = recordable.getBeanClass();
         Method method = recordable.getBeanMethodName() == null
@@ -217,6 +264,7 @@ public class LHReflectionProcessor {
                         }
                     }
                 },
+                config,
                 placeholderValues);
     }
 
