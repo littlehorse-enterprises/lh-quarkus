@@ -19,7 +19,9 @@ public class UUIDTask {
 
     @LHWorkflow(EXAMPLE_TYPE_ADAPTER)
     public void greetingsWorkflow(WorkflowThread wf) {
-        WfRunVariable uuidVar = wf.declareStr(UUID_VAR).searchable();
+        WfRunVariable uuidVar = wf.declareStr(UUID_VAR)
+                .withDefault(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+                .searchable();
         uuidVar.assign(wf.execute(GET_UUID_TASK));
         wf.execute(ECHO_UUID_TASK, uuidVar);
     }
