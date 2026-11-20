@@ -62,7 +62,6 @@ jobs:
       matrix:
         project:
           - littlehorse-quarkus
-          - littlehorse-restful-gateway
           - littlehorse-saddle-bag
     steps:
       - name: Checkout
@@ -116,25 +115,3 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
         run: gh release create ${{ github.ref_name }} -t ${{ github.ref_name }} -F CHANGELOG.md --prerelease="$PRERELEASE"
-
-  docker-build-restful-gateway:
-    needs:
-      - prepare
-      - publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Docker Build RESTful Gateway
-        uses: ./.github/actions/docker-build
-        with:
-          gradle-project: restful-gateway
-          image-name: lh-restful-gateway
-          dockerfile: ./extras/restful-gateway/Dockerfile
-          context: ./extras/restful-gateway
-          version: ${{ needs.prepare.outputs.tag }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: ${{ needs.prepare.outputs.prerelease }}

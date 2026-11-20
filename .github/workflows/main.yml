@@ -67,7 +67,6 @@ jobs:
       matrix:
         project:
           - littlehorse-quarkus
-          - littlehorse-restful-gateway
           - littlehorse-saddle-bag
     steps:
       - name: Checkout
@@ -94,25 +93,3 @@ jobs:
           signing-password: ${{ secrets.GPG_PASSPHRASE }}
           sonatype-username: ${{ secrets.OSSRH_USERNAME }}
           sonatype-password: ${{ secrets.OSSRH_PASSWORD }}
-
-  docker-build-restful-gateway:
-    needs:
-      - prepare
-      - integration-tests
-      - publish
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Docker Build RESTful Gateway
-        uses: ./.github/actions/docker-build
-        with:
-          gradle-project: restful-gateway
-          image-name: lh-restful-gateway
-          dockerfile: ./extras/restful-gateway/Dockerfile
-          context: ./extras/restful-gateway
-          version: ${{ needs.prepare.outputs.version }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
