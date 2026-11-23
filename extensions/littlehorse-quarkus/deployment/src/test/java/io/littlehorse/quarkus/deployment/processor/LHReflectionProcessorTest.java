@@ -115,7 +115,9 @@ class LHReflectionProcessorTest {
 
         assertThat(LHReflectionProcessor.workflowReflectiveTypeNames(workflow))
                 .containsExactlyInAnyOrder(
-                        WorkflowCustomer.class.getName(), WorkflowOnlyAddress.class.getName());
+                        WorkflowCustomer.class.getName(),
+                        WorkflowCustomer[].class.getName(),
+                        WorkflowOnlyAddress.class.getName());
     }
 
     @Test
@@ -175,7 +177,9 @@ class LHReflectionProcessorTest {
 
         assertThat(reflection.stream().flatMap(item -> item.getClassNames().stream()))
                 .containsExactlyInAnyOrder(
-                        WorkflowCustomer.class.getName(), WorkflowOnlyAddress.class.getName());
+                        WorkflowCustomer.class.getName(),
+                        WorkflowCustomer[].class.getName(),
+                        WorkflowOnlyAddress.class.getName());
         assertThat(reflection).allSatisfy(item -> {
             assertThat(item.isConstructors()).isTrue();
             assertThat(item.isMethods()).isTrue();
