@@ -207,7 +207,10 @@ public class LHRecorder {
 
     public void registerLHStructDefs(List<LHStructDefRecordable> structDefRecordables) {
         List<LHStructDefRecordable> existingRecordables = structDefRecordables.stream()
-                .filter(recordable -> doesBeanExist(recordable.getBeanClass()))
+                // Record StructDefs are registered from their class and are deliberately vetoed in
+                // CDI.
+                .filter(recordable -> recordable.getBeanClass().isRecord()
+                        || doesBeanExist(recordable.getBeanClass()))
                 .toList();
 
         // Combine the placeholder values of every StructDef so that placeholders in nested

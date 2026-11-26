@@ -53,9 +53,12 @@ class StructRegistrationTest {
                             .addResults(StructDefId.newBuilder()
                                     .setName("lh-person")
                                     .build())
+                            .addResults(StructDefId.newBuilder()
+                                    .setName("record-person")
+                                    .build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(6);
+                    assertThat(results.getResultsCount()).isEqualTo(7);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

@@ -36,6 +36,9 @@ class TaskRegistrationTest {
                             .addResults(TaskDefId.newBuilder()
                                     .setName("build-person")
                                     .build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("build-record-person")
+                                    .build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("count-map").build())
                             .addResults(TaskDefId.newBuilder()
@@ -43,6 +46,9 @@ class TaskRegistrationTest {
                                     .build())
                             .addResults(TaskDefId.newBuilder()
                                     .setName("describe-person")
+                                    .build())
+                            .addResults(TaskDefId.newBuilder()
+                                    .setName("describe-record-person")
                                     .build())
                             .addResults(
                                     TaskDefId.newBuilder().setName("echo-uuid").build())
@@ -76,7 +82,7 @@ class TaskRegistrationTest {
                                     TaskDefId.newBuilder().setName("sum-array").build())
                             .build();
 
-                    assertThat(results.getResultsCount()).isEqualTo(16);
+                    assertThat(results.getResultsCount()).isEqualTo(18);
                     assertThat(results).isEqualTo(expectedResult);
                 });
     }

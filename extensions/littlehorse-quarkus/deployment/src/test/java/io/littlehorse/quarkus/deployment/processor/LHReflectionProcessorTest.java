@@ -210,6 +210,16 @@ class LHReflectionProcessorTest {
                 .doesNotContain(String.class.getName());
     }
 
+    @Test
+    void shouldRegisterRecordComponentTypesRecursively() throws IOException {
+        Index index = Index.of(RecordEnvelope.class, RecordAddress.class);
+
+        assertThat(LHReflectionProcessor.reflectiveTypeNames(index))
+                .containsExactlyInAnyOrder(
+                        RecordEnvelope.class.getName(), RecordAddress.class.getName())
+                .doesNotContain(String.class.getName(), Map.class.getName());
+    }
+
     public static class ChildType {}
 
     public static class HandlerType {}
@@ -333,4 +343,12 @@ class LHReflectionProcessorTest {
             return address;
         }
     }
+
+    @LHStructDef("record-envelope")
+    record RecordEnvelope(
+            RecordAddress address,
+            RecordAddress[] previousAddresses,
+            Map<String, RecordAddress> addressesByLabel) {}
+
+    record RecordAddress(String street) {}
 }

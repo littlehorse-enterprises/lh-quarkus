@@ -33,6 +33,7 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.jandex.MethodInfo;
+import org.jboss.jandex.RecordComponentInfo;
 import org.jboss.jandex.Type;
 import org.jboss.logging.Logger;
 
@@ -337,6 +338,10 @@ public class LHReflectionProcessor {
         if (classInfo == null || classInfo.isInterface()) {
             return;
         }
+
+        classInfo.recordComponents().stream()
+                .map(RecordComponentInfo::type)
+                .forEach(type -> collectType(type, index, typeNames, visited));
 
         classInfo.methods().stream()
                 .filter(method -> !Modifier.isStatic(method.flags()))
