@@ -4,6 +4,10 @@ import static io.littlehorse.tasks.ExternalInlineStructTask.PROMPT_STRUCT_DEF_NA
 import static io.littlehorse.tasks.ExternalInlineStructTask.REQUEST_STRUCT_DEF_NAME;
 import static io.littlehorse.tasks.ExternalInlineStructTask.RESPONSE_STRUCT_DEF_NAME;
 
+import static org.awaitility.Awaitility.await;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.littlehorse.container.LittleHorseCluster;
 import io.littlehorse.sdk.common.config.LHConfig;
 import io.littlehorse.sdk.common.proto.InlineStructDef;
@@ -20,6 +24,7 @@ import io.quarkus.test.common.QuarkusTestResourceLifecycleManager.TestInjector.A
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Map;
 
 public class ContainersTestResource implements QuarkusTestResourceLifecycleManager {
@@ -49,11 +54,17 @@ public class ContainersTestResource implements QuarkusTestResourceLifecycleManag
     }
 
     private void registerExternalStructDefs() {
-        blockingStub.putStructDef(PutStructDefRequest.newBuilder()
+        PutStructDefRequest prompt = PutStructDefRequest.newBuilder()
                 .setName(PROMPT_STRUCT_DEF_NAME)
                 .setStructDef(InlineStructDef.newBuilder().putFields("text", stringField()))
                 .setAllowedUpdates(StructDefCompatibilityType.NO_SCHEMA_UPDATES)
-                .build());
+                .build();
+        await().atMost(Duration.ofMinutes(2))
+                .pollInterval(Duration.ofSeconds(1))
+                .ignoreExceptionsMatching(
+                        exception -> exception instanceof StatusRuntimeException statusException
+                                && statusException.getStatus().getCode() == Status.Code.UNAVAILABLE)
+                .untilAsserted(() -> blockingStub.putStructDef(prompt));
         blockingStub.putStructDef(PutStructDefRequest.newBuilder()
                 .setName(REQUEST_STRUCT_DEF_NAME)
                 .setStructDef(InlineStructDef.newBuilder()
