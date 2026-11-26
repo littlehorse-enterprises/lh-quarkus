@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 /**
  * Registers a type and its nested JavaBean property types for reflection.
  *
- * <p>Use this annotation for application types referenced only by a workflow specification, such
- * as a type passed to {@code WorkflowThread.declareInlineStruct}. It does not register a CDI bean
- * or a named LittleHorse StructDef.
+ * <p>Use this annotation for workflow-only types that cannot be discovered by compiling the
+ * workflow at build time, such as definitions requiring runtime CDI injection or types selected
+ * by runtime configuration. It does not register a CDI bean or a named LittleHorse StructDef.
  *
- * <p>This annotation is a compatibility mechanism until the LittleHorse SDK exposes the types
- * referenced by a workflow specification.
+ * <p>Workflows that can compile during native-image augmentation have their referenced types
+ * registered automatically using the LittleHorse SDK.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

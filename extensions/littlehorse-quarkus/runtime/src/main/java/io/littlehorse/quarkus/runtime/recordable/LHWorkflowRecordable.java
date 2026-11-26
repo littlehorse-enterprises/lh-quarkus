@@ -118,6 +118,7 @@ public class LHWorkflowRecordable extends LHRecordable {
                         throw new RuntimeException(e);
                     }
                 },
+                config,
                 getPlaceholderValues());
 
         String parent = getParent();
@@ -183,7 +184,7 @@ public class LHWorkflowRecordable extends LHRecordable {
             workflow.setDefaultTaskExponentialBackoffPolicy(backoffRetryBuilder.build());
         }
 
-        workflow.compileWorkflow(config);
+        workflow.compileWorkflow();
 
         return workflow;
     }
