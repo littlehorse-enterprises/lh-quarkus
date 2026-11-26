@@ -26,11 +26,6 @@ file("examples").listFiles().findAll { it.isDirectory() }.sort { it.name }.each 
     project(":example-${dir.name}").projectDir = dir
 }
 
-file("extras").listFiles().findAll { it.isDirectory() }.sort { it.name }.each { dir ->
-    include(dir.name)
-    project(":${dir.name}").projectDir = dir
-}
-
 file("integration-tests").listFiles().findAll { it.isDirectory() }.sort { it.name }.each { dir ->
     include("integration-tests-${dir.name}")
     project(":integration-tests-${dir.name}").projectDir = dir

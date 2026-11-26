@@ -51,7 +51,6 @@ jobs:
       matrix:
         project:
           - littlehorse-quarkus
-          - littlehorse-restful-gateway
           - littlehorse-saddle-bag
     steps:
       - name: Checkout
